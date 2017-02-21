@@ -649,15 +649,15 @@ func (t *Table) SprintTable(f int) (string, error) {
 	case TABLEOUTPDF:
 		return t.SprintTablePDF(f)
 	}
-	return "", fmt.Errorf("SprintTable: unrecognized format:  %d\n", f)
+	return "", fmt.Errorf("SprintTable: unrecognized format:  %d", f)
 }
 
 // SprintColumnHeaders returns a string with the column headers formatted as type f
 func (t *Table) SprintColumnHeaders(f int) (string, error) {
 	// first check if there are any headers
 	if len(t.ColDefs) < 1 {
-		fmt.Errorf("there are no headers\n")
-		return "", ErrHeaders
+
+		return "", fmt.Errorf("there are no headers")
 	}
 
 	switch f {
@@ -670,14 +670,14 @@ func (t *Table) SprintColumnHeaders(f int) (string, error) {
 	case TABLEOUTPDF:
 		return t.SprintColHdrsPDF()
 	}
-	return "", fmt.Errorf("SprintColumnHeaders unrecognized format:  %d\n", f)
+	return "", fmt.Errorf("SprintColumnHeaders unrecognized format:  %d", f)
 }
 
 // SprintRows returns a string formatted for all rows
 func (t *Table) SprintRows(f int) (string, error) {
 	// if there are no rows in table
 	if t.Rows() < 1 {
-		return "", fmt.Errorf("SprintRows: there are no rows\n")
+		return "", fmt.Errorf("SprintRows: there are no rows")
 	}
 
 	switch f {
@@ -690,17 +690,17 @@ func (t *Table) SprintRows(f int) (string, error) {
 	case TABLEOUTPDF:
 		return t.SprintRowsPDF(f)
 	}
-	return "", fmt.Errorf("SprintRows unrecognized format:  %d\n", f)
+	return "", fmt.Errorf("SprintRows unrecognized format:  %d", f)
 }
 
 // SprintRow returns a string formatted for output type f with the information in row
 func (t *Table) SprintRow(row, f int) (string, error) {
 
 	if row < 0 {
-		return "", fmt.Errorf("SprintRow: row number is less than zero , row: %d\n", row)
+		return "", fmt.Errorf("SprintRow: row number is less than zero , row: %d", row)
 	}
 	if row >= len(t.Row) {
-		return "", fmt.Errorf("SprintRow: row number > rows in table, row: %d\n", row)
+		return "", fmt.Errorf("SprintRow: row number > rows in table, row: %d", row)
 	}
 
 	switch f {
@@ -713,5 +713,5 @@ func (t *Table) SprintRow(row, f int) (string, error) {
 	case TABLEOUTPDF:
 		return t.SprintRowPDF(row)
 	}
-	return "", fmt.Errorf("SprintRow unrecognized format:  %d\n", f)
+	return "", fmt.Errorf("SprintRow unrecognized format:  %d", f)
 }
