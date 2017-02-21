@@ -656,7 +656,6 @@ func (t *Table) SprintTable(f int) (string, error) {
 func (t *Table) SprintColumnHeaders(f int) (string, error) {
 	// first check if there are any headers
 	if len(t.ColDefs) < 1 {
-
 		return "", fmt.Errorf("there are no headers")
 	}
 

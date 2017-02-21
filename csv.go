@@ -6,7 +6,7 @@ import (
 	"github.com/dustin/go-humanize"
 )
 
-// cellSep used to seperate csv cells
+// cellSep used to separate csv cells
 var cellSep = ","
 
 // SprintTableCSV return the table header in csv layout
