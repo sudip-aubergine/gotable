@@ -1,1 +1,2 @@
-# [gotable](https://github.com/stmansour/gotable)&nbsp; &nbsp;   ![Build Status](https://travis-ci.org/stmansour/gotable.png?branch=master) 
+# [gotable](https://github.com/stmansour/gotable)&nbsp; &nbsp;   ![Build Status](https://travis-ci.org/stmansour/gotable.png?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/stMansour/gotable)](https://goreportcard.com/report/github.com/stMansour/gotable)
