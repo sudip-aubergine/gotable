@@ -103,7 +103,7 @@ func TestSmoke(t *testing.T) {
 		t.Fail()
 	}
 	if tbl.Getd(1, DOB) != d[1].DOB {
-		t.Logf("smoke_test: Expected %d,  found %d\n", tbl.Getd(1, DOB), d[1].DOB)
+		t.Logf("smoke_test: Expected %s,  found %s\n", tbl.Getd(1, DOB).Format("1/2/2006"), d[1].DOB.Format("1/2/2006"))
 		t.Fail()
 	}
 	if tbl.Type(1, Name) != CELLSTRING {
