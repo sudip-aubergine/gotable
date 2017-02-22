@@ -138,7 +138,7 @@ func (t *Table) RowCount() int {
 	return len(t.Row)
 }
 
-// Cols returns the number of columns in the table
+// ColCount returns the number of columns in the table
 func (t *Table) ColCount() int {
 	return len(t.ColDefs)
 }
