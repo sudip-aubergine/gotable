@@ -129,22 +129,22 @@ func (t *Table) RowCount() int {
 	return len(t.Row)
 }
 
-// TypeToString returns a string describing the data type of the cell.
-func (c *Cell) TypeToString() string {
-	switch c.Type {
-	case CELLSTRING:
-		return "string"
-	case CELLINT:
-		return "int"
-	case CELLFLOAT:
-		return "float"
-	case CELLDATE:
-		return "date"
-	case CELLDATETIME:
-		return "datetime"
-	}
-	return "unknown"
-}
+// // TypeToString returns a string describing the data type of the cell.
+// func (c *Cell) TypeToString() string {
+// 	switch c.Type {
+// 	case CELLSTRING:
+// 		return "string"
+// 	case CELLINT:
+// 		return "int"
+// 	case CELLFLOAT:
+// 		return "float"
+// 	case CELLDATE:
+// 		return "date"
+// 	case CELLDATETIME:
+// 		return "datetime"
+// 	}
+// 	return "unknown"
+// }
 
 // Init sets internal formatting controls to their default values
 func (t *Table) Init() {
@@ -499,7 +499,7 @@ func (t *Table) Cols() int {
 // print(t)
 func (t Table) String() string {
 	s, _ := t.SprintTable(TABLEOUTTEXT)
-	return t.Title + "\n" + t.Section1 + "\n" + t.Section2 + "\n" + s
+	return t.Title + t.Section1 + t.Section2 + s
 }
 
 // InsertRow adds a new Row at the specified index.

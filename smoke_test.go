@@ -10,10 +10,13 @@ import (
 
 func TestSmoke(t *testing.T) {
 	var tbl Table
+	title := "GOTABLE"
+	section1 := "A Smoke Test"
+	section2 := "February 21, 2017"
 	tbl.Init() //sets column spacing and date format to default
-	tbl.SetTitle("GOTABLE")
-	tbl.SetSection1("A Smoke Test")
-	tbl.SetSection2("February 21, 2017")
+	tbl.SetTitle(title)
+	tbl.SetSection1(section1)
+	tbl.SetSection2(section2)
 	tbl.AddColumn("Name", 35, CELLSTRING, COLJUSTIFYLEFT)             // 0 Name
 	tbl.AddColumn("Age", 3, CELLINT, COLJUSTIFYRIGHT)                 // 1 Age
 	tbl.AddColumn("Height (cm)", 8, CELLINT, COLJUSTIFYRIGHT)         // 2 Height in centimeters
@@ -72,6 +75,47 @@ func TestSmoke(t *testing.T) {
 	tbl.AddLineAfter(tbl.RowCount() - 1) // a line after the last row in the table
 	tbl.InsertSumRowsetCols(totalsRSet, tbl.RowCount(), []int{Winnings})
 
+	// Start with simple checks...
+	if tbl.GetTitle() != title {
+		t.Logf("smoke_test: Expected %s,  found %s\n", tbl.GetTitle(), title)
+		t.Fail()
+	}
+	if tbl.Section1() != section1 {
+		t.Logf("smoke_test: Expected %s,  found %s\n", tbl.Section1(), section1)
+		t.Fail()
+	}
+	if tbl.Section2() != section2 {
+		t.Logf("smoke_test: Expected %s,  found %s\n", tbl.Section2(), section2)
+		t.Fail()
+	}
+
+	cell := tbl.Get(0, 0)
+	if cell.Sval != d[0].Name {
+		t.Logf("smoke_test: Expected %s,  found %s\n", cell.Sval, d[0].Name)
+		t.Fail()
+	}
+	if tbl.Geti(1, Age) != d[1].Age {
+		t.Logf("smoke_test: Expected %d,  found %d\n", tbl.Geti(1, Age), d[1].Age)
+		t.Fail()
+	}
+	if tbl.Getf(1, Winnings) != d[1].Winnings {
+		t.Logf("smoke_test: Expected %d,  found %d\n", tbl.Getf(1, Winnings), d[1].Winnings)
+		t.Fail()
+	}
+	if tbl.Gets(1, Name) != d[1].Name {
+		t.Logf("smoke_test: Expected %d,  found %d\n", tbl.Gets(1, Name), d[1].Name)
+		t.Fail()
+	}
+	if tbl.Getd(1, DOB) != d[1].DOB {
+		t.Logf("smoke_test: Expected %d,  found %d\n", tbl.Getd(1, DOB), d[1].DOB)
+		t.Fail()
+	}
+	if tbl.Type(1, NAME) != CELLSTRING {
+		t.Logf("smoke_test: Expected %d,  found %d\n", tbl.Type(1, NAME), CELLSTRING)
+		t.Fail()
+	}
+
+	// Now hit it hard...
 	DoTextOutput(t, &tbl)
 	DoCSVOutput(t, &tbl)
 	DoHTMLOutput(t, &tbl)
