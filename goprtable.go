@@ -94,7 +94,10 @@ type Table struct {
 	RS           []Rowset    // a list of rowsets
 }
 
-// SetTitle sets the table's Title string to the supplied value
+// SetTitle sets the table's Title string to the supplied value.
+// Note: Caller is expected to supply "\n" on strings if desired for
+// text output.  The "\n" may not be desired or needed for the other
+// formats
 func (t *Table) SetTitle(s string) {
 	t.Title = s
 }
@@ -105,6 +108,9 @@ func (t *Table) GetTitle() string {
 }
 
 // SetSection1 sets the table's Section1 string to the supplied value
+// Note: Caller is expected to supply "\n" on strings if desired for
+// text output.  The "\n" may not be desired or needed for the other
+// formats
 func (t *Table) SetSection1(s string) {
 	t.Section1 = s
 }
@@ -115,6 +121,9 @@ func (t *Table) GetSection1() string {
 }
 
 // SetSection2 sets the table's Section2 string to the supplied value
+// Note: Caller is expected to supply "\n" on strings if desired for
+// text output.  The "\n" may not be desired or needed for the other
+// formats
 func (t *Table) SetSection2(s string) {
 	t.Section2 = s
 }

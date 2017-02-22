@@ -10,9 +10,9 @@ import (
 
 func TestSmoke(t *testing.T) {
 	var tbl Table
-	title := "GOTABLE"
-	section1 := "A Smoke Test"
-	section2 := "February 21, 2017"
+	title := "GOTABLE\n"
+	section1 := "A Smoke Test\n"
+	section2 := "February 21, 2017\n"
 	tbl.Init() //sets column spacing and date format to default
 	tbl.SetTitle(title)
 	tbl.SetSection1(section1)
@@ -71,21 +71,17 @@ func TestSmoke(t *testing.T) {
 		tbl.Putf(-1, Winnings, d[i].Winnings)
 		tbl.Puts(-1, Notest, d[i].Notes)
 	}
-	tbl.Sort(0, tbl.RowCount()-1, DOB)
-	tbl.AddLineAfter(tbl.RowCount() - 1) // a line after the last row in the table
-	tbl.InsertSumRowsetCols(totalsRSet, tbl.RowCount(), []int{Winnings})
-
 	// Start with simple checks...
 	if tbl.GetTitle() != title {
 		t.Logf("smoke_test: Expected %s,  found %s\n", tbl.GetTitle(), title)
 		t.Fail()
 	}
-	if tbl.Section1() != section1 {
-		t.Logf("smoke_test: Expected %s,  found %s\n", tbl.Section1(), section1)
+	if tbl.GetSection1() != section1 {
+		t.Logf("smoke_test: Expected %s,  found %s\n", tbl.GetSection1(), section1)
 		t.Fail()
 	}
-	if tbl.Section2() != section2 {
-		t.Logf("smoke_test: Expected %s,  found %s\n", tbl.Section2(), section2)
+	if tbl.GetSection2() != section2 {
+		t.Logf("smoke_test: Expected %s,  found %s\n", tbl.GetSection2(), section2)
 		t.Fail()
 	}
 
@@ -110,10 +106,15 @@ func TestSmoke(t *testing.T) {
 		t.Logf("smoke_test: Expected %d,  found %d\n", tbl.Getd(1, DOB), d[1].DOB)
 		t.Fail()
 	}
-	if tbl.Type(1, NAME) != CELLSTRING {
-		t.Logf("smoke_test: Expected %d,  found %d\n", tbl.Type(1, NAME), CELLSTRING)
+	if tbl.Type(1, Name) != CELLSTRING {
+		t.Logf("smoke_test: Expected %d,  found %d\n", tbl.Type(1, Name), CELLSTRING)
 		t.Fail()
 	}
+
+	// Bang it a bit...
+	tbl.Sort(0, tbl.RowCount()-1, DOB)
+	tbl.AddLineAfter(tbl.RowCount() - 1) // a line after the last row in the table
+	tbl.InsertSumRowsetCols(totalsRSet, tbl.RowCount(), []int{Winnings})
 
 	// Now hit it hard...
 	DoTextOutput(t, &tbl)
