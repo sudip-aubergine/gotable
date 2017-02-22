@@ -196,6 +196,9 @@ func (t *Table) SumRowset(rsid, col int) Cell {
 }
 
 // InsertSumRowsetCols sums the values for the specified rowset and appends it at the specified row
+// rsid = the RowSet on which to perform the sum
+// row  = a row will be inserted at this index, and the totals will be added to this row
+// cols = an array of column numbers to total
 func (t *Table) InsertSumRowsetCols(rsid, row int, cols []int) {
 	t.InsertRow(row)
 	for i := 0; i < len(cols); i++ {
@@ -496,7 +499,7 @@ func (t *Table) Cols() int {
 // print(t)
 func (t Table) String() string {
 	s, _ := t.SprintTable(TABLEOUTTEXT)
-	return t.Title + t.Section1 + t.Section2 + s
+	return t.Title + "\n" + t.Section1 + "\n" + t.Section2 + "\n" + s
 }
 
 // InsertRow adds a new Row at the specified index.
