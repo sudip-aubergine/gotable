@@ -120,6 +120,7 @@ func TestSmoke(t *testing.T) {
 	DoTextOutput(t, &tbl)
 	DoCSVOutput(t, &tbl)
 	DoHTMLOutput(t, &tbl)
+	DoPDFOutput(t, &tbl)
 }
 
 func DoTextOutput(t *testing.T, tbl *Table) {
@@ -127,17 +128,6 @@ func DoTextOutput(t *testing.T, tbl *Table) {
 	(*tbl).TightenColumns()
 	s += fmt.Sprintf("%s\n", (*tbl))
 	saveTableToFile(t, "smoke_test.out", s)
-
-	// // save output for later inspection if anything goes wrong
-	// f, err := os.Create("smoke_test.out")
-	// if nil != err {
-	// 	t.Logf("smoke_test: Error creating file: %s\n", err.Error())
-	// 	t.Fail()
-	// 	// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
-	// }
-	// defer f.Close()
-	// fmt.Fprintf(f, "%s", s)
-	// f.Sync()
 
 	// now compare what we have to the known-good output
 	b, _ := ioutil.ReadFile("./testdata/smoke_test.txt")
@@ -165,17 +155,6 @@ func DoCSVOutput(t *testing.T, tbl *Table) {
 		// fmt.Printf("smoke_test: Error creating CSV output: %s\n", err.Error())
 	}
 	saveTableToFile(t, "smoke_test.csv", s)
-
-	// // save for later inspection if anything goes wrong
-	// f, err := os.Create("smoke_test.csv")
-	// if nil != err {
-	// 	t.Logf("smoke_test: Error creating file: %s\n", err.Error())
-	// 	t.Fail()
-	// 	// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
-	// }
-	// defer f.Close()
-	// fmt.Fprintf(f, "%s", s)
-	// f.Sync()
 
 	// now compare what we have to the known-good output
 	b, _ := ioutil.ReadFile("./testdata/smoke_test.csv")
@@ -205,17 +184,6 @@ func DoHTMLOutput(t *testing.T, tbl *Table) {
 	}
 	saveTableToFile(t, "smoke_test.html", s)
 
-	// // save for later inspection if anything goes wrong
-	// f, err := os.Create("smoke_test.html")
-	// if nil != err {
-	// 	t.Logf("smoke_test: Error creating file: %s\n", err.Error())
-	// 	t.Fail()
-	// 	// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
-	// }
-	// defer f.Close()
-	// fmt.Fprintf(f, "%s", s)
-	// f.Sync()
-
 	// now compare what we have to the known-good output
 	b, _ := ioutil.ReadFile("./testdata/smoke_test.html")
 	sb := []byte(s)
@@ -231,6 +199,17 @@ func DoHTMLOutput(t *testing.T, tbl *Table) {
 			// fmt.Printf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
 			break
 		}
+	}
+}
+
+func DoPDFOutput(t *testing.T, tbl *Table) {
+	s, err := (*tbl).SprintTable(TABLEOUTPDF)
+	if nil != err {
+		t.Logf("smoke_test: Error creating PDF output: %s\n", err.Error())
+		// fmt.Printf("smoke_test: Error creating PDF output: %s\n", err.Error())
+	}
+	if len(s) > 0 {
+		fmt.Printf("s = %s\n", s)
 	}
 }
 

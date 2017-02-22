@@ -204,18 +204,6 @@ func (t *Table) SumRowset(rsid, col int) Cell {
 	return c
 }
 
-// InsertSumRowsetCols sums the values for the specified rowset and appends it at the specified row
-// rsid = the RowSet on which to perform the sum
-// row  = a row will be inserted at this index, and the totals will be added to this row
-// cols = an array of column numbers to total
-func (t *Table) InsertSumRowsetCols(rsid, row int, cols []int) {
-	t.InsertRow(row)
-	for i := 0; i < len(cols); i++ {
-		c := t.SumRowset(rsid, cols[i])
-		t.Put(row, cols[i], c)
-	}
-}
-
 // AdjustFormatString can be called when the format string is null or when the column width changes
 // to set a proper formatting string
 func (t *Table) AdjustFormatString(cd *ColumnDef) {
@@ -497,7 +485,7 @@ func (t *Table) Cols() int {
 // print(t)
 func (t Table) String() string {
 	s, _ := t.SprintTable(TABLEOUTTEXT)
-	return t.Title + t.Section1 + t.Section2 + s
+	return prepareForTextPrint(t.Title) + prepareForTextPrint(t.Section1) + prepareForTextPrint(t.Section2) + s
 }
 
 func (t *Table) createColSet(c *Colset) {
@@ -507,25 +495,6 @@ func (t *Table) createColSet(c *Colset) {
 	}
 	c.Height = 1
 
-}
-
-// AddRow appends a new Row to the table. Initially, all cells are empty
-func (t *Table) AddRow() {
-	var c Colset
-	t.createColSet(&c)
-	t.Row = append(t.Row, c)
-}
-
-// InsertRow adds a new Row at the specified index.
-func (t *Table) InsertRow(row int) {
-	if row >= len(t.Row) || row < 0 {
-		t.AddRow()
-		return
-	}
-	var c Colset
-	t.createColSet(&c)
-	t.Row = append(t.Row[:row+1], t.Row[row:]...)
-	t.Row[row] = c
 }
 
 // Sum computes the sum of the rows at the specified column index. It returns a Cell
@@ -588,6 +557,53 @@ func (t *Table) Sort(from, to, col int) {
 	}
 }
 
+// InsertSumRowsetCols sums the values for the specified rowset and appends it at the specified row
+// rsid = the RowSet on which to perform the sum
+// row  = a row will be inserted at this index, and the totals will be added to this row
+// cols = an array of column numbers to total
+func (t *Table) InsertSumRowsetCols(rsid, row int, cols []int) {
+	t.InsertRow(row)
+	for i := 0; i < len(cols); i++ {
+		c := t.SumRowset(rsid, cols[i])
+		t.Put(row, cols[i], c)
+	}
+}
+
+// AddRow appends a new Row to the table. Initially, all cells are empty
+func (t *Table) AddRow() {
+	var c Colset
+	t.createColSet(&c)
+	t.Row = append(t.Row, c)
+}
+
+// InsertRow adds a new Row at the specified index.
+func (t *Table) InsertRow(row int) {
+	if row >= len(t.Row) || row < 0 {
+		t.AddRow()
+		return
+	}
+	var c Colset
+	t.createColSet(&c)
+	t.Row = append(t.Row[:row+1], t.Row[row:]...)
+	t.Row[row] = c
+
+	// Adjust LineAfter
+	for i := 0; i < len(t.LineAfter); i++ {
+		if t.LineAfter[i] >= row {
+			t.LineAfter[i]++
+		}
+	}
+	// Adjust RowSets
+	// TODO --  NEED A BETTER UNIT TEST FOR THIS
+	for i := 0; i < len(t.RS); i++ {
+		for j := 0; j < len(t.RS[i].R); j++ {
+			if t.RS[i].R[j] >= row {
+				t.RS[i].R[j]--
+			}
+		}
+	}
+}
+
 // DeleteRow removes the table row at the specified index. All rowsets and LineAfter sets are adjusted.
 // Cleanup on LineAfter and RowSets does not work if row == 0. I was just too lazy at the time to add this
 // code because I know how/where delete will be used and it will not affect row 0.
@@ -608,6 +624,7 @@ func (t *Table) DeleteRow(row int) {
 		}
 	}
 	// Clean up RowSets
+	// TODO --  NEED A BETTER UNIT TEST FOR THIS
 	for i := 0; i < len(t.RS); i++ {
 		for j := 0; j < len(t.RS[i].R); j++ {
 			if t.RS[i].R[j] >= row {
