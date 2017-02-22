@@ -1,10 +1,12 @@
 gotable: *.go
 	go vet
-	golint
 	go build
 
 clean:
 	rm -rf *.out
+
+lint:
+	golint
 
 test:
 	go test -coverprofile=coverage.out 
