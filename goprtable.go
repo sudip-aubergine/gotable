@@ -291,17 +291,6 @@ func (t *Table) AdjustAllColumnHeaders() {
 	}
 }
 
-// AddRow appends a new Row to the table. Initially, all cells are empty
-func (t *Table) AddRow() {
-	var c Colset
-	for i := 0; i < len(t.ColDefs); i++ {
-		var cell Cell
-		c.Col = append(c.Col, cell)
-	}
-	c.Height = 1
-	t.Row = append(t.Row, c)
-}
-
 // Get returns the cell at the supplied row,col.  If the supplied
 // row or col is outside the table's boundaries, then an empty cell
 // is returned
@@ -511,19 +500,30 @@ func (t Table) String() string {
 	return t.Title + t.Section1 + t.Section2 + s
 }
 
-// InsertRow adds a new Row at the specified index.
-func (t *Table) InsertRow(row int) {
-	if row >= len(t.Row) {
-		t.AddRow()
-		return
-	}
-
-	var c Colset
+func (t *Table) createColSet(c *Colset) {
 	for i := 0; i < len(t.ColDefs); i++ {
 		var cell Cell
 		c.Col = append(c.Col, cell)
 	}
+	c.Height = 1
 
+}
+
+// AddRow appends a new Row to the table. Initially, all cells are empty
+func (t *Table) AddRow() {
+	var c Colset
+	t.createColSet(&c)
+	t.Row = append(t.Row, c)
+}
+
+// InsertRow adds a new Row at the specified index.
+func (t *Table) InsertRow(row int) {
+	if row >= len(t.Row) || row < 0 {
+		t.AddRow()
+		return
+	}
+	var c Colset
+	t.createColSet(&c)
 	t.Row = append(t.Row[:row+1], t.Row[row:]...)
 	t.Row[row] = c
 }

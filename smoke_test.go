@@ -126,17 +126,18 @@ func DoTextOutput(t *testing.T, tbl *Table) {
 	s := fmt.Sprintf("%s\n", (*tbl))
 	(*tbl).TightenColumns()
 	s += fmt.Sprintf("%s\n", (*tbl))
+	saveTableToFile(t, "smoke_test.out", s)
 
-	// save output for later inspection if anything goes wrong
-	f, err := os.Create("smoke_test.out")
-	if nil != err {
-		t.Logf("smoke_test: Error creating file: %s\n", err.Error())
-		t.Fail()
-		// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
-	}
-	defer f.Close()
-	fmt.Fprintf(f, "%s", s)
-	f.Sync()
+	// // save output for later inspection if anything goes wrong
+	// f, err := os.Create("smoke_test.out")
+	// if nil != err {
+	// 	t.Logf("smoke_test: Error creating file: %s\n", err.Error())
+	// 	t.Fail()
+	// 	// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
+	// }
+	// defer f.Close()
+	// fmt.Fprintf(f, "%s", s)
+	// f.Sync()
 
 	// now compare what we have to the known-good output
 	b, _ := ioutil.ReadFile("./testdata/smoke_test.txt")
@@ -163,17 +164,18 @@ func DoCSVOutput(t *testing.T, tbl *Table) {
 		t.Fail()
 		// fmt.Printf("smoke_test: Error creating CSV output: %s\n", err.Error())
 	}
+	saveTableToFile(t, "smoke_test.csv", s)
 
-	// save for later inspection if anything goes wrong
-	f, err := os.Create("smoke_test.csv")
-	if nil != err {
-		t.Logf("smoke_test: Error creating file: %s\n", err.Error())
-		t.Fail()
-		// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
-	}
-	defer f.Close()
-	fmt.Fprintf(f, "%s", s)
-	f.Sync()
+	// // save for later inspection if anything goes wrong
+	// f, err := os.Create("smoke_test.csv")
+	// if nil != err {
+	// 	t.Logf("smoke_test: Error creating file: %s\n", err.Error())
+	// 	t.Fail()
+	// 	// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
+	// }
+	// defer f.Close()
+	// fmt.Fprintf(f, "%s", s)
+	// f.Sync()
 
 	// now compare what we have to the known-good output
 	b, _ := ioutil.ReadFile("./testdata/smoke_test.csv")
@@ -201,17 +203,18 @@ func DoHTMLOutput(t *testing.T, tbl *Table) {
 		t.Fail()
 		// fmt.Printf("smoke_test: Error creating HTML output: %s\n", err.Error())
 	}
+	saveTableToFile(t, "smoke_test.html", s)
 
-	// save for later inspection if anything goes wrong
-	f, err := os.Create("smoke_test.html")
-	if nil != err {
-		t.Logf("smoke_test: Error creating file: %s\n", err.Error())
-		t.Fail()
-		// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
-	}
-	defer f.Close()
-	fmt.Fprintf(f, "%s", s)
-	f.Sync()
+	// // save for later inspection if anything goes wrong
+	// f, err := os.Create("smoke_test.html")
+	// if nil != err {
+	// 	t.Logf("smoke_test: Error creating file: %s\n", err.Error())
+	// 	t.Fail()
+	// 	// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
+	// }
+	// defer f.Close()
+	// fmt.Fprintf(f, "%s", s)
+	// f.Sync()
 
 	// now compare what we have to the known-good output
 	b, _ := ioutil.ReadFile("./testdata/smoke_test.html")
@@ -229,4 +232,17 @@ func DoHTMLOutput(t *testing.T, tbl *Table) {
 			break
 		}
 	}
+}
+
+func saveTableToFile(t *testing.T, fname string, s string) error {
+	// save for later inspection if anything goes wrong
+	f, err := os.Create(fname)
+	if nil != err {
+		t.Logf("smoke_test: Error creating file %s: %s\n", fname, err.Error())
+		t.Fail()
+		// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
+	}
+	defer f.Close()
+	fmt.Fprintf(f, "%s", s)
+	return err
 }
