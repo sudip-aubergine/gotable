@@ -95,11 +95,11 @@ func TestSmoke(t *testing.T) {
 		t.Fail()
 	}
 	if tbl.Getf(1, Winnings) != d[1].Winnings {
-		t.Logf("smoke_test: Expected %d,  found %d\n", tbl.Getf(1, Winnings), d[1].Winnings)
+		t.Logf("smoke_test: Expected %f,  found %f\n", tbl.Getf(1, Winnings), d[1].Winnings)
 		t.Fail()
 	}
 	if tbl.Gets(1, Name) != d[1].Name {
-		t.Logf("smoke_test: Expected %d,  found %d\n", tbl.Gets(1, Name), d[1].Name)
+		t.Logf("smoke_test: Expected %s,  found %s\n", tbl.Gets(1, Name), d[1].Name)
 		t.Fail()
 	}
 	if tbl.Getd(1, DOB) != d[1].DOB {
