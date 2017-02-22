@@ -44,7 +44,7 @@ func (t *Table) SprintColHdrsCSV() (string, error) {
 // SprintRowsCSV returns the table rows in csv layout
 func (t *Table) SprintRowsCSV(f int) (string, error) {
 	rowsStr := ""
-	for i := 0; i < t.Rows(); i++ {
+	for i := 0; i < t.RowCount(); i++ {
 		s, err := t.SprintRow(i, f)
 		if err != nil {
 			return "", err

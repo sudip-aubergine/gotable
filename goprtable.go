@@ -138,6 +138,11 @@ func (t *Table) RowCount() int {
 	return len(t.Row)
 }
 
+// Cols returns the number of columns in the table
+func (t *Table) ColCount() int {
+	return len(t.ColDefs)
+}
+
 // // TypeToString returns a string describing the data type of the cell.
 // func (c *Cell) TypeToString() string {
 // 	switch c.Type {
@@ -185,6 +190,14 @@ func (t *Table) CreateRowset() int {
 // AppendToRowset adds a new row index to the rowset rsid
 func (t *Table) AppendToRowset(rsid, row int) {
 	t.RS[rsid].R = append(t.RS[rsid].R, row)
+}
+
+// GetRowset returns an array of ints with the rows in the rowset
+func (t *Table) GetRowset(rsid int) []int {
+	if rsid < 0 || rsid >= len(t.RS) {
+		return []int{}
+	}
+	return t.RS[rsid].R
 }
 
 // SumRowset computes the sum of the rows in rowset[rs] at the specified column index. It returns a Cell with the sum
@@ -471,16 +484,6 @@ func (t *Table) Put(row, col int, c Cell) {
 	t.Row[row].Col[col] = c
 }
 
-// Rows returns the number of rows in the table
-func (t *Table) Rows() int {
-	return len(t.Row)
-}
-
-// Cols returns the number of columns in the table
-func (t *Table) Cols() int {
-	return len(t.ColDefs)
-}
-
 // String is the "stringer" method implementation for go so that you can simply
 // print(t)
 func (t Table) String() string {
@@ -546,7 +549,7 @@ func (t *Table) Sort(from, to, col int) {
 			case CELLFLOAT:
 				swap = t.Row[i].Col[col].Fval > t.Row[j].Col[col].Fval
 			case CELLSTRING:
-				swap = t.Row[i].Col[col].Sval > t.Row[j].Col[col].Sval
+				swap = strings.ToLower(t.Row[i].Col[col].Sval) > strings.ToLower(t.Row[j].Col[col].Sval)
 			case CELLDATE, CELLDATETIME:
 				swap = t.Row[i].Col[col].Dval.After(t.Row[j].Col[col].Dval)
 			}
@@ -570,6 +573,7 @@ func (t *Table) InsertSumRowsetCols(rsid, row int, cols []int) {
 }
 
 // AddRow appends a new Row to the table. Initially, all cells are empty
+// It returns the row number just added.
 func (t *Table) AddRow() {
 	var c Colset
 	t.createColSet(&c)
@@ -594,13 +598,15 @@ func (t *Table) InsertRow(row int) {
 		}
 	}
 	// Adjust RowSets
-	// TODO --  NEED A BETTER UNIT TEST FOR THIS
 	for i := 0; i < len(t.RS); i++ {
+		// adjust the existing rows...
 		for j := 0; j < len(t.RS[i].R); j++ {
 			if t.RS[i].R[j] >= row {
-				t.RS[i].R[j]--
+				t.RS[i].R[j]++
 			}
 		}
+		// add in the new row...
+		t.RS[i].R = append(t.RS[i].R, row)
 	}
 }
 
@@ -608,25 +614,26 @@ func (t *Table) InsertRow(row int) {
 // Cleanup on LineAfter and RowSets does not work if row == 0. I was just too lazy at the time to add this
 // code because I know how/where delete will be used and it will not affect row 0.
 func (t *Table) DeleteRow(row int) {
-	if row == 0 {
-		t.Row = t.Row[1:]
-	} else {
-		n := t.Row[0:row]
-		if len(t.Row) > row {
-			n = append(n, t.Row[row+1:]...)
-		}
-		t.Row = n
-	}
+	t.Row = t.Row[:row+copy(t.Row[row:], t.Row[row+1:])] // this removes t.Row[row]
 	// Clean up LineAfter
 	for i := 0; i < len(t.LineAfter); i++ {
-		if t.LineAfter[i] >= row {
+		if t.LineAfter[i] > row {
 			t.LineAfter[i]--
 		}
 	}
 	// Clean up RowSets
-	// TODO --  NEED A BETTER UNIT TEST FOR THIS
 	for i := 0; i < len(t.RS); i++ {
-		for j := 0; j < len(t.RS[i].R); j++ {
+		l := len(t.RS[i].R) // length of jth rowset
+		// First remove the row from the rowset
+		for j := 0; j < l; j++ {
+			if t.RS[i].R[j] == row {
+				t.RS[i].R = append(t.RS[i].R[:j], t.RS[i].R[j+1:]...) // this append statement removes element j from the slice
+				break
+			}
+		}
+		// Now adjust the row numbers of the remaining rows
+		l = len(t.RS[i].R)
+		for j := 0; j < l; j++ {
 			if t.RS[i].R[j] >= row {
 				t.RS[i].R[j]--
 			}
@@ -704,7 +711,7 @@ func (t *Table) SprintColumnHeaders(f int) (string, error) {
 // SprintRows returns a string formatted for all rows
 func (t *Table) SprintRows(f int) (string, error) {
 	// if there are no rows in table
-	if t.Rows() < 1 {
+	if t.RowCount() < 1 {
 		return "", fmt.Errorf("SprintRows: there are no rows")
 	}
 

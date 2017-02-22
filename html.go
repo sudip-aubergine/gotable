@@ -40,7 +40,7 @@ func (t *Table) SprintColHdrsHTML() (string, error) {
 // SprintRowsHTML returns all rows text string
 func (t *Table) SprintRowsHTML(f int) (string, error) {
 	rowsStr := ""
-	for i := 0; i < t.Rows(); i++ {
+	for i := 0; i < t.RowCount(); i++ {
 		s, err := t.SprintRow(i, f)
 		if err != nil {
 			return "", err

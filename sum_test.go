@@ -119,5 +119,8 @@ func TestSum(t *testing.T) {
 	// 	t.Logf("%d.  %d   %10.8f\n", i, j, x)
 	// }
 
-	saveTableToFile(t, "sum_test.txt", s1+"\n\n"+s11+"\n\n"+s2+"\n\n"+s3+"\n\n"+s4)
+	bShowFile := false
+	if bShowFile {
+		saveTableToFile(t, "sum_test.txt", s1+"\n\n"+s11+"\n\n"+s2+"\n\n"+s3+"\n\n"+s4)
+	}
 }

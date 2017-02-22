@@ -80,7 +80,7 @@ func (t *Table) SprintColHdrsText() (string, error) {
 // SprintRowsText returns all rows text string
 func (t *Table) SprintRowsText(f int) (string, error) {
 	rowsStr := ""
-	for i := 0; i < t.Rows(); i++ {
+	for i := 0; i < t.RowCount(); i++ {
 		s, err := t.SprintRow(i, f)
 		if err != nil {
 			return "", err
