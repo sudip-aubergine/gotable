@@ -1,4 +1,5 @@
 gotable: *.go
+	go get -t ./...
 	go vet
 	go build
 
