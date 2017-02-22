@@ -7,87 +7,106 @@ import (
 	"github.com/dustin/go-humanize"
 )
 
-// mkstr returns a string of n of the supplied character that is the specified length
-func mkstr(n int, c byte) string {
-	p := make([]byte, n)
-	for i := 0; i < n; i++ {
-		p[i] = c
-	}
-	return string(p)
+// TextTable struct used to prepare table in text version
+type TextTable struct {
+	*Table
+	TextColSpace int
 }
 
-// SprintTableText prints the whole table in text form
-func (t *Table) SprintTableText(f int) (string, error) {
+// getTableOutput prints the whole table in text form
+func (tt *TextTable) getTableOutput() (string, error) {
 	// get headers first
-	s, err := t.SprintColumnHeaders(f)
+	et, err := tt.getHeaders()
 	if err != nil {
 		return "", err
 	}
 
-	// then append strings of rows
-	rs, err := t.SprintRows(f)
+	// then append table body
+	rs, err := tt.getRows()
 	if err != nil {
 		return "", err
 	}
-	s += rs
+	et += rs
 
-	return s, nil
+	return et, nil
 }
 
 // SprintColHdrsText formats the column headers as text and returns the string
-func (t *Table) SprintColHdrsText() (string, error) {
-	t.AdjustAllColumnHeaders()
+func (tt *TextTable) getHeaders() (string, error) {
+
+	// check for blank headers
+	blankHdrsErr := tt.Table.HasHeaders()
+	if blankHdrsErr != nil {
+		return "", blankHdrsErr
+	}
+
+	tt.Table.AdjustAllColumnHeaders()
+
 	s := ""
-	for j := 0; j < len(t.ColDefs[0].Hdr); j++ {
-		for i := 0; i < len(t.ColDefs); i++ {
+	for j := 0; j < len(tt.Table.ColDefs[0].Hdr); j++ {
+		for i := 0; i < len(tt.Table.ColDefs); i++ {
 			sf := ""
 			lft := ""
-			if t.ColDefs[i].Justify == COLJUSTIFYLEFT {
+			if tt.Table.ColDefs[i].Justify == COLJUSTIFYLEFT {
 				lft += "-"
 			}
-			sf += fmt.Sprintf("%%%s%ds", lft, t.ColDefs[i].Width)
-			s += fmt.Sprintf(sf, t.ColDefs[i].Hdr[j])
-			if i < len(t.ColDefs)-1 {
-				s += mkstr(t.TextColSpace, ' ')
+			sf += fmt.Sprintf("%%%s%ds", lft, tt.Table.ColDefs[i].Width)
+			s += fmt.Sprintf(sf, tt.Table.ColDefs[i].Hdr[j])
+			if i < len(tt.Table.ColDefs)-1 {
+				s += mkstr(tt.TextColSpace, ' ')
 			}
 		}
 		s += "\n"
 	}
-	for i := 0; i < len(t.ColDefs); i++ {
-		s += fmt.Sprintf("%s", mkstr(t.ColDefs[i].Width, '-'))
-		if i < len(t.ColDefs)-1 {
-			s += mkstr(t.TextColSpace, ' ')
+
+	for i := 0; i < len(tt.Table.ColDefs); i++ {
+		s += fmt.Sprintf("%s", mkstr(tt.Table.ColDefs[i].Width, '-'))
+		if i < len(tt.Table.ColDefs)-1 {
+			s += mkstr(tt.TextColSpace, ' ')
 		}
 	}
 	s += "\n"
 	return s, nil
 }
 
-// SprintRowsText returns all rows text string
-func (t *Table) SprintRowsText(f int) (string, error) {
-	rowsStr := ""
-	for i := 0; i < t.Rows(); i++ {
-		s, err := t.SprintRow(i, f)
+func (tt *TextTable) getRows() (string, error) {
+	// check for empty data table
+	blankDataErr := tt.Table.HasData()
+	if blankDataErr != nil {
+		return "", blankDataErr
+	}
+
+	var rowsStr string
+	for i := 0; i < tt.Table.Rows(); i++ {
+		s, err := tt.getRow(i)
 		if err != nil {
 			return "", err
 		}
 		rowsStr += s
 	}
+
 	return rowsStr, nil
 }
 
-// SprintRowText formats the requested row as text in a string and returns the string
-func (t *Table) SprintRowText(row int) (string, error) {
+func (tt *TextTable) getRow(row int) (string, error) {
 
-	s := ""
-	if len(t.LineBefore) > 0 {
-		j := sort.SearchInts(t.LineBefore, row)
-		if j < len(t.LineBefore) && row == t.LineBefore[j] {
-			s += t.SprintLineText()
+	// check that this passed row is valid or not
+	inValidRowErr := tt.Table.HasValidRow(row)
+	if inValidRowErr != nil {
+		return "", inValidRowErr
+	}
+
+	// format table row
+	var s string
+
+	if len(tt.Table.LineBefore) > 0 {
+		j := sort.SearchInts(tt.Table.LineBefore, row)
+		if j < len(tt.Table.LineBefore) && row == tt.Table.LineBefore[j] {
+			s += tt.sprintLineText()
 		}
 	}
 
-	rowColumns := len(t.Row[row].Col)
+	rowColumns := len(tt.Table.Row[row].Col)
 
 	// columns string chunk map, each column holds list of string
 	// that fits in one line at best
@@ -97,14 +116,14 @@ func (t *Table) SprintRowText(row int) (string, error) {
 	// by default table has no all the data in string format, so that we need to add
 	// logic here only, to support multi line functionality
 	for i := 0; i < rowColumns; i++ {
-		if t.Row[row].Col[i].Type == CELLSTRING {
-			cd := t.ColDefs[i]
-			a, _ := t.getMultiLineText(t.Row[row].Col[i].Sval, cd.Width)
+		if tt.Table.Row[row].Col[i].Type == CELLSTRING {
+			cd := tt.Table.ColDefs[i]
+			a, _ := getMultiLineText(tt.Table.Row[row].Col[i].Sval, cd.Width)
 
 			colStringChunkMap[i] = a
 
-			if len(a) > t.Row[row].Height {
-				t.Row[row].Height = len(a)
+			if len(a) > tt.Table.Row[row].Height {
+				tt.Table.Row[row].Height = len(a)
 			}
 		}
 	}
@@ -114,79 +133,82 @@ func (t *Table) SprintRowText(row int) (string, error) {
 	rowTextList := [][]string{}
 
 	// init rowTextList with empty values
-	for k := 0; k < t.Row[row].Height; k++ {
+	for k := 0; k < tt.Table.Row[row].Height; k++ {
 		temp := make([]string, rowColumns)
 		for i := 0; i < rowColumns; i++ {
 			// assign default string with length of column width
-			temp = append(temp, mkstr(t.ColDefs[i].Width, ' '))
+			temp = append(temp, mkstr(tt.Table.ColDefs[i].Width, ' '))
 		}
 		rowTextList = append(rowTextList, temp)
 	}
 
 	// fill the content in rowTextList for the first line
 	for i := 0; i < rowColumns; i++ {
-		switch t.Row[row].Col[i].Type {
+		switch tt.Table.Row[row].Col[i].Type {
 		case CELLFLOAT:
-			rowTextList[0][i] = fmt.Sprintf(t.ColDefs[i].Pfmt, humanize.FormatFloat("#,###.##", t.Row[row].Col[i].Fval))
+			rowTextList[0][i] = fmt.Sprintf(tt.Table.ColDefs[i].Pfmt, humanize.FormatFloat("#,###.##", tt.Table.Row[row].Col[i].Fval))
 		case CELLINT:
-			rowTextList[0][i] = fmt.Sprintf(t.ColDefs[i].Pfmt, t.Row[row].Col[i].Ival)
+			rowTextList[0][i] = fmt.Sprintf(tt.Table.ColDefs[i].Pfmt, tt.Table.Row[row].Col[i].Ival)
 		case CELLSTRING:
-			rowTextList[0][i] = fmt.Sprintf(t.ColDefs[i].Pfmt, colStringChunkMap[i][0])
+			rowTextList[0][i] = fmt.Sprintf(tt.Table.ColDefs[i].Pfmt, colStringChunkMap[i][0])
 		case CELLDATE:
-			rowTextList[0][i] = fmt.Sprintf("%*.*s", t.ColDefs[i].Width, t.ColDefs[i].Width, t.Row[row].Col[i].Dval.Format(t.DateFmt))
+			rowTextList[0][i] = fmt.Sprintf("%*.*s", tt.Table.ColDefs[i].Width, tt.Table.ColDefs[i].Width, tt.Table.Row[row].Col[i].Dval.Format(tt.Table.DateFmt))
 		case CELLDATETIME:
-			rowTextList[0][i] = fmt.Sprintf("%*.*s", t.ColDefs[i].Width, t.ColDefs[i].Width, t.Row[row].Col[i].Dval.Format(t.DateTimeFmt))
+			rowTextList[0][i] = fmt.Sprintf("%*.*s", tt.Table.ColDefs[i].Width, tt.Table.ColDefs[i].Width, tt.Table.Row[row].Col[i].Dval.Format(tt.Table.DateTimeFmt))
 		default:
-			rowTextList[0][i] = mkstr(t.ColDefs[i].Width, ' ')
+			rowTextList[0][i] = mkstr(tt.Table.ColDefs[i].Width, ' ')
 		}
 	}
 
 	// rowTextList to string
-	for k := 0; k < t.Row[row].Height; k++ {
+	for k := 0; k < tt.Table.Row[row].Height; k++ {
 		for i := 0; i < rowColumns; i++ {
 
 			// if not first row then process multi line format
 			if k > 0 {
-				if t.Row[row].Col[i].Type == CELLSTRING {
+				if tt.Table.Row[row].Col[i].Type == CELLSTRING {
 					if k >= len(colStringChunkMap[i]) {
-						rowTextList[k][i] = fmt.Sprintf(t.ColDefs[i].Pfmt, "")
+						rowTextList[k][i] = fmt.Sprintf(tt.Table.ColDefs[i].Pfmt, "")
 					} else {
-						rowTextList[k][i] = fmt.Sprintf(t.ColDefs[i].Pfmt, colStringChunkMap[i][k])
+						rowTextList[k][i] = fmt.Sprintf(tt.Table.ColDefs[i].Pfmt, colStringChunkMap[i][k])
 					}
 				}
 			}
 
 			// if blank then append string of column width with blank
 			if rowTextList[k][i] == "" {
-				rowTextList[k][i] = mkstr(t.ColDefs[i].Width, ' ')
+				rowTextList[k][i] = mkstr(tt.Table.ColDefs[i].Width, ' ')
 			}
 			s += rowTextList[k][i]
 
 			// if it is not last block then
 			if i < (rowColumns - 1) {
-				s += mkstr(t.TextColSpace, ' ')
+				s += mkstr(tt.TextColSpace, ' ')
 			}
 		}
 		s += "\n"
 	}
 
-	if len(t.LineAfter) > 0 {
-		j := sort.SearchInts(t.LineAfter, row)
-		if j < len(t.LineAfter) && row == t.LineAfter[j] {
-			s += t.SprintLineText()
+	if len(tt.Table.LineAfter) > 0 {
+		j := sort.SearchInts(tt.Table.LineAfter, row)
+		if j < len(tt.Table.LineAfter) && row == tt.Table.LineAfter[j] {
+			s += tt.sprintLineText()
 		}
 	}
 	return s, nil
 }
 
 // SprintLineText returns a line across all rows in the table
-func (t *Table) SprintLineText() string {
-	s := ""
-	for i := 0; i < len(t.ColDefs); i++ {
-		s += mkstr(t.ColDefs[i].Width, '-')
-		if i < len(t.ColDefs)-1 {
-			s += mkstr(t.TextColSpace, ' ')
-		}
+func (tt *TextTable) sprintLineText() string {
+	var s string
+	for i := 0; i < len(tt.Table.ColDefs); i++ {
+		// draw line with hyphen `-` char
+		s += mkstr(tt.Table.ColDefs[i].Width, '-')
+
+		// separate text columns
+		s += mkstr(tt.TextColSpace, ' ')
 	}
+	// remove last textColSpace from s
+	s = s[0 : len(s)-tt.TextColSpace]
 	return s + "\n"
 }
