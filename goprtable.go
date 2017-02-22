@@ -1,10 +1,8 @@
 package gotable
 
 import (
-	"errors"
 	"fmt"
 	"sort"
-	"strings"
 	"time"
 )
 
@@ -33,18 +31,7 @@ const (
 	TABLEOUTCSV  = 4
 )
 
-var (
-	// ErrHeaders error
-	ErrHeaders = errors.New("No Headers found in table")
-	// ErrRows error
-	ErrRows = errors.New("No Rows found in table")
-	// ErrUnKnownFmt error
-	ErrUnKnownFmt = errors.New("Unrecognized format")
-	// ErrPDF error
-	ErrPDF = errors.New("PDF output format yet not supported")
-)
-
-// Cell is the basic data value type for the Table class.
+// Cell is the basic data value type for the Table class
 type Cell struct {
 	Type int       // int, float, or string enumeration
 	Ival int64     // integer value
@@ -80,18 +67,25 @@ type Rowset struct {
 // Table is a structure that defines a spreadsheet-like grid of cells and the
 // operations that can be performed.
 type Table struct {
-	Title        string      // table title
-	Section1     string      // another section for the title, in a different style
-	Section2     string      // a third section for the title, in a different style
-	ColDefs      []ColumnDef // table's column definitions, ordered 0..n left to right
-	Row          []Colset    // Each Colset forms a row
-	TextColSpace int         // space between text columns
-	maxHdrRows   int         // maximum number of header rows across all ColDefs
-	DateFmt      string      // format for printing dates
-	DateTimeFmt  string      // format for datetime values
-	LineAfter    []int       // array of row numbers that have a horizontal line after they are printed
-	LineBefore   []int       // array of row numbers that have a horizontal line before they are printed
-	RS           []Rowset    // a list of rowsets
+	Title       string      // table title
+	Section1    string      // another section for the title, in a different style
+	Section2    string      // a third section for the title, in a different style
+	ColDefs     []ColumnDef // table's column definitions, ordered 0..n left to right
+	Row         []Colset    // Each Colset forms a row
+	maxHdrRows  int         // maximum number of header rows across all ColDefs
+	DateFmt     string      // format for printing dates
+	DateTimeFmt string      // format for datetime values
+	LineAfter   []int       // array of row numbers that have a horizontal line after they are printed
+	LineBefore  []int       // array of row numbers that have a horizontal line before they are printed
+	RS          []Rowset    // a list of rowsets
+}
+
+// TableExportFormat ,each export output format must satisfy this interface
+type TableExportFormat interface {
+	getTableOutput() (string, error)
+	getHeaders() (string, error)
+	getRows() (string, error)
+	getRow(row int) (string, error)
 }
 
 // SetTitle sets the table's Title string to the supplied value.
@@ -157,7 +151,6 @@ func (t *Table) RowCount() int {
 
 // Init sets internal formatting controls to their default values
 func (t *Table) Init() {
-	t.TextColSpace = 2
 	t.DateFmt = "01/02/2006"
 	t.DateTimeFmt = "01/02/2006 15:04:00 MST"
 }
@@ -248,7 +241,7 @@ func (t *Table) AddColumn(title string, width, celltype int, justification int) 
 // make the title fit.  If necessary, it will force the width of the column to be
 // wide enough to fit the longest word in the title.
 func (t *Table) AdjustColumnHeader(cd *ColumnDef) {
-	a, maxColWidth := t.getMultiLineText(cd.ColTitle, cd.Width)
+	a, maxColWidth := getMultiLineText(cd.ColTitle, cd.Width)
 	if maxColWidth > cd.Width { // if the length of the column title is greater than the user-specified width
 		cd.Width = maxColWidth //increase the column width to hold the column title
 	}
@@ -384,42 +377,6 @@ func (t *Table) Putf(row, col int, v float64) bool {
 	return true
 }
 
-func (t *Table) getMultiLineText(v string, colWidth int) ([]string, int) {
-	var a []string
-
-	// fit the content in one line whatever it is irrespective of column width
-	if colWidth < 1 {
-		a[0] = v
-		return a, -1
-	}
-
-	// get multi line chunk in form of array
-	sa := strings.Split(v, " ") // break up the string at the spaces
-	j := 0
-	maxColWidth := 0
-	for i := 0; i < len(sa); i++ { // spin through all substrings
-		if len(sa[i]) <= colWidth && i+1 < len(sa) { // if the width of this substring is less than the requested width, and we're not at the end of the list
-			s := sa[i]                         // we know we're adding this one
-			for k := i + 1; k < len(sa); k++ { // take as many as possible
-				if len(s)+len(sa[k])+1 <= colWidth { // if it fits...
-					s += " " + sa[k] // ...add it to the list...
-					i = k            // ...and keep loop in sync
-				} else {
-					break // otherwise, add what we have and then go back to the outer loop
-				}
-			}
-			a = append(a, s)
-		} else {
-			a = append(a, sa[i])
-		}
-		if len(a[j]) > maxColWidth { // if there's not enough room for the current string
-			maxColWidth = len(a[j]) // then adjust the max column width we need
-		}
-		j++
-	}
-	return a, maxColWidth
-}
-
 // Puts updates the Cell at row,col with the string value v
 // and sets its type to CELLSTRING. If row or col is out of
 // bounds the return value is false. Otherwise, the return
@@ -437,7 +394,7 @@ func (t *Table) Puts(row, col int, v string) bool {
 	// Need to check width of column everytime when we adding new content
 	// if it is updatable or not
 	cd := t.ColDefs[col]
-	_, cellWidth := t.getMultiLineText(v, cd.Width)
+	_, cellWidth := getMultiLineText(v, cd.Width)
 	if cellWidth > cd.Width { // if the length of the column title is greater than the user-specified width
 		cd.Width = cellWidth //increase the column width to hold the column title
 		t.AdjustFormatString(&cd)
@@ -500,13 +457,13 @@ func (t Table) String() string {
 	return t.Title + t.Section1 + t.Section2 + s
 }
 
+// createColSet creates a new colset with cells, total number of Headers
 func (t *Table) createColSet(c *Colset) {
 	for i := 0; i < len(t.ColDefs); i++ {
 		var cell Cell
 		c.Col = append(c.Col, cell)
 	}
 	c.Height = 1
-
 }
 
 // AddRow appends a new Row to the table. Initially, all cells are empty
@@ -651,78 +608,57 @@ func (t *Table) TightenColumns() {
 
 // SprintTable renders the entire table to a string
 func (t *Table) SprintTable(f int) (string, error) {
-	switch f {
-	case TABLEOUTTEXT:
-		return t.SprintTableText(f)
-	case TABLEOUTHTML:
-		return t.SprintTableHTML(f)
-	case TABLEOUTCSV:
-		return t.SprintTableCSV(f)
-	case TABLEOUTPDF:
-		return t.SprintTablePDF(f)
-	}
-	return "", fmt.Errorf("SprintTable: unrecognized format:  %d", f)
+	return t.sprintTableFormat(f)
 }
 
-// SprintColumnHeaders returns a string with the column headers formatted as type f
-func (t *Table) SprintColumnHeaders(f int) (string, error) {
-	// first check if there are any headers
-	if len(t.ColDefs) < 1 {
-		return "", fmt.Errorf("there are no headers")
-	}
-
-	switch f {
-	case TABLEOUTTEXT:
-		return t.SprintColHdrsText()
-	case TABLEOUTHTML:
-		return t.SprintColHdrsHTML()
-	case TABLEOUTCSV:
-		return t.SprintColHdrsCSV()
-	case TABLEOUTPDF:
-		return t.SprintColHdrsPDF()
-	}
-	return "", fmt.Errorf("SprintColumnHeaders unrecognized format:  %d", f)
-}
-
-// SprintRows returns a string formatted for all rows
-func (t *Table) SprintRows(f int) (string, error) {
+// HasData checks that table has actually data or not
+func (t *Table) HasData() error {
 	// if there are no rows in table
 	if t.Rows() < 1 {
-		return "", fmt.Errorf("SprintRows: there are no rows")
+		return fmt.Errorf("There are no data in the table")
 	}
-
-	switch f {
-	case TABLEOUTTEXT:
-		return t.SprintRowsText(f)
-	case TABLEOUTHTML:
-		return t.SprintRowsHTML(f)
-	case TABLEOUTCSV:
-		return t.SprintRowsCSV(f)
-	case TABLEOUTPDF:
-		return t.SprintRowsPDF(f)
-	}
-	return "", fmt.Errorf("SprintRows unrecognized format:  %d", f)
+	return nil
 }
 
-// SprintRow returns a string formatted for output type f with the information in row
-func (t *Table) SprintRow(row, f int) (string, error) {
+// HasHeaders checks headers are present or not
+func (t *Table) HasHeaders() error {
+	if len(t.ColDefs) < 1 {
+		return fmt.Errorf("There are no headers in the table")
+	}
+	return nil
+}
 
+// HasValidRow checks that row is valid or not
+func (t *Table) HasValidRow(row int) error {
 	if row < 0 {
-		return "", fmt.Errorf("SprintRow: row number is less than zero , row: %d", row)
+		return fmt.Errorf("Row number is less than zero, row: %d", row)
 	}
 	if row >= len(t.Row) {
-		return "", fmt.Errorf("SprintRow: row number > rows in table, row: %d", row)
+		return fmt.Errorf("Row number > rows in table, row: %d", row)
 	}
+	return nil
+}
 
+// sprintTableFormat renders the entire table to a string
+func (t *Table) sprintTableFormat(f int) (string, error) {
+	var tout TableExportFormat
 	switch f {
 	case TABLEOUTTEXT:
-		return t.SprintRowText(row)
+		tout = &TextTable{Table: t, TextColSpace: 2}
+		break
 	case TABLEOUTHTML:
-		return t.SprintRowHTML(row)
+		tout = &HTMLTable{Table: t}
+		break
 	case TABLEOUTCSV:
-		return t.SprintRowCSV(row)
+		tout = &CSVTable{Table: t, CellSep: ","}
+		break
 	case TABLEOUTPDF:
-		return t.SprintRowPDF(row)
+		tout = &PDFTable{Table: t}
+		break
+	default:
+		return "", fmt.Errorf("Unrecognized table format:  %d", f)
 	}
-	return "", fmt.Errorf("SprintRow unrecognized format:  %d", f)
+
+	// return expected formatted output of table object
+	return tout.getTableOutput()
 }
