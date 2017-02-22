@@ -4,7 +4,7 @@ gotable: *.go
 	go build
 
 clean:
-	rm -rf *.out
+	rm -rf *.out *.csv *.html
 
 lint:
 	golint
