@@ -12,6 +12,7 @@ func TestSum(t *testing.T) {
 	tbl.Init() //sets column spacing and date format to default
 	tbl.AddColumn("int", 20, CELLINT, COLJUSTIFYRIGHT)
 	tbl.AddColumn("float", 20, CELLFLOAT, COLJUSTIFYRIGHT)
+	tbl.AddColumn("date/time", 25, CELLDATETIME, COLJUSTIFYLEFT)
 	now := time.Now()
 	rand.Seed(now.UnixNano())
 	var ibuf []int64
@@ -35,6 +36,8 @@ func TestSum(t *testing.T) {
 			tbl.Puti(x, 0, ibuf[i])
 			tbl.Putf(x, 1, fbuf[i])
 		}
+
+		tbl.Putdt(-1, 2, time.Now().Add(time.Duration(rand.Int63()))) // random date in the future
 		t.Logf("i = %d. tbl.RowCount = %d\n", i, tbl.RowCount())
 	}
 
@@ -42,6 +45,8 @@ func TestSum(t *testing.T) {
 	// now. The only rows in the table at the moment are the data rows. So the sum
 	// will be valid even after the summary rows are added.
 	csave := tbl.SumRows(1, -1, n+1000)
+
+	tbl.Sort(0, tbl.RowCount()-1, 2) // sort by the dates just to tweak the code
 
 	tbl.Sort(0, tbl.RowCount()-1, 1) // sort by the floats first
 	for i := 0; i < n-1; i++ {

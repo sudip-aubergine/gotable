@@ -390,7 +390,7 @@ func (t *Table) getMultiLineText(v string, colWidth int) ([]string, int) {
 
 	// fit the content in one line whatever it is irrespective of column width
 	if colWidth < 1 {
-		a[0] = v
+		a = append(a, v)
 		return a, -1
 	}
 
@@ -692,7 +692,7 @@ func (t *Table) SprintTable(f int) (string, error) {
 func (t *Table) SprintColumnHeaders(f int) (string, error) {
 	// first check if there are any headers
 	if len(t.ColDefs) < 1 {
-		return "", fmt.Errorf("there are no headers")
+		return "", fmt.Errorf("there are no columns")
 	}
 
 	switch f {
