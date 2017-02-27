@@ -19,16 +19,9 @@ func TestSmoke(t *testing.T) {
 
 	// force some edge condition errors...
 	errExp := "no columns"
-	_, err := tbl.SprintColumnHeaders(TABLEOUTTEXT)
+	_, err := tbl.SprintTable(TABLEOUTTEXT)
 	if !strings.Contains(err.Error(), errExp) {
-		t.Logf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
-		t.Fail()
-	}
-	errExp = "no rows"
-	_, err = tbl.SprintRows(TABLEOUTTEXT)
-	if !strings.Contains(err.Error(), errExp) {
-		t.Logf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
-		t.Fail()
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 
 	tbl.SetTitle(title)
@@ -42,6 +35,12 @@ func TestSmoke(t *testing.T) {
 	tbl.AddColumn("Winnings", 12, CELLFLOAT, COLJUSTIFYRIGHT)           // 5 total winnings
 	tbl.AddColumn("Notes", 20, CELLSTRING, COLJUSTIFYLEFT)              // 6 Notes
 	tbl.AddColumn("Random Date/Time", 25, CELLDATETIME, COLJUSTIFYLEFT) // 7 totally random datetime
+
+	errExp = "no rows"
+	_, err = tbl.SprintTable(TABLEOUTTEXT)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
 
 	const (
 		Name = iota
@@ -90,7 +89,7 @@ func TestSmoke(t *testing.T) {
 		tbl.Puts(-1, COB, d[i].COB)
 		tbl.Putf(-1, Winnings, d[i].Winnings)
 		tbl.Puts(-1, Notest, d[i].Notes)
-		tbl.Putdt(-1, 7, time.Unix(0, d[i].UnxNano)) // random date in the future
+		tbl.Putdt(-1, 7, time.Unix(0, d[i].UnxNano).UTC()) // random date in the future
 	}
 	// Start with simple checks...
 	if tbl.ColCount() != 8 {
@@ -133,11 +132,6 @@ func TestSmoke(t *testing.T) {
 		t.Logf("smoke_test: Expected %s,  found %s\n", tbl.GetSection2(), section2)
 		t.Fail()
 	}
-	_, iret := tbl.getMultiLineText("ignore", 0)
-	if iret != -1 {
-		t.Logf("smoke_test: Expected -1 return value of false, but got %d\n", iret)
-		t.Fail()
-	}
 
 	cell := tbl.Get(0, 0)
 	if cell.Sval != d[0].Name {
@@ -165,40 +159,8 @@ func TestSmoke(t *testing.T) {
 		t.Fail()
 	}
 
-	errExp = "unrecognized"
+	errExp = "Unrecognized"
 	_, err = tbl.SprintTable(999)
-	if !strings.Contains(err.Error(), errExp) {
-		t.Logf("smoke_test: Expected %q in error, but not found.  Error = %s\n", errExp, err.Error())
-		t.Fail()
-	}
-
-	_, err = tbl.SprintRows(999)
-	if !strings.Contains(err.Error(), errExp) {
-		t.Logf("smoke_test: Expected %q in error, but not found.  Error = %s\n", errExp, err.Error())
-		t.Fail()
-	}
-
-	_, err = tbl.SprintColumnHeaders(999)
-	if !strings.Contains(err.Error(), errExp) {
-		t.Logf("smoke_test: Expected %q in error, but not found.  Error = %s\n", errExp, err.Error())
-		t.Fail()
-	}
-
-	_, err = tbl.SprintRow(0, 999)
-	if !strings.Contains(err.Error(), errExp) {
-		t.Logf("smoke_test: Expected %q in error, but not found.  Error = %s\n", errExp, err.Error())
-		t.Fail()
-	}
-
-	errExp = "less than zero"
-	_, err = tbl.SprintRow(-1, TABLEOUTTEXT)
-	if !strings.Contains(err.Error(), errExp) {
-		t.Logf("smoke_test: Expected %q in error, but not found.  Error = %s\n", errExp, err.Error())
-		t.Fail()
-	}
-
-	errExp = "row number > rows"
-	_, err = tbl.SprintRow(999, TABLEOUTTEXT)
 	if !strings.Contains(err.Error(), errExp) {
 		t.Logf("smoke_test: Expected %q in error, but not found.  Error = %s\n", errExp, err.Error())
 		t.Fail()
@@ -217,14 +179,8 @@ func TestSmoke(t *testing.T) {
 }
 
 func DoTextOutput(t *testing.T, tbl *Table) {
-	_, err := tbl.SprintColumnHeaders(TABLEOUTTEXT)
-	if nil != err {
-		t.Logf("smoke_test: error printing columns: %s\n", err.Error())
-		t.Fail()
-	}
-	s := fmt.Sprintf("%s\n", (*tbl))
 	(*tbl).TightenColumns()
-	s += fmt.Sprintf("%s\n", (*tbl))
+	s := fmt.Sprintf("%s\n", (*tbl))
 	saveTableToFile(t, "smoke_test.txt", s)
 
 	// now compare what we have to the known-good output
@@ -232,13 +188,11 @@ func DoTextOutput(t *testing.T, tbl *Table) {
 	sb := []byte(s)
 	if len(b) != len(sb) {
 		// fmt.Printf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
-		t.Logf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
-		t.Fail()
+		t.Errorf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
 	}
 	for i := 0; i < len(b); i++ {
 		if sb[i] != b[i] {
-			t.Logf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
-			t.Fail()
+			t.Errorf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
 			// fmt.Printf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
 			break
 		}
@@ -246,15 +200,9 @@ func DoTextOutput(t *testing.T, tbl *Table) {
 }
 
 func DoCSVOutput(t *testing.T, tbl *Table) {
-	_, err := tbl.SprintColumnHeaders(TABLEOUTCSV)
-	if nil != err {
-		t.Logf("smoke_test: error printing columns: %s\n", err.Error())
-		t.Fail()
-	}
 	s, err := (*tbl).SprintTable(TABLEOUTCSV)
 	if nil != err {
-		t.Logf("smoke_test: Error creating CSV output: %s\n", err.Error())
-		t.Fail()
+		t.Error("smoke_test: Error creating CSV output: %s\n", err.Error())
 		// fmt.Printf("smoke_test: Error creating CSV output: %s\n", err.Error())
 	}
 	saveTableToFile(t, "smoke_test.csv", s)
@@ -279,11 +227,6 @@ func DoCSVOutput(t *testing.T, tbl *Table) {
 }
 
 func DoHTMLOutput(t *testing.T, tbl *Table) {
-	_, err := tbl.SprintColumnHeaders(TABLEOUTHTML)
-	if nil != err {
-		t.Logf("smoke_test: error printing columns: %s\n", err.Error())
-		t.Fail()
-	}
 	s, err := (*tbl).SprintTable(TABLEOUTHTML)
 	if nil != err {
 		t.Logf("smoke_test: Error creating HTML output: %s\n", err.Error())
@@ -317,7 +260,7 @@ func DoPDFOutput(t *testing.T, tbl *Table) {
 		// fmt.Printf("smoke_test: Error creating PDF output: %s\n", err.Error())
 	}
 	if len(s) > 0 {
-		fmt.Printf("s = %s\n", s)
+		t.Errorf("smoke_test: Expected: `PDF output for table is not supported yet`,  found: `%s`\n", s)
 	}
 }
 
