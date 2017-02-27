@@ -1,21 +1,27 @@
 package gotable
 
-// SprintTablePDF return the table header in PDF layout
-func (t *Table) SprintTablePDF(f int) (string, error) {
-	return "", ErrPDF
+import (
+	"fmt"
+)
+
+// PDFTable struct used to prepare table in pdf version
+type PDFTable struct {
+	*Table
 }
 
-// SprintColHdrsPDF return the table header in PDF layout
-func (t *Table) SprintColHdrsPDF() (string, error) {
-	return "", ErrPDF
+// getTableOutput return table output in pdf form
+func (ht *PDFTable) getTableOutput() (string, error) {
+	return "", fmt.Errorf("%s", "PDF output for table is not supported yet")
 }
 
-// SprintRowsPDF returns the table rows in PDF layout
-func (t *Table) SprintRowsPDF(f int) (string, error) {
-	return "", ErrPDF
+func (ht *PDFTable) getHeaders() (string, error) {
+	panic("Implementation Error")
 }
 
-// SprintRowPDF return a table row in PDF layout
-func (t *Table) SprintRowPDF(row int) (string, error) {
-	return "", ErrPDF
+func (ht *PDFTable) getRows() (string, error) {
+	panic("Implementation Error")
+}
+
+func (ht *PDFTable) getRow(row int) (string, error) {
+	panic("Implementation Error")
 }
