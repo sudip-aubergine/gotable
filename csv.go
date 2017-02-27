@@ -58,7 +58,7 @@ func (ct *CSVTable) getRows() (string, error) {
 	}
 
 	var rowsStr string
-	for i := 0; i < ct.Table.Rows(); i++ {
+	for i := 0; i < ct.Table.RowCount(); i++ {
 		s, err := ct.getRow(i)
 		if err != nil {
 			return "", err

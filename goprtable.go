@@ -638,7 +638,7 @@ func (t *Table) SprintTable(f int) (string, error) {
 // HasData checks that table has actually data or not
 func (t *Table) HasData() error {
 	// if there are no rows in table
-	if t.Rows() < 1 {
+	if t.RowCount() < 1 {
 		return fmt.Errorf("There are no data in the table")
 	}
 	return nil
@@ -647,7 +647,7 @@ func (t *Table) HasData() error {
 // HasHeaders checks headers are present or not
 func (t *Table) HasHeaders() error {
 	if len(t.ColDefs) < 1 {
-		return fmt.Errorf("There are no headers in the table")
+		return fmt.Errorf("There are no columns in the table")
 	}
 	return nil
 }

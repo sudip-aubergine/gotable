@@ -69,7 +69,7 @@ func (ht *HTMLTable) getRows() (string, error) {
 	}
 
 	var rowsStr string
-	for i := 0; i < ht.Table.Rows(); i++ {
+	for i := 0; i < ht.Table.RowCount(); i++ {
 		s, err := ht.getRow(i)
 		if err != nil {
 			return "", err

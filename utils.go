@@ -13,7 +13,7 @@ func getMultiLineText(v string, colWidth int) ([]string, int) {
 
 	// fit the content in one line whatever it is irrespective of column width
 	if colWidth < 1 {
-		a[0] = v
+		a = append(a, v)
 		return a, -1
 	}
 
