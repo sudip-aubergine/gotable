@@ -28,7 +28,7 @@ func (ht *HTMLTable) getTableOutput() (string, error) {
 	et += rs
 
 	// finally return HTML table layout
-	return "<table>" + et + "</table>", nil
+	return "<table class='rpt-table'>" + et + "</table>", nil
 }
 
 func (ht *HTMLTable) getHeaders() (string, error) {
