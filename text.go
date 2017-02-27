@@ -91,7 +91,7 @@ func (tt *TextTable) getRows() (string, error) {
 	}
 
 	var rowsStr string
-	for i := 0; i < tt.Table.Rows(); i++ {
+	for i := 0; i < tt.Table.RowCount(); i++ {
 		s, err := tt.getRow(i)
 		if err != nil {
 			return "", err

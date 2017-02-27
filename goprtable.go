@@ -3,6 +3,7 @@ package gotable
 import (
 	"fmt"
 	"sort"
+	"strings"
 	"time"
 )
 
