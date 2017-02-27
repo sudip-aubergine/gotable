@@ -640,7 +640,7 @@ func (t *Table) SprintTable(f int) (string, error) {
 func (t *Table) HasData() error {
 	// if there are no rows in table
 	if t.RowCount() < 1 {
-		return fmt.Errorf("There are no data in the table")
+		return fmt.Errorf("There are no rows in the table")
 	}
 	return nil
 }
