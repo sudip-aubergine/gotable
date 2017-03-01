@@ -12,9 +12,9 @@ import (
 
 func TestSmoke(t *testing.T) {
 	var tbl Table
-	title := "GOTABLE\n"
-	section1 := "A Smoke Test\n"
-	section2 := "February 21, 2017\n"
+	title := "GOTABLE"
+	section1 := "A Smoke Test"
+	section2 := "February 21, 2017"
 	tbl.Init() //sets column spacing and date format to default
 
 	// force some edge condition errors...
