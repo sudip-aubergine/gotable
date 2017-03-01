@@ -2,33 +2,68 @@ package gotable
 
 import (
 	"fmt"
-	// "strconv"
+	"sort"
+	"strconv"
 
 	"github.com/dustin/go-humanize"
 )
+
+// CSSProperty holds css property to be used as inline css
+type CSSProperty struct {
+	Name, Value string
+}
 
 // HTMLTable struct used to prepare table in html version
 type HTMLTable struct {
 	*Table
 }
 
-// getTableOutput return table outputin html form
 func (ht *HTMLTable) getTableOutput() (string, error) {
-	// get headers first
-	et, err := ht.getHeaders()
+	var tout string
+
+	// append headers
+	headerStr, err := ht.getHeaders()
 	if err != nil {
 		return "", err
 	}
+	tout += headerStr
 
-	// then append table body
-	rs, err := ht.getRows()
+	// append rows
+	rowsStr, err := ht.getRows()
 	if err != nil {
 		return "", err
 	}
-	et += rs
+	tout += rowsStr
 
-	// finally return HTML table layout
-	return "<table class='rpt-table'>" + et + "</table>", nil
+	// return output
+	return `<table class="rpt-table">` + tout + `</table>`, nil
+}
+
+func (ht *HTMLTable) getTitle() string {
+	title := ht.Table.GetTitle()
+	colSpan := strconv.Itoa(ht.Table.ColCount())
+	if title != "" {
+		title = `<tr class="title"><th colspan="` + colSpan + `">` + title + `</th></tr>`
+	}
+	return title
+}
+
+func (ht *HTMLTable) getSection1() string {
+	section1 := ht.Table.GetSection1()
+	colSpan := strconv.Itoa(ht.Table.ColCount())
+	if section1 != "" {
+		return `<tr class="section1"><th colspan="` + colSpan + `">` + section1 + `</th></tr>`
+	}
+	return section1
+}
+
+func (ht *HTMLTable) getSection2() string {
+	section2 := ht.Table.GetSection2()
+	colSpan := strconv.Itoa(ht.Table.ColCount())
+	if section2 != "" {
+		return `<tr class="section2"><th colspan="` + colSpan + `">` + section2 + `</th></tr>`
+	}
+	return section2
 }
 
 func (ht *HTMLTable) getHeaders() (string, error) {
@@ -39,8 +74,21 @@ func (ht *HTMLTable) getHeaders() (string, error) {
 		return "", blankHdrsErr
 	}
 
+	// htmlHeader includes title, section1, section2, header of table struct
+	// this all going to be part of thead tag
+	var htmlHeader string
+
+	// append title
+	htmlHeader += ht.getTitle()
+
+	// append section 1
+	htmlHeader += ht.getSection1()
+
+	// append section 2
+	htmlHeader += ht.getSection2()
+
 	// format headers
-	var tHeader string
+	var tHeaders string
 
 	for i := 0; i < len(ht.Table.ColDefs); i++ {
 		// cd := ht.Table.ColDefs[i]
@@ -48,16 +96,19 @@ func (ht *HTMLTable) getHeaders() (string, error) {
 
 		// TODO: handle case when custom htmlwidth passed for a cell
 		// if cd.HTMLWidth != -1 {
-		// 	headerCell = "<th width=\"" + strconv.Itoa(cd.HTMLWidth) + "\">" + headerCell + "</th>"
+		// 	headerCell = `<th width="` + strconv.Itoa(cd.HTMLWidth) + `">` + headerCell + `</th>`
 		// } else {
-		// 	headerCell = "<th>" + headerCell + "</th>"
+		// 	headerCell = `<th>` + headerCell + `</th>`
 		// }
 
-		headerCell = "<th>" + headerCell + "</th>"
-		tHeader += headerCell
+		headerCell = `<th>` + headerCell + `</th>`
+		tHeaders += headerCell
 	}
 
-	return "<thead><tr>" + tHeader + "</tr></thead>", nil
+	htmlHeader += `<tr class="headers">` + tHeaders + `</tr>`
+
+	// finally return html header with thead
+	return `<thead>` + htmlHeader + `</thead>`, nil
 }
 
 func (ht *HTMLTable) getRows() (string, error) {
@@ -77,7 +128,7 @@ func (ht *HTMLTable) getRows() (string, error) {
 		rowsStr += s
 	}
 
-	return "<tbody>" + rowsStr + "</tbody>", nil
+	return `<tbody>` + rowsStr + `</tbody>`, nil
 }
 
 func (ht *HTMLTable) getRow(row int) (string, error) {
@@ -90,6 +141,14 @@ func (ht *HTMLTable) getRow(row int) (string, error) {
 
 	// format table row
 	var tRow string
+	var trClass string
+
+	if len(ht.Table.LineBefore) > 0 {
+		j := sort.SearchInts(ht.Table.LineBefore, row)
+		if j < len(ht.Table.LineBefore) && row == ht.Table.LineBefore[j] {
+			trClass += `top-line`
+		}
+	}
 
 	// fill the content in rowTextList for the first line
 	for i := 0; i < len(ht.Table.Row[row].Col); i++ {
@@ -116,9 +175,20 @@ func (ht *HTMLTable) getRow(row int) (string, error) {
 		}
 
 		// format td cell
-		rowCell = "<td>" + rowCell + "</td>"
+		rowCell = `<td>` + rowCell + `</td>`
 		tRow += rowCell
 	}
 
-	return "<tr>" + tRow + "</tr>", nil
+	if len(ht.Table.LineAfter) > 0 {
+		j := sort.SearchInts(ht.Table.LineAfter, row)
+		if j < len(ht.Table.LineAfter) && row == ht.Table.LineAfter[j] {
+			trClass += `bottom-line`
+		}
+	}
+
+	if trClass != "" {
+		return `<tr class="` + trClass + `">` + tRow + `</tr>`, nil
+	}
+	return `<tr>` + tRow + `</tr>`, nil
+
 }

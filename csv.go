@@ -13,23 +13,46 @@ type CSVTable struct {
 	CellSep string
 }
 
-// getTableOutput return the table header in csv layout
 func (ct *CSVTable) getTableOutput() (string, error) {
-	// get headers first
-	et, err := ct.getHeaders()
+	var tout string
+
+	// append title
+	tout += ct.getTitle()
+
+	// append section 1
+	tout += ct.getSection1()
+
+	// append section 2
+	tout += ct.getSection2()
+
+	// append headers
+	headerStr, err := ct.getHeaders()
 	if err != nil {
 		return "", err
 	}
+	tout += headerStr
 
-	// then append table body
-	rs, err := ct.getRows()
+	// append rows
+	rowsStr, err := ct.getRows()
 	if err != nil {
 		return "", err
 	}
-	et += rs
+	tout += rowsStr
 
-	// fmt.Println(strings.Replace(s, "\\\"", "'", -1))
-	return et, nil
+	// return output
+	return tout, nil
+}
+
+func (ct *CSVTable) getTitle() string {
+	return stringln(fmt.Sprintf("%q", ct.Table.GetTitle()))
+}
+
+func (ct *CSVTable) getSection1() string {
+	return stringln(fmt.Sprintf("%q", ct.Table.GetSection1()))
+}
+
+func (ct *CSVTable) getSection2() string {
+	return stringln(fmt.Sprintf("%q", ct.Table.GetSection2()))
 }
 
 func (ct *CSVTable) getHeaders() (string, error) {
@@ -47,7 +70,7 @@ func (ct *CSVTable) getHeaders() (string, error) {
 	}
 
 	// append last newLine char
-	return strings.Join(tHeader, ct.CellSep) + "\n", nil
+	return stringln(strings.Join(tHeader, ct.CellSep)), nil
 }
 
 func (ct *CSVTable) getRows() (string, error) {
@@ -99,5 +122,5 @@ func (ct *CSVTable) getRow(row int) (string, error) {
 	}
 
 	// append newline char at last
-	return strings.Join(tRow, ct.CellSep) + "\n", nil
+	return stringln(strings.Join(tRow, ct.CellSep)), nil
 }

@@ -81,9 +81,12 @@ type Table struct {
 	RS          []Rowset    // a list of rowsets
 }
 
-// TableExportFormat ,each export output format must satisfy this interface
-type TableExportFormat interface {
+// TableExportType ,each export output format must satisfy this interface
+type TableExportType interface {
 	getTableOutput() (string, error)
+	getTitle() string
+	getSection1() string
+	getSection2() string
 	getHeaders() (string, error)
 	getRows() (string, error)
 	getRow(row int) (string, error)
@@ -445,8 +448,11 @@ func (t *Table) Put(row, col int, c Cell) {
 // String is the "stringer" method implementation for go so that you can simply
 // print(t)
 func (t Table) String() string {
-	s, _ := t.SprintTable(TABLEOUTTEXT)
-	return prepareForTextPrint(t.Title) + prepareForTextPrint(t.Section1) + prepareForTextPrint(t.Section2) + s
+	s, err := t.SprintTable(TABLEOUTTEXT)
+	if err != nil {
+		return err.Error()
+	}
+	return s
 }
 
 // createColSet creates a new colset with cells, total number of Headers
@@ -666,7 +672,7 @@ func (t *Table) HasValidRow(row int) error {
 
 // sprintTableFormat renders the entire table to a string
 func (t *Table) sprintTableFormat(f int) (string, error) {
-	var tout TableExportFormat
+	var tout TableExportType
 	switch f {
 	case TABLEOUTTEXT:
 		tout = &TextTable{Table: t, TextColSpace: 2}
@@ -681,7 +687,7 @@ func (t *Table) sprintTableFormat(f int) (string, error) {
 		tout = &PDFTable{Table: t}
 		break
 	default:
-		return "", fmt.Errorf("Unrecognized table format:  %d", f)
+		return "", fmt.Errorf("Unrecognized table format: %d", f)
 	}
 
 	// return expected formatted output of table object

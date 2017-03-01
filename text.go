@@ -13,36 +13,58 @@ type TextTable struct {
 	TextColSpace int
 }
 
-// prepareForTextPrint
-// For text output we want at least one "\n" at the end of a section or title.
-// If the supplied string does not end in "\n", then one will be appended to it
-// on the return value.
-func prepareForTextPrint(s string) string {
-	if len(s) == 0 {
-		return ""
+func (tt *TextTable) getTableOutput() (string, error) {
+	var tout string
+
+	// append title
+	tout += tt.getTitle()
+
+	// append section 1
+	tout += tt.getSection1()
+
+	// append section 2
+	tout += tt.getSection2()
+
+	// append headers
+	headerStr, err := tt.getHeaders()
+	if err != nil {
+		return "", err
 	}
-	if s[len(s)-1] != '\n' {
-		return s + "\n"
+	tout += headerStr
+
+	// append rows
+	rowsStr, err := tt.getRows()
+	if err != nil {
+		return "", err
 	}
-	return s
+	tout += rowsStr
+
+	// return output
+	return tout, nil
 }
 
-// getTableOutput prints the whole table in text form
-func (tt *TextTable) getTableOutput() (string, error) {
-	// get headers first
-	et, err := tt.getHeaders()
-	if err != nil {
-		return "", err
+func (tt *TextTable) getTitle() string {
+	title := tt.Table.GetTitle()
+	if title != "" {
+		return stringln(title)
 	}
+	return title
+}
 
-	// then append table body
-	rs, err := tt.getRows()
-	if err != nil {
-		return "", err
+func (tt *TextTable) getSection1() string {
+	section1 := tt.Table.GetSection1()
+	if section1 != "" {
+		return stringln(section1)
 	}
-	et += rs
+	return section1
+}
 
-	return et, nil
+func (tt *TextTable) getSection2() string {
+	section2 := tt.Table.GetSection2()
+	if section2 != "" {
+		return stringln(section2)
+	}
+	return section2
 }
 
 // SprintColHdrsText formats the column headers as text and returns the string
@@ -73,13 +95,9 @@ func (tt *TextTable) getHeaders() (string, error) {
 		s += "\n"
 	}
 
-	for i := 0; i < len(tt.Table.ColDefs); i++ {
-		s += fmt.Sprintf("%s", mkstr(tt.Table.ColDefs[i].Width, '-'))
-		if i < len(tt.Table.ColDefs)-1 {
-			s += mkstr(tt.TextColSpace, ' ')
-		}
-	}
-	s += "\n"
+	// finally append separator with line
+	s += tt.sprintLineText()
+
 	return s, nil
 }
 
@@ -224,5 +242,5 @@ func (tt *TextTable) sprintLineText() string {
 	}
 	// remove last textColSpace from s
 	s = s[0 : len(s)-tt.TextColSpace]
-	return s + "\n"
+	return stringln(s)
 }

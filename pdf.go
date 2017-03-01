@@ -9,19 +9,30 @@ type PDFTable struct {
 	*Table
 }
 
-// getTableOutput return table output in pdf form
-func (ht *PDFTable) getTableOutput() (string, error) {
-	return "", fmt.Errorf("%s", "PDF output for table is not supported yet")
+func (pt *PDFTable) getTableOutput() (string, error) {
+	return "", fmt.Errorf("PDF output for table is not supported yet")
 }
 
-func (ht *PDFTable) getHeaders() (string, error) {
+func (pt *PDFTable) getTitle() string {
 	panic("Implementation Error")
 }
 
-func (ht *PDFTable) getRows() (string, error) {
+func (pt *PDFTable) getSection1() string {
 	panic("Implementation Error")
 }
 
-func (ht *PDFTable) getRow(row int) (string, error) {
+func (pt *PDFTable) getSection2() string {
+	panic("Implementation Error")
+}
+
+func (pt *PDFTable) getHeaders() (string, error) {
+	panic("Implementation Error")
+}
+
+func (pt *PDFTable) getRows() (string, error) {
+	panic("Implementation Error")
+}
+
+func (pt *PDFTable) getRow(row int) (string, error) {
 	panic("Implementation Error")
 }
