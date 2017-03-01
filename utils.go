@@ -52,3 +52,17 @@ func mkstr(n int, c byte) string {
 	}
 	return string(p)
 }
+
+// stringln
+// For text output we want at least one "\n" at the end of a section or title.
+// If the supplied string does not end in "\n", then one will be appended to it
+// on the return value.
+func stringln(s string) string {
+	if len(s) == 0 {
+		return ""
+	}
+	if s[len(s)-1] != '\n' {
+		return s + "\n"
+	}
+	return s
+}
