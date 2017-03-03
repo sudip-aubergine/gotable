@@ -8,18 +8,33 @@ import (
 	"github.com/dustin/go-humanize"
 )
 
-// CSSProperty holds css property to be used as inline css
-type CSSProperty struct {
-	Name, Value string
-}
+const (
+	CSSCLASSSELECTOR = `.`
+	CSSBLOCKSTARTS   = `{`
+	CSSBLOCKENDS     = `}`
+	CSSPROPSEP       = `:`
+	CSSPROPENDS      = `;`
+	TABLECLASS       = `rpt-table`
+)
 
 // HTMLTable struct used to prepare table in html version
 type HTMLTable struct {
 	*Table
+	StyleString string
 }
 
 func (ht *HTMLTable) getTableOutput() (string, error) {
+
 	var tout string
+
+	// append title
+	tout += ht.getTitle()
+
+	// append section 1
+	tout += ht.getSection1()
+
+	// append section 2
+	tout += ht.getSection2()
 
 	// append headers
 	headerStr, err := ht.getHeaders()
@@ -36,14 +51,14 @@ func (ht *HTMLTable) getTableOutput() (string, error) {
 	tout += rowsStr
 
 	// return output
-	return `<table class="rpt-table">` + tout + `</table>`, nil
+	return `<style>` + ht.StyleString + `</style>` + `<table class="` + TABLECLASS + `">` + tout + `</table>`, nil
 }
 
 func (ht *HTMLTable) getTitle() string {
 	title := ht.Table.GetTitle()
 	colSpan := strconv.Itoa(ht.Table.ColCount())
 	if title != "" {
-		title = `<tr class="title"><th colspan="` + colSpan + `">` + title + `</th></tr>`
+		title = `<tr class="title"><td colspan="` + colSpan + `">` + title + `</td></tr>`
 	}
 	return title
 }
@@ -52,7 +67,7 @@ func (ht *HTMLTable) getSection1() string {
 	section1 := ht.Table.GetSection1()
 	colSpan := strconv.Itoa(ht.Table.ColCount())
 	if section1 != "" {
-		return `<tr class="section1"><th colspan="` + colSpan + `">` + section1 + `</th></tr>`
+		return `<tr class="section1"><td colspan="` + colSpan + `">` + section1 + `</td></tr>`
 	}
 	return section1
 }
@@ -61,7 +76,7 @@ func (ht *HTMLTable) getSection2() string {
 	section2 := ht.Table.GetSection2()
 	colSpan := strconv.Itoa(ht.Table.ColCount())
 	if section2 != "" {
-		return `<tr class="section2"><th colspan="` + colSpan + `">` + section2 + `</th></tr>`
+		return `<tr class="section2"><td colspan="` + colSpan + `">` + section2 + `</td></tr>`
 	}
 	return section2
 }
@@ -74,41 +89,31 @@ func (ht *HTMLTable) getHeaders() (string, error) {
 		return "", blankHdrsErr
 	}
 
-	// htmlHeader includes title, section1, section2, header of table struct
-	// this all going to be part of thead tag
-	var htmlHeader string
-
-	// append title
-	htmlHeader += ht.getTitle()
-
-	// append section 1
-	htmlHeader += ht.getSection1()
-
-	// append section 2
-	htmlHeader += ht.getSection2()
-
 	// format headers
 	var tHeaders string
 
-	for i := 0; i < len(ht.Table.ColDefs); i++ {
-		// cd := ht.Table.ColDefs[i]
-		headerCell := ht.Table.ColDefs[i].ColTitle
+	for headerIndex := 0; headerIndex < len(ht.Table.ColDefs); headerIndex++ {
+		// cd := ht.Table.ColDefs[headerIndex]
+		headerCell := ht.Table.ColDefs[headerIndex].ColTitle
 
 		// TODO: handle case when custom htmlwidth passed for a cell
 		// if cd.HTMLWidth != -1 {
-		// 	headerCell = `<th width="` + strconv.Itoa(cd.HTMLWidth) + `">` + headerCell + `</th>`
+		// 	headerCell = `<td width="` + strconv.Itoa(cd.HTMLWidth) + `">` + headerCell + `</td>`
 		// } else {
-		// 	headerCell = `<th>` + headerCell + `</th>`
+		// 	headerCell = `<td>` + headerCell + `</td>`
 		// }
 
-		headerCell = `<th>` + headerCell + `</th>`
+		colWidth := strconv.Itoa(ht.Table.ColDefs[headerIndex].Width * CSSFONTSIZE)
+		thClass := `header-` + strconv.Itoa(headerIndex)
+		ht.StyleString += CSSCLASSSELECTOR + thClass + CSSBLOCKSTARTS +
+			`width` + CSSPROPSEP + colWidth + CSSFONTUNIT + CSSPROPENDS +
+			CSSBLOCKENDS
+
+		headerCell = `<td class="` + thClass + `">` + headerCell + `</td>`
 		tHeaders += headerCell
 	}
 
-	htmlHeader += `<tr class="headers">` + tHeaders + `</tr>`
-
-	// finally return html header with thead
-	return `<thead>` + htmlHeader + `</thead>`, nil
+	return `<tr class="headers">` + tHeaders + `</tr>`, nil
 }
 
 func (ht *HTMLTable) getRows() (string, error) {
@@ -128,60 +133,72 @@ func (ht *HTMLTable) getRows() (string, error) {
 		rowsStr += s
 	}
 
-	return `<tbody>` + rowsStr + `</tbody>`, nil
+	return rowsStr, nil
 }
 
-func (ht *HTMLTable) getRow(row int) (string, error) {
+func (ht *HTMLTable) getRow(rowIndex int) (string, error) {
 
-	// check that this passed row is valid or not
-	inValidRowErr := ht.Table.HasValidRow(row)
+	// check that this passed rowIndex is valid or not
+	inValidRowErr := ht.Table.HasValidRow(rowIndex)
 	if inValidRowErr != nil {
 		return "", inValidRowErr
 	}
 
-	// format table row
+	// format table rows
 	var tRow string
 	var trClass string
 
 	if len(ht.Table.LineBefore) > 0 {
-		j := sort.SearchInts(ht.Table.LineBefore, row)
-		if j < len(ht.Table.LineBefore) && row == ht.Table.LineBefore[j] {
+		j := sort.SearchInts(ht.Table.LineBefore, rowIndex)
+		if j < len(ht.Table.LineBefore) && rowIndex == ht.Table.LineBefore[j] {
 			trClass += `top-line`
 		}
 	}
 
 	// fill the content in rowTextList for the first line
-	for i := 0; i < len(ht.Table.Row[row].Col); i++ {
+	for colIndex := 0; colIndex < len(ht.Table.Row[rowIndex].Col); colIndex++ {
 
 		var rowCell string
 		// append content in TD
-		switch ht.Table.Row[row].Col[i].Type {
+		switch ht.Table.Row[rowIndex].Col[colIndex].Type {
 		case CELLFLOAT:
-			rowCell = fmt.Sprintf(ht.Table.ColDefs[i].Pfmt, humanize.FormatFloat("#,###.##", ht.Table.Row[row].Col[i].Fval))
+			rowCell = fmt.Sprintf(ht.Table.ColDefs[colIndex].Pfmt, humanize.FormatFloat("#,###.##", ht.Table.Row[rowIndex].Col[colIndex].Fval))
 		case CELLINT:
-			rowCell = fmt.Sprintf(ht.Table.ColDefs[i].Pfmt, ht.Table.Row[row].Col[i].Ival)
+			rowCell = fmt.Sprintf(ht.Table.ColDefs[colIndex].Pfmt, ht.Table.Row[rowIndex].Col[colIndex].Ival)
 		case CELLSTRING:
 			// ******************************************************
 			// FOR HTML, APPEND FULL STRING, THERE ARE NO
 			// MULTILINE TEXT IN THIS
 			// ******************************************************
-			rowCell = fmt.Sprintf("%s", ht.Table.Row[row].Col[i].Sval)
+			rowCell = fmt.Sprintf("%s", ht.Table.Row[rowIndex].Col[colIndex].Sval)
 		case CELLDATE:
-			rowCell = fmt.Sprintf("%*.*s", ht.Table.ColDefs[i].Width, ht.Table.ColDefs[i].Width, ht.Table.Row[row].Col[i].Dval.Format(ht.Table.DateFmt))
+			rowCell = fmt.Sprintf("%*.*s", ht.Table.ColDefs[colIndex].Width, ht.Table.ColDefs[colIndex].Width, ht.Table.Row[rowIndex].Col[colIndex].Dval.Format(ht.Table.DateFmt))
 		case CELLDATETIME:
-			rowCell = fmt.Sprintf("%*.*s", ht.Table.ColDefs[i].Width, ht.Table.ColDefs[i].Width, ht.Table.Row[row].Col[i].Dval.Format(ht.Table.DateTimeFmt))
+			rowCell = fmt.Sprintf("%*.*s", ht.Table.ColDefs[colIndex].Width, ht.Table.ColDefs[colIndex].Width, ht.Table.Row[rowIndex].Col[colIndex].Dval.Format(ht.Table.DateTimeFmt))
 		default:
-			rowCell = mkstr(ht.Table.ColDefs[i].Width, ' ')
+			rowCell = mkstr(ht.Table.ColDefs[colIndex].Width, ' ')
 		}
 
-		// format td cell
-		rowCell = `<td>` + rowCell + `</td>`
+		// format td cell with custom class if exists for it
+		g := CSSIndex{Row: rowIndex, Col: colIndex}
+		if cssMap, ok := ht.Table.CSS[g]; ok {
+			var cssString string
+			tdClass := `cell-row-` + strconv.Itoa(rowIndex) + `-col-` + strconv.Itoa(colIndex)
+			for _, cssProp := range cssMap {
+				cssString += cssProp.Name + CSSPROPSEP + cssProp.Value + CSSPROPENDS
+			}
+			ht.StyleString += CSSCLASSSELECTOR + tdClass + CSSBLOCKSTARTS + cssString + CSSBLOCKENDS
+			rowCell = `<td class="` + tdClass + `">` + rowCell + `</td>`
+		} else {
+			rowCell = `<td>` + rowCell + `</td>`
+		}
+
 		tRow += rowCell
 	}
 
 	if len(ht.Table.LineAfter) > 0 {
-		j := sort.SearchInts(ht.Table.LineAfter, row)
-		if j < len(ht.Table.LineAfter) && row == ht.Table.LineAfter[j] {
+		j := sort.SearchInts(ht.Table.LineAfter, rowIndex)
+		if j < len(ht.Table.LineAfter) && rowIndex == ht.Table.LineAfter[j] {
 			trClass += `bottom-line`
 		}
 	}
@@ -191,4 +208,10 @@ func (ht *HTMLTable) getRow(row int) (string, error) {
 	}
 	return `<tr>` + tRow + `</tr>`, nil
 
+}
+
+// getCSSMapKeyForCell returns key for cell which has css properties
+// which resides at rowIndex, colIndex
+func (ht *HTMLTable) getCSSMapKeyForCell(rowIndex, colIndex int) string {
+	return `row:` + strconv.Itoa(rowIndex) + `-col:` + strconv.Itoa(colIndex)
 }

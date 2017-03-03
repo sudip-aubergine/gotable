@@ -3,6 +3,7 @@ package gotable
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -30,6 +31,9 @@ const (
 	TABLEOUTHTML = 2
 	TABLEOUTPDF  = 3
 	TABLEOUTCSV  = 4
+
+	CSSFONTSIZE = 14
+	CSSFONTUNIT = `px`
 )
 
 // Cell is the basic data value type for the Table class
@@ -79,9 +83,106 @@ type Table struct {
 	LineAfter   []int       // array of row numbers that have a horizontal line after they are printed
 	LineBefore  []int       // array of row numbers that have a horizontal line before they are printed
 	RS          []Rowset    // a list of rowsets
+	CSS         map[CSSIndex]map[string]*CSSProperty
 }
 
-// TableExportType ,each export output format must satisfy this interface
+// CSSProperty holds css property to be used as inline css
+type CSSProperty struct {
+	Name, Value string
+}
+
+// String is the "stringer" method implementation for CSSProperty
+func (cp CSSProperty) String() string {
+	return `"` + cp.Name + `":"` + cp.Value + `;"`
+}
+
+// CSSIndex holds row, col index for cells, rows, columns of table
+// will be used for css property
+// for row `Col` would be -1
+// for column `Row` would be -1
+// for cells both `Col` and `Row` has value
+type CSSIndex struct {
+	Row, Col int
+}
+
+// String is the "stringer" method implementation for CSSIndex
+func (gt CSSIndex) String() string {
+	return `(Row:` + strconv.Itoa(gt.Row) + `,Col:` + strconv.Itoa(gt.Col) + `)`
+}
+
+// SetRowCSS sets css properties for Table Rows
+func (t *Table) SetRowCSS(rowIndex int, cssList []*CSSProperty) error {
+
+	// check row is valid or not
+	if err := t.HasValidRow(rowIndex); err != nil {
+		return err
+	}
+
+	// css property map
+	cssMap := make(map[string]*CSSProperty)
+	for _, css := range cssList {
+		cssMap[css.Name] = css
+	}
+
+	// convert it into cells attributes
+	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
+		g := CSSIndex{Row: rowIndex, Col: colIndex}
+		t.CSS[g] = cssMap
+	}
+
+	return nil
+}
+
+// SetColCSS sets css properties for Table Columns
+func (t *Table) SetColCSS(colIndex int, cssList []*CSSProperty) error {
+
+	// check row is valid or not
+	if err := t.HasValidColumn(colIndex); err != nil {
+		return err
+	}
+
+	// css property map
+	cssMap := make(map[string]*CSSProperty)
+	for _, css := range cssList {
+		cssMap[css.Name] = css
+	}
+
+	// convert it into cells attributes
+	for rowIndex := 0; rowIndex < t.RowCount(); rowIndex++ {
+		g := CSSIndex{Row: rowIndex, Col: colIndex}
+		t.CSS[g] = cssMap
+	}
+
+	return nil
+}
+
+// SetCellCSS sets css properties for Table Cells
+func (t *Table) SetCellCSS(rowIndex, colIndex int, cssList []*CSSProperty) error {
+
+	// check row is valid or not
+	if err := t.HasValidRow(rowIndex); err != nil {
+		return err
+	}
+
+	// check row is valid or not
+	if err := t.HasValidColumn(colIndex); err != nil {
+		return err
+	}
+
+	// css property map
+	cssMap := make(map[string]*CSSProperty)
+	for _, css := range cssList {
+		cssMap[css.Name] = css
+	}
+
+	// map it in style of html table
+	g := CSSIndex{Row: rowIndex, Col: colIndex}
+	t.CSS[g] = cssMap
+
+	return nil
+}
+
+// TableExportType, each export output format must satisfy this interface
 type TableExportType interface {
 	getTableOutput() (string, error)
 	getTitle() string
@@ -162,6 +263,7 @@ func (t *Table) ColCount() int {
 func (t *Table) Init() {
 	t.DateFmt = "01/02/2006"
 	t.DateTimeFmt = "01/02/2006 15:04:00 MST"
+	t.CSS = make(map[CSSIndex]map[string]*CSSProperty)
 }
 
 // AddLineAfter keeps track of the row numbers after which a line will be printed
@@ -445,7 +547,7 @@ func (t *Table) Put(row, col int, c Cell) {
 	t.Row[row].Col[col] = c
 }
 
-// String is the "stringer" method implementation for go so that you can simply
+// String is the "stringer" method implementation for gotable so that you can simply
 // print(t)
 func (t Table) String() string {
 	s, err := t.SprintTable(TABLEOUTTEXT)
@@ -659,13 +761,24 @@ func (t *Table) HasHeaders() error {
 	return nil
 }
 
-// HasValidRow checks that row is valid or not
-func (t *Table) HasValidRow(row int) error {
-	if row < 0 {
-		return fmt.Errorf("Row number is less than zero, row: %d", row)
+// HasValidRow checks that rowIndex is valid or not
+func (t *Table) HasValidRow(rowIndex int) error {
+	if rowIndex < 0 {
+		return fmt.Errorf("Row number is less than zero, row: %d", rowIndex)
 	}
-	if row >= len(t.Row) {
-		return fmt.Errorf("Row number > rows in table, row: %d", row)
+	if rowIndex >= t.RowCount() {
+		return fmt.Errorf("Row number > rows in table, row: %d", rowIndex)
+	}
+	return nil
+}
+
+// HasValidRow checks that colIndex is valid or not
+func (t *Table) HasValidColumn(colIndex int) error {
+	if colIndex < 0 {
+		return fmt.Errorf("Column number is less than zero, column: %d", colIndex)
+	}
+	if colIndex >= t.ColCount() {
+		return fmt.Errorf("Column number > rows in table, column: %d", colIndex)
 	}
 	return nil
 }
