@@ -1,8 +1,13 @@
 package gotable
 
 import (
+	"strconv"
 	"strings"
 )
+
+// ==========
+// TEXT UTILS
+// ==========
 
 // getMultiLineText used to get multi line texts,
 // from one long string which length exceeds by given column width
@@ -65,4 +70,51 @@ func stringln(s string) string {
 		return s + "\n"
 	}
 	return s
+}
+
+// ==========
+// HTML UTILS
+// ==========
+
+// getCSSMapKeyForCell format and returns key for cell for css properties usage
+func getCSSMapKeyForCell(rowIndex, colIndex int) string {
+	return `row:` + strconv.Itoa(rowIndex) + `-col:` + strconv.Itoa(colIndex)
+}
+
+// getCSSForClassSelector returns css string for a class
+func getCSSForClassSelector(className string, cssList []*CSSProperty) string {
+	var classCSS string
+
+	// append notation for selector
+	classCSS += `.` + className + `{`
+
+	for _, cssProp := range cssList {
+		// append css property name
+		classCSS += cssProp.Name + `:` + cssProp.Value + `;`
+	}
+
+	// finally block ending sign
+	classCSS += `}`
+
+	// return class css string
+	return classCSS
+}
+
+// getCSSForHTMLTag return css string for html tag element
+func getCSSForHTMLTag(tagEl string, cssList []*CSSProperty) string {
+	var classCSS string
+
+	// append notation for selector
+	classCSS += tagEl + `{`
+
+	for _, cssProp := range cssList {
+		// append css property name
+		classCSS += cssProp.Name + `:` + cssProp.Value + `;`
+	}
+
+	// finally block ending sign
+	classCSS += `}`
+
+	// return class css string
+	return classCSS
 }

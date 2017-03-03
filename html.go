@@ -9,12 +9,11 @@ import (
 )
 
 const (
-	CSSCLASSSELECTOR = `.`
-	CSSBLOCKSTARTS   = `{`
-	CSSBLOCKENDS     = `}`
-	CSSPROPSEP       = `:`
-	CSSPROPENDS      = `;`
-	TABLECLASS       = `rpt-table`
+	TABLECLASS    = `rpt-table`
+	TITLECLASS    = `title`
+	HEADERSCLASS  = `headers`
+	SECTION1CLASS = `section1`
+	SECTION2CLASS = `section2`
 )
 
 // HTMLTable struct used to prepare table in html version
@@ -56,28 +55,76 @@ func (ht *HTMLTable) getTableOutput() (string, error) {
 
 func (ht *HTMLTable) getTitle() string {
 	title := ht.Table.GetTitle()
-	colSpan := strconv.Itoa(ht.Table.ColCount())
+
 	if title != "" {
-		title = `<tr class="title"><td colspan="` + colSpan + `">` + title + `</td></tr>`
+		if cssMap, ok := ht.Table.CSS[TITLECLASS]; ok {
+
+			// list of css properties for this td cell
+			var cellCSSProps []*CSSProperty
+			for _, cssProp := range cssMap {
+				cellCSSProps = append(cellCSSProps, cssProp)
+			}
+
+			// get css string for this td cell
+			ht.StyleString += `table.` + TABLECLASS + ` tr.` + TITLECLASS + ` `
+			ht.StyleString += getCSSForHTMLTag(`td`, cellCSSProps)
+
+		}
+		colSpan := strconv.Itoa(ht.Table.ColCount())
+		return `<tr class="` + TITLECLASS + `"><td colspan="` + colSpan + `">` + title + `</td></tr>`
 	}
+
+	// blank return
 	return title
 }
 
 func (ht *HTMLTable) getSection1() string {
 	section1 := ht.Table.GetSection1()
-	colSpan := strconv.Itoa(ht.Table.ColCount())
+
 	if section1 != "" {
-		return `<tr class="section1"><td colspan="` + colSpan + `">` + section1 + `</td></tr>`
+		if cssMap, ok := ht.Table.CSS[SECTION1CLASS]; ok {
+
+			// list of css properties for this td cell
+			var cellCSSProps []*CSSProperty
+			for _, cssProp := range cssMap {
+				cellCSSProps = append(cellCSSProps, cssProp)
+			}
+
+			// get css string for this td cell
+			ht.StyleString += `table.` + TABLECLASS + ` tr.` + SECTION1CLASS + ` `
+			ht.StyleString += getCSSForHTMLTag(`td`, cellCSSProps)
+
+		}
+		colSpan := strconv.Itoa(ht.Table.ColCount())
+		return `<tr class="` + SECTION1CLASS + `"><td colspan="` + colSpan + `">` + section1 + `</td></tr>`
 	}
+
+	// blank return
 	return section1
 }
 
 func (ht *HTMLTable) getSection2() string {
 	section2 := ht.Table.GetSection2()
-	colSpan := strconv.Itoa(ht.Table.ColCount())
+
 	if section2 != "" {
-		return `<tr class="section2"><td colspan="` + colSpan + `">` + section2 + `</td></tr>`
+		if cssMap, ok := ht.Table.CSS[SECTION2CLASS]; ok {
+
+			// list of css properties for this td cell
+			var cellCSSProps []*CSSProperty
+			for _, cssProp := range cssMap {
+				cellCSSProps = append(cellCSSProps, cssProp)
+			}
+
+			// get css string for this td cell
+			ht.StyleString += `table.` + TABLECLASS + ` tr.` + SECTION2CLASS + ` `
+			ht.StyleString += getCSSForHTMLTag(`td`, cellCSSProps)
+
+		}
+		colSpan := strconv.Itoa(ht.Table.ColCount())
+		return `<tr class="` + SECTION2CLASS + `"><td colspan="` + colSpan + `">` + section2 + `</td></tr>`
 	}
+
+	// blank return
 	return section2
 }
 
@@ -93,24 +140,41 @@ func (ht *HTMLTable) getHeaders() (string, error) {
 	var tHeaders string
 
 	for headerIndex := 0; headerIndex < len(ht.Table.ColDefs); headerIndex++ {
-		// cd := ht.Table.ColDefs[headerIndex]
-		headerCell := ht.Table.ColDefs[headerIndex].ColTitle
 
-		// TODO: handle case when custom htmlwidth passed for a cell
-		// if cd.HTMLWidth != -1 {
-		// 	headerCell = `<td width="` + strconv.Itoa(cd.HTMLWidth) + `">` + headerCell + `</td>`
-		// } else {
-		// 	headerCell = `<td>` + headerCell + `</td>`
-		// }
+		headerCell := ht.Table.ColDefs[headerIndex]
 
-		colWidth := strconv.Itoa(ht.Table.ColDefs[headerIndex].Width * CSSFONTSIZE)
+		// css class for this header cell
 		thClass := `header-` + strconv.Itoa(headerIndex)
-		ht.StyleString += CSSCLASSSELECTOR + thClass + CSSBLOCKSTARTS +
-			`width` + CSSPROPSEP + colWidth + CSSFONTUNIT + CSSPROPENDS +
-			CSSBLOCKENDS
 
-		headerCell = `<td class="` + thClass + `">` + headerCell + `</td>`
-		tHeaders += headerCell
+		// list of css property for th cells
+		var cellCSSProps []*CSSProperty
+
+		// col width
+		var colWidth string
+
+		if headerCell.HTMLWidth != -1 {
+			// calculate column width based on characters with font size
+			colWidth = strconv.Itoa(headerCell.HTMLWidth) + CSSFONTUNIT
+		} else {
+			// calculate column width based on characters with font size
+			colWidth = strconv.Itoa(ht.Table.ColDefs[headerIndex].Width*CSSFONTSIZE) + CSSFONTUNIT
+		}
+
+		// append width css property
+		cellCSSProps = append(cellCSSProps, &CSSProperty{Name: "width", Value: colWidth})
+
+		if cssMap, ok := ht.Table.CSS[HEADERSCLASS]; ok {
+			// list of css properties for this td cell
+			for _, cssProp := range cssMap {
+				cellCSSProps = append(cellCSSProps, cssProp)
+			}
+		}
+
+		// get css string for this cell
+		ht.StyleString += `table.` + TABLECLASS + ` tr.` + HEADERSCLASS + ` td`
+		ht.StyleString += getCSSForClassSelector(thClass, cellCSSProps)
+
+		tHeaders += `<td class="` + thClass + `">` + headerCell.ColTitle + `</td>`
 	}
 
 	return `<tr class="headers">` + tHeaders + `</tr>`, nil
@@ -180,14 +244,20 @@ func (ht *HTMLTable) getRow(rowIndex int) (string, error) {
 		}
 
 		// format td cell with custom class if exists for it
-		g := CSSIndex{Row: rowIndex, Col: colIndex}
+		g := getCSSMapKeyForCell(rowIndex, colIndex)
 		if cssMap, ok := ht.Table.CSS[g]; ok {
-			var cssString string
+
 			tdClass := `cell-row-` + strconv.Itoa(rowIndex) + `-col-` + strconv.Itoa(colIndex)
+
+			// list of css properties for this td cell
+			var cellCSSProps []*CSSProperty
 			for _, cssProp := range cssMap {
-				cssString += cssProp.Name + CSSPROPSEP + cssProp.Value + CSSPROPENDS
+				cellCSSProps = append(cellCSSProps, cssProp)
 			}
-			ht.StyleString += CSSCLASSSELECTOR + tdClass + CSSBLOCKSTARTS + cssString + CSSBLOCKENDS
+
+			// get css string for this td cell
+			ht.StyleString += getCSSForClassSelector(tdClass, cellCSSProps)
+
 			rowCell = `<td class="` + tdClass + `">` + rowCell + `</td>`
 		} else {
 			rowCell = `<td>` + rowCell + `</td>`
@@ -208,10 +278,4 @@ func (ht *HTMLTable) getRow(rowIndex int) (string, error) {
 	}
 	return `<tr>` + tRow + `</tr>`, nil
 
-}
-
-// getCSSMapKeyForCell returns key for cell which has css properties
-// which resides at rowIndex, colIndex
-func (ht *HTMLTable) getCSSMapKeyForCell(rowIndex, colIndex int) string {
-	return `row:` + strconv.Itoa(rowIndex) + `-col:` + strconv.Itoa(colIndex)
 }
