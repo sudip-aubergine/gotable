@@ -149,7 +149,21 @@ func (ht *HTMLTable) getHeaders() (string, error) {
 		// list of css property for th cells
 		var cellCSSProps []*CSSProperty
 
-		// col width
+		// decide align property
+		alignProp := &CSSProperty{Name: "text-align"}
+		if headerCell.Justify == COLJUSTIFYRIGHT {
+			alignProp.Value = "right"
+		} else if headerCell.Justify == COLJUSTIFYLEFT {
+			alignProp.Value = "left"
+		}
+		// append align css property
+		cellCSSProps = append(cellCSSProps, alignProp)
+		// apply this property to all cells belong to this column
+		ht.Table.SetColCSS(headerIndex, cellCSSProps)
+
+		// NOTE: width calculatation should be done after alignment
+		// width only needs to be set on header cells only not on all
+		// cells belong to column
 		var colWidth string
 
 		if headerCell.HTMLWidth != -1 {
