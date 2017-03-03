@@ -135,13 +135,17 @@ func (t *Table) SetCellCSS(rowIndex, colIndex int, cssList []*CSSProperty) error
 	}
 
 	// css property map
-	cssMap := make(map[string]*CSSProperty)
-	for _, css := range cssList {
-		cssMap[css.Name] = css
+	g := getCSSMapKeyForCell(rowIndex, colIndex)
+	cssMap, ok := t.CSS[g]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
 	}
 
 	// map it in style of html table
-	g := getCSSMapKeyForCell(rowIndex, colIndex)
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
 	t.CSS[g] = cssMap
 
 	return nil
@@ -163,37 +167,65 @@ func (t *Table) SetColWidth(colIndex int, width uint, unit string) error {
 
 // SetTitleCSS sets css for title row
 func (t *Table) SetTitleCSS(cssList []*CSSProperty) {
-	cssMap := map[string]*CSSProperty{}
+	// css property map
+	cssMap, ok := t.CSS[TITLECLASS]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
 	for _, cssProp := range cssList {
 		cssMap[cssProp.Name] = cssProp
 	}
+
 	t.CSS[TITLECLASS] = cssMap
 }
 
 // SetHeaderCSS sets css for headers row
 func (t *Table) SetHeaderCSS(cssList []*CSSProperty) {
-	cssMap := map[string]*CSSProperty{}
+	// css property map
+	cssMap, ok := t.CSS[HEADERSCLASS]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
 	for _, cssProp := range cssList {
 		cssMap[cssProp.Name] = cssProp
 	}
+
 	t.CSS[HEADERSCLASS] = cssMap
 }
 
 // SetSection1CSS sets css for section1 row
 func (t *Table) SetSection1CSS(cssList []*CSSProperty) {
-	cssMap := map[string]*CSSProperty{}
+	// css property map
+	cssMap, ok := t.CSS[SECTION1CLASS]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
 	for _, cssProp := range cssList {
 		cssMap[cssProp.Name] = cssProp
 	}
+
 	t.CSS[SECTION1CLASS] = cssMap
 }
 
 // SetSection2CSS sets css for section2 row
 func (t *Table) SetSection2CSS(cssList []*CSSProperty) {
-	cssMap := map[string]*CSSProperty{}
+	// css property map
+	cssMap, ok := t.CSS[SECTION2CLASS]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
 	for _, cssProp := range cssList {
 		cssMap[cssProp.Name] = cssProp
 	}
+
 	t.CSS[SECTION2CLASS] = cssMap
 }
 
