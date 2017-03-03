@@ -6,7 +6,7 @@ gotable: *.go
 
 clean:
 	go clean
-	rm -rf *.out *.csv *.html *.txt *.pdf
+	rm -rf *.out *.csv *.html *.txt *.pdf *.css* .sass-cache
 
 lint:
 	golint
