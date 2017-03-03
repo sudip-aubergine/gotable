@@ -3,7 +3,6 @@ package gotable
 import (
 	"fmt"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -83,7 +82,7 @@ type Table struct {
 	LineAfter   []int       // array of row numbers that have a horizontal line after they are printed
 	LineBefore  []int       // array of row numbers that have a horizontal line before they are printed
 	RS          []Rowset    // a list of rowsets
-	CSS         map[CSSIndex]map[string]*CSSProperty
+	CSS         map[string]map[string]*CSSProperty
 }
 
 // CSSProperty holds css property to be used as inline css
@@ -93,41 +92,17 @@ type CSSProperty struct {
 
 // String is the "stringer" method implementation for CSSProperty
 func (cp CSSProperty) String() string {
-	return `"` + cp.Name + `":"` + cp.Value + `;"`
-}
-
-// CSSIndex holds row, col index for cells, rows, columns of table
-// will be used for css property
-// for row `Col` would be -1
-// for column `Row` would be -1
-// for cells both `Col` and `Row` has value
-type CSSIndex struct {
-	Row, Col int
-}
-
-// String is the "stringer" method implementation for CSSIndex
-func (gt CSSIndex) String() string {
-	return `(Row:` + strconv.Itoa(gt.Row) + `,Col:` + strconv.Itoa(gt.Col) + `)`
+	return `"` + cp.Name + `:` + cp.Value + `;"`
 }
 
 // SetRowCSS sets css properties for Table Rows
 func (t *Table) SetRowCSS(rowIndex int, cssList []*CSSProperty) error {
 
-	// check row is valid or not
-	if err := t.HasValidRow(rowIndex); err != nil {
-		return err
-	}
-
-	// css property map
-	cssMap := make(map[string]*CSSProperty)
-	for _, css := range cssList {
-		cssMap[css.Name] = css
-	}
-
 	// convert it into cells attributes
 	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
-		g := CSSIndex{Row: rowIndex, Col: colIndex}
-		t.CSS[g] = cssMap
+		if err := t.SetCellCSS(rowIndex, colIndex, cssList); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -136,21 +111,11 @@ func (t *Table) SetRowCSS(rowIndex int, cssList []*CSSProperty) error {
 // SetColCSS sets css properties for Table Columns
 func (t *Table) SetColCSS(colIndex int, cssList []*CSSProperty) error {
 
-	// check row is valid or not
-	if err := t.HasValidColumn(colIndex); err != nil {
-		return err
-	}
-
-	// css property map
-	cssMap := make(map[string]*CSSProperty)
-	for _, css := range cssList {
-		cssMap[css.Name] = css
-	}
-
 	// convert it into cells attributes
 	for rowIndex := 0; rowIndex < t.RowCount(); rowIndex++ {
-		g := CSSIndex{Row: rowIndex, Col: colIndex}
-		t.CSS[g] = cssMap
+		if err := t.SetCellCSS(rowIndex, colIndex, cssList); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -176,10 +141,60 @@ func (t *Table) SetCellCSS(rowIndex, colIndex int, cssList []*CSSProperty) error
 	}
 
 	// map it in style of html table
-	g := CSSIndex{Row: rowIndex, Col: colIndex}
+	g := getCSSMapKeyForCell(rowIndex, colIndex)
 	t.CSS[g] = cssMap
 
 	return nil
+}
+
+// SetColWidth sets the column width for table
+func (t *Table) SetColWidth(colIndex int, width uint, unit string) error {
+
+	// TODO: conversion from different units of font to `px` unit with body font base size
+	// so that width has value with `px` unit value
+
+	if err := t.HasValidColumn(colIndex); err != nil {
+		return err
+	}
+
+	t.ColDefs[colIndex].HTMLWidth = int(width)
+	return nil
+}
+
+// SetTitleCSS sets css for title row
+func (t *Table) SetTitleCSS(cssList []*CSSProperty) {
+	cssMap := map[string]*CSSProperty{}
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+	t.CSS[TITLECLASS] = cssMap
+}
+
+// SetHeaderCSS sets css for headers row
+func (t *Table) SetHeaderCSS(cssList []*CSSProperty) {
+	cssMap := map[string]*CSSProperty{}
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+	t.CSS[HEADERSCLASS] = cssMap
+}
+
+// SetSection1CSS sets css for section1 row
+func (t *Table) SetSection1CSS(cssList []*CSSProperty) {
+	cssMap := map[string]*CSSProperty{}
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+	t.CSS[SECTION1CLASS] = cssMap
+}
+
+// SetSection2CSS sets css for section2 row
+func (t *Table) SetSection2CSS(cssList []*CSSProperty) {
+	cssMap := map[string]*CSSProperty{}
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+	t.CSS[SECTION2CLASS] = cssMap
 }
 
 // TableExportType, each export output format must satisfy this interface
@@ -263,7 +278,7 @@ func (t *Table) ColCount() int {
 func (t *Table) Init() {
 	t.DateFmt = "01/02/2006"
 	t.DateTimeFmt = "01/02/2006 15:04:00 MST"
-	t.CSS = make(map[CSSIndex]map[string]*CSSProperty)
+	t.CSS = make(map[string]map[string]*CSSProperty)
 }
 
 // AddLineAfter keeps track of the row numbers after which a line will be printed
@@ -336,8 +351,9 @@ func (t *Table) AdjustFormatString(cd *ColumnDef) {
 // AddColumn adds a new ColumnDef to the table
 func (t *Table) AddColumn(title string, width, celltype int, justification int) {
 	var cd = ColumnDef{
-		ColTitle: title, Width: width, CellType: celltype,
-		Justify: justification, Fdecimals: 2, HTMLWidth: -1,
+		ColTitle: title, Width: width,
+		CellType: celltype, Justify: justification,
+		Fdecimals: 2, HTMLWidth: -1,
 	}
 	t.AdjustColumnHeader(&cd)
 	t.AdjustFormatString(&cd)
