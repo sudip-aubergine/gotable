@@ -1,3 +1,5 @@
+SCSS_BIN := scss
+
 gotable: *.go
 	go clean
 	go get -t ./...
@@ -8,11 +10,14 @@ clean:
 	go clean
 	rm -rf *.out *.csv *.html *.txt *.pdf *.css* .sass-cache
 
+css:
+	${SCSS_BIN} ./scss/report.scss ./report.css --style=expanded --sourcemap=none
+
 lint:
 	golint
 
 test:
-	go test -coverprofile=coverage.out 
+	go test -coverprofile=coverage.out
 	go tool cover -html=coverage.out
 
 update:
