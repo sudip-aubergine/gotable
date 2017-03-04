@@ -229,7 +229,7 @@ func (t *Table) SetSection2CSS(cssList []*CSSProperty) {
 	t.CSS[SECTION2CLASS] = cssMap
 }
 
-// TableExportType, each export output format must satisfy this interface
+// TableExportType each export output format must satisfy this interface
 type TableExportType interface {
 	getTableOutput() (string, error)
 	getTitle() string
@@ -820,7 +820,7 @@ func (t *Table) HasValidRow(rowIndex int) error {
 	return nil
 }
 
-// HasValidRow checks that colIndex is valid or not
+// HasValidColumn checks that colIndex is valid or not
 func (t *Table) HasValidColumn(colIndex int) error {
 	if colIndex < 0 {
 		return fmt.Errorf("Column number is less than zero, column: %d", colIndex)

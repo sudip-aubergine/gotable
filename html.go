@@ -8,6 +8,7 @@ import (
 	"github.com/dustin/go-humanize"
 )
 
+// TABLECLASS et. al. are the constants used in the html version of table object
 const (
 	TABLECLASS    = `rpt-table`
 	TITLECLASS    = `title`
