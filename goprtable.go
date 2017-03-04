@@ -544,7 +544,7 @@ func (t *Table) Puts(row, col int, v string) bool {
 		row = len(t.Row) - 1
 	}
 	t.Row[row].Col[col].Type = CELLSTRING
-	t.Row[row].Col[col].Sval = v
+	t.Row[row].Col[col].Sval = standardizeSpaces(v)
 
 	// Need to check width of column everytime when we adding new content
 	// if it is updatable or not
