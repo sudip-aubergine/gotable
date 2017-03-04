@@ -202,7 +202,7 @@ func DoTextOutput(t *testing.T, tbl *Table) {
 func DoCSVOutput(t *testing.T, tbl *Table) {
 	s, err := (*tbl).SprintTable(TABLEOUTCSV)
 	if nil != err {
-		t.Error("smoke_test: Error creating CSV output: %s\n", err.Error())
+		t.Errorf("smoke_test: Error creating CSV output: %s\n", err.Error())
 		// fmt.Printf("smoke_test: Error creating CSV output: %s\n", err.Error())
 	}
 	saveTableToFile(t, "smoke_test.csv", s)
