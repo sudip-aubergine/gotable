@@ -245,7 +245,7 @@ type TableExportType interface {
 // text output.  The "\n" may not be desired or needed for the other
 // formats
 func (t *Table) SetTitle(s string) {
-	t.Title = s
+	t.Title = standardizeSpaces(s)
 }
 
 // GetTitle sets the table's Title string to the supplied value
@@ -258,7 +258,7 @@ func (t *Table) GetTitle() string {
 // text output.  The "\n" may not be desired or needed for the other
 // formats
 func (t *Table) SetSection1(s string) {
-	t.Section1 = s
+	t.Section1 = standardizeSpaces(s)
 }
 
 // GetSection1 sets the table's Section1 string to the supplied value
@@ -271,7 +271,7 @@ func (t *Table) GetSection1() string {
 // text output.  The "\n" may not be desired or needed for the other
 // formats
 func (t *Table) SetSection2(s string) {
-	t.Section2 = s
+	t.Section2 = standardizeSpaces(s)
 }
 
 // GetSection2 sets the table's Section2 string to the supplied value
@@ -433,7 +433,7 @@ func (t *Table) AdjustAllColumnHeaders() {
 		}
 		// now add the remaining strings
 		for j := iStart; j < t.maxHdrRows; j++ {
-			n[j] = t.ColDefs[i].Hdr[j-iStart]
+			n[j] = standardizeSpaces(t.ColDefs[i].Hdr[j-iStart])
 		}
 		t.ColDefs[i].Hdr = n // replace the old hdr with the new one
 	}

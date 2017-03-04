@@ -13,6 +13,11 @@ import (
 // TEXT UTILS
 // ==========
 
+// REF: http://stackoverflow.com/questions/37290693/how-to-remove-redundant-spaces-whitespace-from-a-string-in-golang
+func standardizeSpaces(s string) string {
+	return strings.Join(strings.Fields(s), " ")
+}
+
 // getMultiLineText used to get multi line texts,
 // from one long string which length exceeds by given column width
 // it tries to split the string and store that splitted line slice such a way that
@@ -27,7 +32,7 @@ func getMultiLineText(v string, colWidth int) ([]string, int) {
 	}
 
 	// get multi line chunk in form of array
-	sa := strings.Split(v, " ") // break up the string at the spaces
+	sa := strings.Split(standardizeSpaces(v), " ") // break up the string at the spaces
 	j := 0
 	maxColWidth := 0
 	for i := 0; i < len(sa); i++ { // spin through all substrings
