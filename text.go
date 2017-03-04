@@ -140,7 +140,7 @@ func (tt *TextTable) getRow(row int) (string, error) {
 		}
 	}
 
-	rowColumns := len(tt.Table.Row[row].Col)
+	rowColumns := tt.Table.ColCount()
 
 	// columns string chunk map, each column holds list of string
 	// used for multi line text
@@ -169,6 +169,8 @@ func (tt *TextTable) getRow(row int) (string, error) {
 	rowHeight := tt.Table.Row[row].Height
 
 	// rowGrid holds grid for row with multi line text
+	// NOTE: Non constant bound array error
+	// cannot create with runtime variable value
 	rowGrid := [][]string{}
 
 	// fill grid with empty whitespace value so that it can hold proper spacing
@@ -176,7 +178,7 @@ func (tt *TextTable) getRow(row int) (string, error) {
 	emptyCols := make([]string, rowColumns)
 	for gridColIndex := 0; gridColIndex < rowColumns; gridColIndex++ {
 		// assign default string with length of column width
-		emptyCols = append(emptyCols, mkstr(tt.Table.ColDefs[gridColIndex].Width, ' '))
+		emptyCols[gridColIndex] = mkstr(tt.Table.ColDefs[gridColIndex].Width, ' ')
 	}
 	// fit these prepared empty column list in rowGrid for each row
 	for gridRowIndex := 0; gridRowIndex < rowHeight; gridRowIndex++ {
@@ -221,10 +223,6 @@ func (tt *TextTable) getRow(row int) (string, error) {
 				} else {
 					rowGrid[gridRowIndex][gridColIndex] = fmt.Sprintf(tt.Table.ColDefs[gridColIndex].Pfmt, colMultiLineTextMap[gridColIndex][gridRowIndex])
 				}
-			}
-
-			if rowGrid[gridRowIndex][gridColIndex] == "" {
-				rowGrid[gridRowIndex][gridColIndex] = mkstr(tt.Table.ColDefs[gridColIndex].Width, ' ')
 			}
 
 			s += rowGrid[gridRowIndex][gridColIndex]
