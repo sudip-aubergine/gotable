@@ -151,6 +151,21 @@ func (t *Table) SetCellCSS(rowIndex, colIndex int, cssList []*CSSProperty) error
 	return nil
 }
 
+// SetAllCellCSS sets css properties for all Table Cells
+func (t *Table) SetAllCellCSS(cssList []*CSSProperty) error {
+
+	// convert it into cells attributes
+	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
+		for rowIndex := 0; rowIndex < t.RowCount(); rowIndex++ {
+			if err := t.SetCellCSS(rowIndex, colIndex, cssList); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 // SetColWidth sets the column width for table
 func (t *Table) SetColWidth(colIndex int, width uint, unit string) error {
 
