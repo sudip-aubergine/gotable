@@ -93,77 +93,61 @@ func TestSmoke(t *testing.T) {
 	}
 	// Start with simple checks...
 	if tbl.ColCount() != 8 {
-		t.Logf("smoke_test: Expected %d,  found %d\n", 8, tbl.ColCount())
-		t.Fail()
+		t.Errorf("smoke_test: Expected %d,  found %d\n", 8, tbl.ColCount())
 	}
 	if len(tbl.GetRowset(99)) != 0 {
-		t.Logf("smoke_test: Expected emty rowset,  found %#v\n", tbl.GetRowset(99))
-		t.Fail()
+		t.Errorf("smoke_test: Expected emty rowset,  found %#v\n", tbl.GetRowset(99))
 	}
 	if 0 != tbl.Type(999, 999) {
-		t.Logf("smoke_test: Expected %d,  found %d\n", 0, tbl.Type(999, 999))
-		t.Fail()
+		t.Errorf("smoke_test: Expected %d,  found %d\n", 0, tbl.Type(999, 999))
 	}
 	if tbl.GetTitle() != title {
-		t.Logf("smoke_test: Expected %s,  found %s\n", tbl.GetTitle(), title)
-		t.Fail()
+		t.Errorf("smoke_test: Expected %s,  found %s\n", tbl.GetTitle(), title)
 	}
 	if false != tbl.Puti(999, 999, 1) {
-		t.Logf("smoke_test: Expected return value of false, but got true\n")
-		t.Fail()
+		t.Errorf("smoke_test: Expected return value of false, but got true\n")
 	}
 	if false != tbl.Putf(999, 999, 1) {
-		t.Logf("smoke_test: Expected return value of false, but got true\n")
-		t.Fail()
+		t.Errorf("smoke_test: Expected return value of false, but got true\n")
 	}
 	if false != tbl.Puts(999, 999, "ignore") {
-		t.Logf("smoke_test: Expected return value of false, but got true\n")
-		t.Fail()
+		t.Errorf("smoke_test: Expected return value of false, but got true\n")
 	}
 	if false != tbl.Putd(999, 999, time.Now()) {
-		t.Logf("smoke_test: Expected return value of false, but got true\n")
-		t.Fail()
+		t.Errorf("smoke_test: Expected return value of false, but got true\n")
 	}
 	if tbl.GetSection1() != section1 {
-		t.Logf("smoke_test: Expected %s,  found %s\n", tbl.GetSection1(), section1)
-		t.Fail()
+		t.Errorf("smoke_test: Expected %s,  found %s\n", tbl.GetSection1(), section1)
 	}
 	if tbl.GetSection2() != section2 {
-		t.Logf("smoke_test: Expected %s,  found %s\n", tbl.GetSection2(), section2)
-		t.Fail()
+		t.Errorf("smoke_test: Expected %s,  found %s\n", tbl.GetSection2(), section2)
 	}
 
 	cell := tbl.Get(0, 0)
 	if cell.Sval != d[0].Name {
-		t.Logf("smoke_test: Expected %s,  found %s\n", cell.Sval, d[0].Name)
-		t.Fail()
+		t.Errorf("smoke_test: Expected %s,  found %s\n", cell.Sval, d[0].Name)
 	}
 	if tbl.Geti(1, Age) != d[1].Age {
-		t.Logf("smoke_test: Expected %d,  found %d\n", tbl.Geti(1, Age), d[1].Age)
-		t.Fail()
+		t.Errorf("smoke_test: Expected %d,  found %d\n", tbl.Geti(1, Age), d[1].Age)
+
 	}
 	if tbl.Getf(1, Winnings) != d[1].Winnings {
-		t.Logf("smoke_test: Expected %f,  found %f\n", tbl.Getf(1, Winnings), d[1].Winnings)
-		t.Fail()
+		t.Errorf("smoke_test: Expected %f,  found %f\n", tbl.Getf(1, Winnings), d[1].Winnings)
 	}
 	if tbl.Gets(1, Name) != d[1].Name {
-		t.Logf("smoke_test: Expected %s,  found %s\n", tbl.Gets(1, Name), d[1].Name)
-		t.Fail()
+		t.Errorf("smoke_test: Expected %s,  found %s\n", tbl.Gets(1, Name), d[1].Name)
 	}
 	if tbl.Getd(1, DOB) != d[1].DOB {
-		t.Logf("smoke_test: Expected %s,  found %s\n", tbl.Getd(1, DOB).Format("1/2/2006"), d[1].DOB.Format("1/2/2006"))
-		t.Fail()
+		t.Logf("smoke_test: Expected %s,  found %s\n", tbl.Getd(1, DOB).Format("1/2/2006"), d[1].DOB.Format("1/Errorf06"))
 	}
 	if tbl.Type(1, Name) != CELLSTRING {
-		t.Logf("smoke_test: Expected %d,  found %d\n", tbl.Type(1, Name), CELLSTRING)
-		t.Fail()
+		t.Errorf("smoke_test: Expected %d,  found %d\n", tbl.Type(1, Name), CELLSTRING)
 	}
 
 	errExp = "Unrecognized"
 	_, err = tbl.SprintTable(999)
 	if !strings.Contains(err.Error(), errExp) {
-		t.Logf("smoke_test: Expected %q in error, but not found.  Error = %s\n", errExp, err.Error())
-		t.Fail()
+		t.Errorf("smoke_test: Expected %q in error, but not found.  Error = %s\n", errExp, err.Error())
 	}
 
 	// Bang it a bit...
@@ -212,13 +196,11 @@ func DoCSVOutput(t *testing.T, tbl *Table) {
 	sb := []byte(s)
 	if len(b) != len(sb) {
 		// fmt.Printf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
-		t.Logf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
-		t.Fail()
+		t.Errorf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
 	}
 	for i := 0; i < len(b); i++ {
 		if sb[i] != b[i] {
 			t.Logf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
-			t.Fail()
 			// fmt.Printf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
 			break
 		}
@@ -229,8 +211,7 @@ func DoCSVOutput(t *testing.T, tbl *Table) {
 func DoHTMLOutput(t *testing.T, tbl *Table) {
 	s, err := (*tbl).SprintTable(TABLEOUTHTML)
 	if nil != err {
-		t.Logf("smoke_test: Error creating HTML output: %s\n", err.Error())
-		t.Fail()
+		t.Errorf("smoke_test: Error creating HTML output: %s\n", err.Error())
 		// fmt.Printf("smoke_test: Error creating HTML output: %s\n", err.Error())
 	}
 	saveTableToFile(t, "smoke_test.html", s)
@@ -240,13 +221,11 @@ func DoHTMLOutput(t *testing.T, tbl *Table) {
 	sb := []byte(s)
 	if len(b) != len(sb) {
 		// fmt.Printf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
-		t.Logf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
-		t.Fail()
+		t.Errorf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
 	}
 	for i := 0; i < len(b); i++ {
 		if sb[i] != b[i] {
 			t.Logf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
-			t.Fail()
 			// fmt.Printf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
 			break
 		}
@@ -268,8 +247,7 @@ func saveTableToFile(t *testing.T, fname string, s string) error {
 	// save for later inspection if anything goes wrong
 	f, err := os.Create(fname)
 	if nil != err {
-		t.Logf("smoke_test: Error creating file %s: %s\n", fname, err.Error())
-		t.Fail()
+		t.Errorf("smoke_test: Error creating file %s: %s\n", fname, err.Error())
 		// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
 	}
 	defer f.Close()
