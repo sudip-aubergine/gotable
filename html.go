@@ -1,11 +1,15 @@
 package gotable
 
 import (
+	"bytes"
 	"fmt"
 	"sort"
 	"strconv"
+	// "strings"
+	"text/template"
 
 	"github.com/dustin/go-humanize"
+	"github.com/yosssi/gohtml"
 )
 
 // TABLECLASS et. al. are the constants used in the html version of table object
@@ -23,8 +27,13 @@ type HTMLTable struct {
 	StyleString string
 }
 
-func (ht *HTMLTable) getTableOutput() (string, error) {
+// HTMLTemplateContext holds the context for table html template
+type HTMLTemplateContext struct {
+	FontSize                                    int
+	HeadTitle, DefaultCSS, CustomCSS, TableHTML string
+}
 
+func (ht *HTMLTable) getTableOutput() (string, error) {
 	var tout string
 
 	// append title
@@ -50,8 +59,41 @@ func (ht *HTMLTable) getTableOutput() (string, error) {
 	}
 	tout += rowsStr
 
+	// make context for template
+	htmlContext := HTMLTemplateContext{FontSize: CSSFONTSIZE}
+	htmlContext.HeadTitle = ht.Table.Title
+	htmlContext.DefaultCSS, err = getReportDefaultCSS()
+	if err != nil {
+		return "", err
+	}
+	htmlContext.DefaultCSS = `<style>` + htmlContext.DefaultCSS + `</style>`
+	htmlContext.CustomCSS = `<style>` + ht.StyleString + `</style>`
+	htmlContext.TableHTML = `<table class="` + TABLECLASS + `">` + tout + `</table>`
+
+	// get template string
+	tableTmplPath, err := getTableTemplatePath()
+	if err != nil {
+		return "", err
+	}
+
+	// Create a new template and parse the context in it
+	tmpl := template.New("table.tmpl")
+	tmpl, err = tmpl.ParseFiles(tableTmplPath)
+	if err != nil {
+		return "", err
+	}
+
+	// write html output in buffer
+	var htmlBuffer bytes.Buffer
+	err = tmpl.Execute(&htmlBuffer, htmlContext)
+	if err != nil {
+		return "", err
+	}
+
 	// return output
-	return `<style>` + ht.StyleString + `</style>` + `<table class="` + TABLECLASS + `">` + tout + `</table>`, nil
+	tableHTML := gohtml.Format(htmlBuffer.String())
+	// tableHTML = strings.Replace(tableHTML, "\\\n", "", -1)
+	return tableHTML, nil
 }
 
 func (ht *HTMLTable) getTitle() string {
