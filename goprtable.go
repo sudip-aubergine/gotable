@@ -157,9 +157,8 @@ func (t *Table) SetAllCellCSS(cssList []*CSSProperty) error {
 	// convert it into cells attributes
 	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
 		for rowIndex := 0; rowIndex < t.RowCount(); rowIndex++ {
-			if err := t.SetCellCSS(rowIndex, colIndex, cssList); err != nil {
-				return err
-			}
+			// will never meet an error from below function
+			t.SetCellCSS(rowIndex, colIndex, cssList)
 		}
 	}
 
