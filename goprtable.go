@@ -85,164 +85,6 @@ type Table struct {
 	CSS         map[string]map[string]*CSSProperty
 }
 
-// CSSProperty holds css property to be used as inline css
-type CSSProperty struct {
-	Name, Value string
-}
-
-// String is the "stringer" method implementation for CSSProperty
-func (cp CSSProperty) String() string {
-	return `"` + cp.Name + `:` + cp.Value + `;"`
-}
-
-// SetRowCSS sets css properties for Table Rows
-func (t *Table) SetRowCSS(rowIndex int, cssList []*CSSProperty) error {
-
-	// convert it into cells attributes
-	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
-		if err := t.SetCellCSS(rowIndex, colIndex, cssList); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// SetColCSS sets css properties for Table Columns
-func (t *Table) SetColCSS(colIndex int, cssList []*CSSProperty) error {
-
-	// convert it into cells attributes
-	for rowIndex := 0; rowIndex < t.RowCount(); rowIndex++ {
-		if err := t.SetCellCSS(rowIndex, colIndex, cssList); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// SetCellCSS sets css properties for Table Cells
-func (t *Table) SetCellCSS(rowIndex, colIndex int, cssList []*CSSProperty) error {
-
-	// check row is valid or not
-	if err := t.HasValidRow(rowIndex); err != nil {
-		return err
-	}
-
-	// check row is valid or not
-	if err := t.HasValidColumn(colIndex); err != nil {
-		return err
-	}
-
-	// css property map
-	g := getCSSMapKeyForCell(rowIndex, colIndex)
-	cssMap, ok := t.CSS[g]
-	if !ok {
-		cssMap = make(map[string]*CSSProperty)
-	}
-
-	// map it in style of html table
-	for _, cssProp := range cssList {
-		cssMap[cssProp.Name] = cssProp
-	}
-
-	t.CSS[g] = cssMap
-
-	return nil
-}
-
-// SetAllCellCSS sets css properties for all Table Cells
-func (t *Table) SetAllCellCSS(cssList []*CSSProperty) error {
-
-	// convert it into cells attributes
-	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
-		for rowIndex := 0; rowIndex < t.RowCount(); rowIndex++ {
-			// will never meet an error from below function
-			t.SetCellCSS(rowIndex, colIndex, cssList)
-		}
-	}
-
-	return nil
-}
-
-// SetColWidth sets the column width for table
-func (t *Table) SetColWidth(colIndex int, width uint, unit string) error {
-
-	// TODO: conversion from different units of font to `px` unit with body font base size
-	// so that width has value with `px` unit value
-
-	if err := t.HasValidColumn(colIndex); err != nil {
-		return err
-	}
-
-	t.ColDefs[colIndex].HTMLWidth = int(width)
-	return nil
-}
-
-// SetTitleCSS sets css for title row
-func (t *Table) SetTitleCSS(cssList []*CSSProperty) {
-	// css property map
-	cssMap, ok := t.CSS[TITLECLASS]
-	if !ok {
-		cssMap = make(map[string]*CSSProperty)
-	}
-
-	// map it in style of html table
-	for _, cssProp := range cssList {
-		cssMap[cssProp.Name] = cssProp
-	}
-
-	t.CSS[TITLECLASS] = cssMap
-}
-
-// SetHeaderCSS sets css for headers row
-func (t *Table) SetHeaderCSS(cssList []*CSSProperty) {
-	// css property map
-	cssMap, ok := t.CSS[HEADERSCLASS]
-	if !ok {
-		cssMap = make(map[string]*CSSProperty)
-	}
-
-	// map it in style of html table
-	for _, cssProp := range cssList {
-		cssMap[cssProp.Name] = cssProp
-	}
-
-	t.CSS[HEADERSCLASS] = cssMap
-}
-
-// SetSection1CSS sets css for section1 row
-func (t *Table) SetSection1CSS(cssList []*CSSProperty) {
-	// css property map
-	cssMap, ok := t.CSS[SECTION1CLASS]
-	if !ok {
-		cssMap = make(map[string]*CSSProperty)
-	}
-
-	// map it in style of html table
-	for _, cssProp := range cssList {
-		cssMap[cssProp.Name] = cssProp
-	}
-
-	t.CSS[SECTION1CLASS] = cssMap
-}
-
-// SetSection2CSS sets css for section2 row
-func (t *Table) SetSection2CSS(cssList []*CSSProperty) {
-	// css property map
-	cssMap, ok := t.CSS[SECTION2CLASS]
-	if !ok {
-		cssMap = make(map[string]*CSSProperty)
-	}
-
-	// map it in style of html table
-	for _, cssProp := range cssList {
-		cssMap[cssProp.Name] = cssProp
-	}
-
-	t.CSS[SECTION2CLASS] = cssMap
-}
-
 // TableExportType each export output format must satisfy this interface
 type TableExportType interface {
 	getTableOutput() (string, error)
@@ -867,4 +709,166 @@ func (t *Table) sprintTableFormat(f int) (string, error) {
 
 	// return expected formatted output of table object
 	return tout.getTableOutput()
+}
+
+// ==========================
+// METHODs for HTML output //
+// ==========================
+
+// CSSProperty holds css property to be used as inline css
+type CSSProperty struct {
+	Name, Value string
+}
+
+// String is the "stringer" method implementation for CSSProperty
+func (cp CSSProperty) String() string {
+	return `"` + cp.Name + `:` + cp.Value + `;"`
+}
+
+// SetRowCSS sets css properties for Table Rows
+func (t *Table) SetRowCSS(rowIndex int, cssList []*CSSProperty) error {
+
+	// convert it into cells attributes
+	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
+		if err := t.SetCellCSS(rowIndex, colIndex, cssList); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// SetColCSS sets css properties for Table Columns
+func (t *Table) SetColCSS(colIndex int, cssList []*CSSProperty) error {
+
+	// convert it into cells attributes
+	for rowIndex := 0; rowIndex < t.RowCount(); rowIndex++ {
+		if err := t.SetCellCSS(rowIndex, colIndex, cssList); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// SetCellCSS sets css properties for Table Cells
+func (t *Table) SetCellCSS(rowIndex, colIndex int, cssList []*CSSProperty) error {
+
+	// check row is valid or not
+	if err := t.HasValidRow(rowIndex); err != nil {
+		return err
+	}
+
+	// check row is valid or not
+	if err := t.HasValidColumn(colIndex); err != nil {
+		return err
+	}
+
+	// css property map
+	g := getCSSMapKeyForCell(rowIndex, colIndex)
+	cssMap, ok := t.CSS[g]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[g] = cssMap
+
+	return nil
+}
+
+// SetAllCellCSS sets css properties for all Table Cells
+func (t *Table) SetAllCellCSS(cssList []*CSSProperty) error {
+
+	// convert it into cells attributes
+	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
+		for rowIndex := 0; rowIndex < t.RowCount(); rowIndex++ {
+			// will never meet an error from below function
+			t.SetCellCSS(rowIndex, colIndex, cssList)
+		}
+	}
+
+	return nil
+}
+
+// SetColWidth sets the column width for table
+func (t *Table) SetColWidth(colIndex int, width uint, unit string) error {
+
+	// TODO: conversion from different units of font to `px` unit with body font base size
+	// so that width has value with `px` unit value
+
+	if err := t.HasValidColumn(colIndex); err != nil {
+		return err
+	}
+
+	t.ColDefs[colIndex].HTMLWidth = int(width)
+	return nil
+}
+
+// SetTitleCSS sets css for title row
+func (t *Table) SetTitleCSS(cssList []*CSSProperty) {
+	// css property map
+	cssMap, ok := t.CSS[TITLECLASS]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[TITLECLASS] = cssMap
+}
+
+// SetHeaderCSS sets css for headers row
+func (t *Table) SetHeaderCSS(cssList []*CSSProperty) {
+	// css property map
+	cssMap, ok := t.CSS[HEADERSCLASS]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[HEADERSCLASS] = cssMap
+}
+
+// SetSection1CSS sets css for section1 row
+func (t *Table) SetSection1CSS(cssList []*CSSProperty) {
+	// css property map
+	cssMap, ok := t.CSS[SECTION1CLASS]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[SECTION1CLASS] = cssMap
+}
+
+// SetSection2CSS sets css for section2 row
+func (t *Table) SetSection2CSS(cssList []*CSSProperty) {
+	// css property map
+	cssMap, ok := t.CSS[SECTION2CLASS]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[SECTION2CLASS] = cssMap
 }
