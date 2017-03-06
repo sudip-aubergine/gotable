@@ -671,7 +671,7 @@ func (t *Table) HasValidRow(rowIndex int) error {
 		return fmt.Errorf("Row number is less than zero, row: %d", rowIndex)
 	}
 	if rowIndex >= t.RowCount() {
-		return fmt.Errorf("Row number > rows in table, row: %d", rowIndex)
+		return fmt.Errorf("Row number > no of rows in table, row: %d", rowIndex)
 	}
 	return nil
 }
@@ -682,7 +682,7 @@ func (t *Table) HasValidColumn(colIndex int) error {
 		return fmt.Errorf("Column number is less than zero, column: %d", colIndex)
 	}
 	if colIndex >= t.ColCount() {
-		return fmt.Errorf("Column number > rows in table, column: %d", colIndex)
+		return fmt.Errorf("Column number > no of columns in table, column: %d", colIndex)
 	}
 	return nil
 }
