@@ -1,6 +1,6 @@
 SCSS_BIN := scss
 
-gotable: *.go
+gotable: *.go css
 	go clean
 	go get -t ./...
 	go vet
