@@ -260,7 +260,7 @@ type TableExportType interface {
 // text output.  The "\n" may not be desired or needed for the other
 // formats
 func (t *Table) SetTitle(s string) {
-	t.Title = standardizeSpaces(s)
+	t.Title = s
 }
 
 // GetTitle sets the table's Title string to the supplied value
@@ -273,7 +273,7 @@ func (t *Table) GetTitle() string {
 // text output.  The "\n" may not be desired or needed for the other
 // formats
 func (t *Table) SetSection1(s string) {
-	t.Section1 = standardizeSpaces(s)
+	t.Section1 = s
 }
 
 // GetSection1 sets the table's Section1 string to the supplied value
@@ -286,7 +286,7 @@ func (t *Table) GetSection1() string {
 // text output.  The "\n" may not be desired or needed for the other
 // formats
 func (t *Table) SetSection2(s string) {
-	t.Section2 = standardizeSpaces(s)
+	t.Section2 = s
 }
 
 // GetSection2 sets the table's Section2 string to the supplied value
