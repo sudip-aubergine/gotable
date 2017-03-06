@@ -19,7 +19,13 @@ func TestSmoke(t *testing.T) {
 
 	// force some edge condition errors...
 	errExp := "no columns"
-	_, err := tbl.SprintTable(TABLEOUTTEXT)
+	// headers check
+	err := tbl.HasHeaders()
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	// print table check
+	_, err = tbl.SprintTable(TABLEOUTTEXT)
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
@@ -37,6 +43,12 @@ func TestSmoke(t *testing.T) {
 	tbl.AddColumn("Random Date/Time", 25, CELLDATETIME, COLJUSTIFYLEFT) // 7 totally random datetime
 
 	errExp = "no rows"
+	// headers check
+	err = tbl.HasData()
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	// print table check
 	_, err = tbl.SprintTable(TABLEOUTTEXT)
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
@@ -122,7 +134,6 @@ func TestSmoke(t *testing.T) {
 	if tbl.GetSection2() != section2 {
 		t.Errorf("smoke_test: Expected %s,  found %s\n", tbl.GetSection2(), section2)
 	}
-
 	cell := tbl.Get(0, 0)
 	if cell.Sval != d[0].Name {
 		t.Errorf("smoke_test: Expected %s,  found %s\n", cell.Sval, d[0].Name)
@@ -155,10 +166,36 @@ func TestSmoke(t *testing.T) {
 	tbl.AddLineAfter(tbl.RowCount() - 1) // a line after the last row in the table
 	tbl.InsertSumRowsetCols(totalsRSet, tbl.RowCount(), []int{Winnings})
 
+	// valid row checks
+	errExp = "Row number > no of rows in table"
+	err = tbl.HasValidRow(999)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+
+	errExp = "Row number is less than zero"
+	err = tbl.HasValidRow(-999)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+
+	// valid column checks
+	errExp = "Column number > no of columns in table"
+	err = tbl.HasValidColumn(999)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+
+	errExp = "Column number is less than zero"
+	err = tbl.HasValidColumn(-999)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+
 	// Now hit it hard...
 	DoTextOutput(t, &tbl)
 	DoCSVOutput(t, &tbl)
-	DoHTMLOutput(t, &tbl)
+	// DoHTMLOutput(t, &tbl)
 	DoPDFOutput(t, &tbl)
 }
 
