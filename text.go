@@ -112,10 +112,8 @@ func (tt *TextTable) getRows() (string, error) {
 
 	var rowsStr string
 	for i := 0; i < tt.Table.RowCount(); i++ {
-		s, err := tt.getRow(i)
-		if err != nil {
-			return "", err
-		}
+		// for valid row, we will never get an error
+		s := tt.getRow(i)
 		rowsStr += s
 	}
 
@@ -124,11 +122,15 @@ func (tt *TextTable) getRows() (string, error) {
 
 func (tt *TextTable) getRow(row int) (string, error) {
 
+	// This method is only called by internal instance of TextTable
+	// in getRows method, so we should avoid it following error checking
+	// unless we make it exportable
+
 	// check that this passed row is valid or not
-	inValidRowErr := tt.Table.HasValidRow(row)
-	if inValidRowErr != nil {
-		return "", inValidRowErr
-	}
+	// inValidRowErr := tt.Table.HasValidRow(row)
+	// if inValidRowErr != nil {
+	// 	return "", inValidRowErr
+	// }
 
 	// format table row
 	var s string
