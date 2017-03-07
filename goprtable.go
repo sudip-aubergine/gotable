@@ -3,6 +3,7 @@ package gotable
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -765,7 +766,7 @@ func (t *Table) SetCellCSS(rowIndex, colIndex int, cssList []*CSSProperty) error
 	}
 
 	// css property map
-	g := getCSSMapKeyForCell(rowIndex, colIndex)
+	g := t.getCSSMapKeyForCell(rowIndex, colIndex)
 	cssMap, ok := t.CSS[g]
 	if !ok {
 		cssMap = make(map[string]*CSSProperty)
@@ -871,4 +872,9 @@ func (t *Table) SetSection2CSS(cssList []*CSSProperty) {
 	}
 
 	t.CSS[SECTION2CLASS] = cssMap
+}
+
+// getCSSMapKeyForCell format and returns key for cell for css properties usage
+func (t *Table) getCSSMapKeyForCell(rowIndex, colIndex int) string {
+	return `row:` + strconv.Itoa(rowIndex) + `-col:` + strconv.Itoa(colIndex)
 }
