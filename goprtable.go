@@ -729,11 +729,15 @@ func (cp CSSProperty) String() string {
 // SetRowCSS sets css properties for Table Rows
 func (t *Table) SetRowCSS(rowIndex int, cssList []*CSSProperty) error {
 
+	// check row is valid or not
+	if err := t.HasValidRow(rowIndex); err != nil {
+		return err
+	}
+
 	// convert it into cells attributes
 	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
-		if err := t.SetCellCSS(rowIndex, colIndex, cssList); err != nil {
-			return err
-		}
+		// for valid rowIndex set css for all cells belongs to rowIndex row
+		t.SetCellCSS(rowIndex, colIndex, cssList)
 	}
 
 	return nil
@@ -742,11 +746,15 @@ func (t *Table) SetRowCSS(rowIndex int, cssList []*CSSProperty) error {
 // SetColCSS sets css properties for Table Columns
 func (t *Table) SetColCSS(colIndex int, cssList []*CSSProperty) error {
 
+	// check row is valid or not
+	if err := t.HasValidColumn(colIndex); err != nil {
+		return err
+	}
+
 	// convert it into cells attributes
 	for rowIndex := 0; rowIndex < t.RowCount(); rowIndex++ {
-		if err := t.SetCellCSS(rowIndex, colIndex, cssList); err != nil {
-			return err
-		}
+		// for valid colIndex set css for all cells belongs to colIndex column
+		t.SetCellCSS(rowIndex, colIndex, cssList)
 	}
 
 	return nil
