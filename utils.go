@@ -23,10 +23,9 @@ func standardizeSpaces(s string) string {
 func getMultiLineText(v string, colWidth int) ([]string, int) {
 	var a []string
 
-	// fit the content in one line whatever it is irrespective of column width
+	// take default 0
 	if colWidth < 1 {
-		a = append(a, v)
-		return a, -1
+		colWidth = 0
 	}
 
 	// get multi line chunk in form of array

@@ -12,6 +12,12 @@ import (
 
 func TestSmoke(t *testing.T) {
 	var tbl Table
+
+	// stringln case
+	if title := stringln(tbl.Title); title != "" {
+		t.Errorf("smoke_test: Expected blank title, but found: %s\n", title)
+	}
+
 	title := "GOTABLE"
 	section1 := "A Smoke Test"
 	section2 := "February 21, 2017"
@@ -45,7 +51,7 @@ func TestSmoke(t *testing.T) {
 	tbl.SetSection2(section2)
 	tbl.AddColumn("Name", 35, CELLSTRING, COLJUSTIFYLEFT)               // 0 Name
 	tbl.AddColumn("Person Age", 3, CELLINT, COLJUSTIFYRIGHT)            // 1 Age
-	tbl.AddColumn("Height (cm)", 8, CELLINT, COLJUSTIFYRIGHT)           // 2 Height in centimeters
+	tbl.AddColumn("Height (cm)", 0, CELLINT, COLJUSTIFYRIGHT)           // 2 Height in centimeters
 	tbl.AddColumn("Date of Birth", 10, CELLDATE, COLJUSTIFYLEFT)        // 3 DOB
 	tbl.AddColumn("Country of Birth", 14, CELLSTRING, COLJUSTIFYLEFT)   // 4 COB
 	tbl.AddColumn("Winnings", 12, CELLFLOAT, COLJUSTIFYRIGHT)           // 5 total winnings
