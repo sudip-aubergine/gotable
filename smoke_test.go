@@ -165,9 +165,30 @@ func TestSmoke(t *testing.T) {
 	tbl.AddLineAfter(tbl.RowCount() - 1) // a line after the last row in the table
 	tbl.InsertSumRowsetCols(totalsRSet, tbl.RowCount(), []int{Winnings})
 
-	// valid row checks
+	// css property on table for html
+	cssSmpl := &CSSProperty{Name: "color", Value: "orange"}
+	cssStrExp := `"color:orange;"`
+	cStrOut := fmt.Sprintf("%s", cssSmpl)
+	if cssStrExp != cStrOut {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", cssStrExp, cStrOut)
+	}
+
+	cssList := []*CSSProperty{}
+	cssList = append(cssList, cssSmpl)
+
+	// --------------------------------
+	// validation over rows
+	// --------------------------------
 	errExp = "Row number > no of rows in table"
 	err = tbl.HasValidRow(999)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	err = tbl.SetRowCSS(999, cssList)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	err = tbl.SetCellCSS(999, tbl.ColCount()-1, cssList)
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
@@ -177,10 +198,37 @@ func TestSmoke(t *testing.T) {
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
+	err = tbl.SetRowCSS(-999, cssList)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	err = tbl.SetCellCSS(-999, tbl.ColCount()-1, cssList)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
 
-	// valid column checks
+	// valid row case
+	if err = tbl.HasValidRow(tbl.RowCount() - 1); err != nil {
+		t.Errorf("smoke_test: Expected `nil` Error, but found: %s\n", err.Error())
+	}
+
+	// --------------------------------
+	// validation over columns
+	// --------------------------------
 	errExp = "Column number > no of columns in table"
 	err = tbl.HasValidColumn(999)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	err = tbl.SetColCSS(999, cssList)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	err = tbl.SetCellCSS(tbl.RowCount()-1, 999, cssList)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	err = tbl.SetColHTMLWidth(999, 200, "px")
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
@@ -190,10 +238,71 @@ func TestSmoke(t *testing.T) {
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
+	err = tbl.SetColCSS(-999, cssList)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	err = tbl.SetCellCSS(tbl.RowCount()-1, -999, cssList)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	err = tbl.SetColHTMLWidth(-999, 200, "px")
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
 
-	// ===============
-	// HTML test cases
-	// ===============
+	// valid column case
+	if err = tbl.HasValidColumn(tbl.ColCount() - 1); err != nil {
+		t.Errorf("smoke_test: Expected `nil` Error, but found: %s\n", err.Error())
+	}
+
+	// valid row css - make first row text color orange
+	if err = tbl.SetRowCSS(0, cssList); err != nil {
+		t.Errorf("smoke_test: Expected `nil` Error, but found: %s\n", err.Error())
+	}
+	// valid column css - make first column text color oranage
+	cssList = []*CSSProperty{}
+	cssSmpl = &CSSProperty{Name: "color", Value: "blue"}
+	if err = tbl.SetColCSS(0, cssList); err != nil {
+		t.Errorf("smoke_test: Expected `nil` Error, but found: %s\n", err.Error())
+	}
+	// valid cell css case - make all cells background color yellow
+	cssList = []*CSSProperty{}
+	cssSmpl = &CSSProperty{Name: "background-color", Value: "yellow"}
+	if err = tbl.SetAllCellCSS(cssList); err != nil {
+		t.Errorf("smoke_test: Expected `nil` Error, but found: %s\n", err.Error())
+	}
+	// valid set html width case - make second column width wider
+	if err = tbl.SetColHTMLWidth(1, 20, "px"); err != nil {
+		t.Errorf("smoke_test: Expected `nil` Error, but found: %s\n", err.Error())
+	}
+
+	//set title css
+	cssList = []*CSSProperty{}
+	cssList = append(cssList, &CSSProperty{Name: "color", Value: "blue"})
+	cssList = append(cssList, &CSSProperty{Name: "font-style", Value: "italic"})
+	cssList = append(cssList, &CSSProperty{Name: "font-size", Value: "20px"})
+	tbl.SetTitleCSS(cssList)
+
+	// set header css
+	cssList = []*CSSProperty{}
+	cssList = append(cssList, &CSSProperty{Name: "color", Value: "orange"})
+	cssList = append(cssList, &CSSProperty{Name: "font-style", Value: "italic"})
+	tbl.SetHeaderCSS(cssList)
+	cssList = append(cssList, &CSSProperty{Name: "background-color", Value: "blue"})
+	tbl.SetHeaderCSS(cssList)
+
+	// set section1 css
+	cssList = []*CSSProperty{}
+	cssList = append(cssList, &CSSProperty{Name: "color", Value: "white"})
+	cssList = append(cssList, &CSSProperty{Name: "background-color", Value: "black"})
+	tbl.SetSection1CSS(cssList)
+
+	// set section2 css
+	cssList = []*CSSProperty{}
+	cssList = append(cssList, &CSSProperty{Name: "color", Value: "red"})
+	cssList = append(cssList, &CSSProperty{Name: "background-color", Value: "yellow"})
+	tbl.SetSection2CSS(cssList)
 
 	// Now hit it hard...
 	DoTextOutput(t, &tbl)
