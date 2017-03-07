@@ -24,8 +24,18 @@ func TestSmoke(t *testing.T) {
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
-	// print table check
+	// text version
 	_, err = tbl.SprintTable(TABLEOUTTEXT)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	// csv version
+	_, err = tbl.SprintTable(TABLEOUTCSV)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	// html version
+	_, err = tbl.SprintTable(TABLEOUTHTML)
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
@@ -48,9 +58,19 @@ func TestSmoke(t *testing.T) {
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
-	// print table check
+	// print table check with text version
 	tableOutText := fmt.Sprintf("%s", tbl)
-	if !strings.Contains(err.Error(), tableOutText) {
+	if !strings.Contains(tableOutText, errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	// csv output
+	_, err = tbl.SprintTable(TABLEOUTCSV)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	// html output
+	_, err = tbl.SprintTable(TABLEOUTHTML)
+	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 
