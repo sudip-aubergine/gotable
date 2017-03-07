@@ -17,6 +17,10 @@ func TestSmoke(t *testing.T) {
 	if title := stringln(tbl.Title); title != "" {
 		t.Errorf("smoke_test: Expected blank title, but found: %s\n", title)
 	}
+	titleSmpl := "GOTable\n"
+	if titleOut := stringln(titleSmpl); titleSmpl != titleOut {
+		t.Errorf("smoke_test: Expected %s title, but found: %s\n", titleSmpl, titleOut)
+	}
 
 	title := "GOTABLE"
 	section1 := "A Smoke Test"
