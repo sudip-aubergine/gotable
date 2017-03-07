@@ -49,8 +49,8 @@ func TestSmoke(t *testing.T) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 	// print table check
-	_, err = tbl.SprintTable(TABLEOUTTEXT)
-	if !strings.Contains(err.Error(), errExp) {
+	tableOutText := fmt.Sprintf("%s", tbl)
+	if !strings.Contains(err.Error(), tableOutText) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 
@@ -140,7 +140,6 @@ func TestSmoke(t *testing.T) {
 	}
 	if tbl.Geti(1, Age) != d[1].Age {
 		t.Errorf("smoke_test: Expected %d,  found %d\n", tbl.Geti(1, Age), d[1].Age)
-
 	}
 	if tbl.Getf(1, Winnings) != d[1].Winnings {
 		t.Errorf("smoke_test: Expected %f,  found %f\n", tbl.Getf(1, Winnings), d[1].Winnings)
@@ -191,6 +190,10 @@ func TestSmoke(t *testing.T) {
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
+
+	// ===============
+	// HTML test cases
+	// ===============
 
 	// Now hit it hard...
 	DoTextOutput(t, &tbl)
