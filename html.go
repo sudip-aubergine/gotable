@@ -3,12 +3,15 @@ package gotable
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+	"path"
 	"sort"
 	"strconv"
 	// "strings"
 	"text/template"
 
 	"github.com/dustin/go-humanize"
+	"github.com/kardianos/osext"
 	"github.com/yosssi/gohtml"
 )
 
@@ -62,7 +65,7 @@ func (ht *HTMLTable) getTableOutput() (string, error) {
 	// make context for template
 	htmlContext := HTMLTemplateContext{FontSize: CSSFONTSIZE}
 	htmlContext.HeadTitle = ht.Table.Title
-	htmlContext.DefaultCSS, err = getReportDefaultCSS()
+	htmlContext.DefaultCSS, err = ht.getReportDefaultCSS()
 	if err != nil {
 		return "", err
 	}
@@ -71,7 +74,7 @@ func (ht *HTMLTable) getTableOutput() (string, error) {
 	htmlContext.TableHTML = `<table class="` + TABLECLASS + `">` + tout + `</table>`
 
 	// get template string
-	tableTmplPath, err := getTableTemplatePath()
+	tableTmplPath, err := ht.getTableTemplatePath()
 	if err != nil {
 		return "", err
 	}
@@ -110,7 +113,7 @@ func (ht *HTMLTable) getTitle() string {
 
 			// get css string for this td cell
 			ht.StyleString += `table.` + TABLECLASS + ` tr.` + TITLECLASS + ` `
-			ht.StyleString += getCSSForHTMLTag(`td`, cellCSSProps)
+			ht.StyleString += ht.getCSSForHTMLTag(`td`, cellCSSProps)
 
 		}
 		colSpan := strconv.Itoa(ht.Table.ColCount())
@@ -135,7 +138,7 @@ func (ht *HTMLTable) getSection1() string {
 
 			// get css string for this td cell
 			ht.StyleString += `table.` + TABLECLASS + ` tr.` + SECTION1CLASS + ` `
-			ht.StyleString += getCSSForHTMLTag(`td`, cellCSSProps)
+			ht.StyleString += ht.getCSSForHTMLTag(`td`, cellCSSProps)
 
 		}
 		colSpan := strconv.Itoa(ht.Table.ColCount())
@@ -160,7 +163,7 @@ func (ht *HTMLTable) getSection2() string {
 
 			// get css string for this td cell
 			ht.StyleString += `table.` + TABLECLASS + ` tr.` + SECTION2CLASS + ` `
-			ht.StyleString += getCSSForHTMLTag(`td`, cellCSSProps)
+			ht.StyleString += ht.getCSSForHTMLTag(`td`, cellCSSProps)
 
 		}
 		colSpan := strconv.Itoa(ht.Table.ColCount())
@@ -229,7 +232,7 @@ func (ht *HTMLTable) getHeaders() (string, error) {
 
 		// get css string for this cell
 		ht.StyleString += `table.` + TABLECLASS + ` tr.` + HEADERSCLASS + ` td`
-		ht.StyleString += getCSSForClassSelector(thClass, cellCSSProps)
+		ht.StyleString += ht.getCSSForClassSelector(thClass, cellCSSProps)
 
 		tHeaders += `<td class="` + thClass + `">` + headerCell.ColTitle + `</td>`
 	}
@@ -301,7 +304,7 @@ func (ht *HTMLTable) getRow(rowIndex int) (string, error) {
 		}
 
 		// format td cell with custom class if exists for it
-		g := getCSSMapKeyForCell(rowIndex, colIndex)
+		g := ht.Table.getCSSMapKeyForCell(rowIndex, colIndex)
 		if cssMap, ok := ht.Table.CSS[g]; ok {
 
 			tdClass := `cell-row-` + strconv.Itoa(rowIndex) + `-col-` + strconv.Itoa(colIndex)
@@ -313,7 +316,7 @@ func (ht *HTMLTable) getRow(rowIndex int) (string, error) {
 			}
 
 			// get css string for this td cell
-			ht.StyleString += getCSSForClassSelector(tdClass, cellCSSProps)
+			ht.StyleString += ht.getCSSForClassSelector(tdClass, cellCSSProps)
 
 			rowCell = `<td class="` + tdClass + `">` + rowCell + `</td>`
 		} else {
@@ -335,4 +338,69 @@ func (ht *HTMLTable) getRow(rowIndex int) (string, error) {
 	}
 	return `<tr>` + tRow + `</tr>`, nil
 
+}
+
+// getCSSForClassSelector returns css string for a class
+func (ht *HTMLTable) getCSSForClassSelector(className string, cssList []*CSSProperty) string {
+	var classCSS string
+
+	// append notation for selector
+	classCSS += `.` + className + `{`
+
+	for _, cssProp := range cssList {
+		// append css property name
+		classCSS += cssProp.Name + `:` + cssProp.Value + `;`
+	}
+
+	// finally block ending sign
+	classCSS += `}`
+
+	// return class css string
+	return classCSS
+}
+
+// getCSSForHTMLTag return css string for html tag element
+func (ht *HTMLTable) getCSSForHTMLTag(tagEl string, cssList []*CSSProperty) string {
+	var classCSS string
+
+	// append notation for selector
+	classCSS += tagEl + `{`
+
+	for _, cssProp := range cssList {
+		// append css property name
+		classCSS += cssProp.Name + `:` + cssProp.Value + `;`
+	}
+
+	// finally block ending sign
+	classCSS += `}`
+
+	// return class css string
+	return classCSS
+}
+
+// getReportDefaultCSS reads default css from report.css
+func (ht *HTMLTable) getReportDefaultCSS() (string, error) {
+	folderPath, err := osext.ExecutableFolder()
+	if err != nil {
+		return "", err
+	}
+
+	reportCSS := path.Join(folderPath, "report.css")
+
+	cssString, err := ioutil.ReadFile(reportCSS)
+	if err != nil {
+		return "", err
+	}
+	return string(cssString), nil
+}
+
+// getTableTemplatePath returns the path of table template file
+func (ht *HTMLTable) getTableTemplatePath() (string, error) {
+	folderPath, err := osext.ExecutableFolder()
+	if err != nil {
+		return "", err
+	}
+
+	tmpl := path.Join(folderPath, "table.tmpl")
+	return tmpl, nil
 }
