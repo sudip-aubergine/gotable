@@ -82,10 +82,8 @@ func (ct *CSVTable) getRows() (string, error) {
 
 	var rowsStr string
 	for i := 0; i < ct.Table.RowCount(); i++ {
-		s, err := ct.getRow(i)
-		if err != nil {
-			return "", err
-		}
+		// for valid row, we will never get an error
+		s, _ := ct.getRow(i)
 		rowsStr += s
 	}
 
@@ -93,11 +91,16 @@ func (ct *CSVTable) getRows() (string, error) {
 }
 
 func (ct *CSVTable) getRow(row int) (string, error) {
-	// check that this passed row is valid or not
-	inValidRowErr := ct.Table.HasValidRow(row)
-	if inValidRowErr != nil {
-		return "", inValidRowErr
-	}
+
+	// This method is only called by internal instance of TextTable
+	// in getRows method, so we should avoid following error check
+	// unless we make it as export
+
+	// // check that this passed row is valid or not
+	// inValidRowErr := ct.Table.HasValidRow(row)
+	// if inValidRowErr != nil {
+	// 	return "", inValidRowErr
+	// }
 
 	// format table row
 	var tRow []string

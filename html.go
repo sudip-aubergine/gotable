@@ -250,10 +250,8 @@ func (ht *HTMLTable) getRows() (string, error) {
 
 	var rowsStr string
 	for i := 0; i < ht.Table.RowCount(); i++ {
-		s, err := ht.getRow(i)
-		if err != nil {
-			return "", err
-		}
+		// for valid row, we will never get an error
+		s, _ := ht.getRow(i)
 		rowsStr += s
 	}
 
@@ -262,11 +260,15 @@ func (ht *HTMLTable) getRows() (string, error) {
 
 func (ht *HTMLTable) getRow(rowIndex int) (string, error) {
 
-	// check that this passed rowIndex is valid or not
-	inValidRowErr := ht.Table.HasValidRow(rowIndex)
-	if inValidRowErr != nil {
-		return "", inValidRowErr
-	}
+	// This method is only called by internal instance of TextTable
+	// in getRows method, so we should avoid following error check
+	// unless we make it as export
+
+	// // check that this passed rowIndex is valid or not
+	// inValidRowErr := ht.Table.HasValidRow(rowIndex)
+	// if inValidRowErr != nil {
+	// 	return "", inValidRowErr
+	// }
 
 	// format table rows
 	var tRow string
