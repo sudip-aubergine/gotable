@@ -804,8 +804,8 @@ func (t *Table) SetAllCellCSS(cssList []*CSSProperty) error {
 	return nil
 }
 
-// SetColWidth sets the column width for table
-func (t *Table) SetColWidth(colIndex int, width uint, unit string) error {
+// SetColHTMLWidth sets the column width for table
+func (t *Table) SetColHTMLWidth(colIndex int, width uint, unit string) error {
 
 	// TODO: conversion from different units of font to `px` unit with body font base size
 	// so that width has value with `px` unit value
