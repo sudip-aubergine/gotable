@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/kardianos/osext"
 )
 
 // Table is a simple skeletal row-column "class" for go that implements a few
@@ -72,18 +74,19 @@ type Rowset struct {
 // Table is a structure that defines a spreadsheet-like grid of cells and the
 // operations that can be performed.
 type Table struct {
-	Title       string      // table title
-	Section1    string      // another section for the title, in a different style
-	Section2    string      // a third section for the title, in a different style
-	ColDefs     []ColumnDef // table's column definitions, ordered 0..n left to right
-	Row         []Colset    // Each Colset forms a row
-	maxHdrRows  int         // maximum number of header rows across all ColDefs
-	DateFmt     string      // format for printing dates
-	DateTimeFmt string      // format for datetime values
-	LineAfter   []int       // array of row numbers that have a horizontal line after they are printed
-	LineBefore  []int       // array of row numbers that have a horizontal line before they are printed
-	RS          []Rowset    // a list of rowsets
-	CSS         map[string]map[string]*CSSProperty
+	Title       string                             // table title
+	Section1    string                             // another section for the title, in a different style
+	Section2    string                             // a third section for the title, in a different style
+	ColDefs     []ColumnDef                        // table's column definitions, ordered 0..n left to right
+	Row         []Colset                           // Each Colset forms a row
+	maxHdrRows  int                                // maximum number of header rows across all ColDefs
+	DateFmt     string                             // format for printing dates
+	DateTimeFmt string                             // format for datetime values
+	LineAfter   []int                              // array of row numbers that have a horizontal line after they are printed
+	LineBefore  []int                              // array of row numbers that have a horizontal line before they are printed
+	RS          []Rowset                           // a list of rowsets
+	CSS         map[string]map[string]*CSSProperty //CSS holds css property for title, section1, section2, headers, cells
+	Container   string                             // Container has current executable folder path, so that we can get required dependent files
 }
 
 // TableExportType each export output format must satisfy this interface
@@ -168,6 +171,11 @@ func (t *Table) Init() {
 	t.DateFmt = "01/02/2006"
 	t.DateTimeFmt = "01/02/2006 15:04:00 MST"
 	t.CSS = make(map[string]map[string]*CSSProperty)
+
+	// get current executable dir path
+	// error should be handle when dependency required
+	folderPath, _ := osext.ExecutableFolder()
+	t.Container = folderPath
 }
 
 // AddLineAfter keeps track of the row numbers after which a line will be printed

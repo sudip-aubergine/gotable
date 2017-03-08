@@ -27,6 +27,9 @@ func TestSmoke(t *testing.T) {
 	section2 := "February 21, 2017"
 	tbl.Init() //sets column spacing and date format to default
 
+	// set container path of current directory
+	tbl.Container = "."
+
 	// force some edge condition errors...
 	errExp := "no columns"
 	// headers check
@@ -337,7 +340,7 @@ func TestSmoke(t *testing.T) {
 	// Now hit it hard...
 	DoTextOutput(t, &tbl)
 	DoCSVOutput(t, &tbl)
-	// DoHTMLOutput(t, &tbl)
+	DoHTMLOutput(t, &tbl)
 	DoPDFOutput(t, &tbl)
 }
 

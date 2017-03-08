@@ -11,7 +11,6 @@ import (
 	"text/template"
 
 	"github.com/dustin/go-humanize"
-	"github.com/kardianos/osext"
 	"github.com/yosssi/gohtml"
 )
 
@@ -382,12 +381,7 @@ func (ht *HTMLTable) getCSSForHTMLTag(tagEl string, cssList []*CSSProperty) stri
 
 // getReportDefaultCSS reads default css from report.css
 func (ht *HTMLTable) getReportDefaultCSS() (string, error) {
-	folderPath, err := osext.ExecutableFolder()
-	if err != nil {
-		return "", err
-	}
-
-	reportCSS := path.Join(folderPath, "report.css")
+	reportCSS := path.Join(ht.Table.Container, "report.css")
 
 	cssString, err := ioutil.ReadFile(reportCSS)
 	if err != nil {
@@ -398,11 +392,6 @@ func (ht *HTMLTable) getReportDefaultCSS() (string, error) {
 
 // getTableTemplatePath returns the path of table template file
 func (ht *HTMLTable) getTableTemplatePath() (string, error) {
-	folderPath, err := osext.ExecutableFolder()
-	if err != nil {
-		return "", err
-	}
-
-	tmpl := path.Join(folderPath, "table.tmpl")
+	tmpl := path.Join(ht.Table.Container, "table.tmpl")
 	return tmpl, nil
 }
