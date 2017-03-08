@@ -1,0 +1,29 @@
+table.rpt-table {
+  font: 100% Helvetica, sans-serif;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin: 0;
+  padding: 0;
+  line-height: 1.33333;
+}
+table.rpt-table tr.title td {
+  text-align: center;
+  font-weight: bold;
+}
+table.rpt-table tr.section1 td, table.rpt-table tr.section2 td {
+  text-align: center;
+}
+table.rpt-table tr.headers td {
+  border-bottom: 2px solid #ccc;
+  font-weight: bold;
+  padding-top: 50px;
+}
+table.rpt-table tr.top-line td {
+  border-top: 1px solid #adadad;
+}
+table.rpt-table tr.bottom-line td {
+  border-bottom: 1px solid #adadad;
+}
+table.rpt-table td {
+  padding: 0.75rem;
+}
