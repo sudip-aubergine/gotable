@@ -22,3 +22,5 @@ test:
 
 update:
 	cp smoke_test.txt smoke_test.csv smoke_test.html testdata/
+
+all: clean gotable test
