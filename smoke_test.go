@@ -356,11 +356,13 @@ func DoTextOutput(t *testing.T, tbl *Table) {
 		// fmt.Printf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
 		t.Errorf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
 	}
-	for i := 0; i < len(b); i++ {
-		if sb[i] != b[i] {
-			t.Errorf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
-			// fmt.Printf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
-			break
+	if len(sb) > 0 && len(b) > 0 {
+		for i := 0; i < len(b); i++ {
+			if sb[i] != b[i] {
+				t.Errorf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
+				// fmt.Printf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
+				break
+			}
 		}
 	}
 }
@@ -380,14 +382,15 @@ func DoCSVOutput(t *testing.T, tbl *Table) {
 		// fmt.Printf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
 		t.Errorf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
 	}
-	for i := 0; i < len(b); i++ {
-		if sb[i] != b[i] {
-			t.Logf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
-			// fmt.Printf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
-			break
+	if len(sb) > 0 && len(b) > 0 {
+		for i := 0; i < len(b); i++ {
+			if sb[i] != b[i] {
+				t.Logf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
+				// fmt.Printf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
+				break
+			}
 		}
 	}
-
 }
 
 func DoHTMLOutput(t *testing.T, tbl *Table) {
@@ -405,11 +408,13 @@ func DoHTMLOutput(t *testing.T, tbl *Table) {
 		// fmt.Printf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
 		t.Errorf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
 	}
-	for i := 0; i < len(b); i++ {
-		if sb[i] != b[i] {
-			t.Logf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
-			// fmt.Printf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
-			break
+	if len(sb) > 0 && len(b) > 0 {
+		for i := 0; i < len(b); i++ {
+			if sb[i] != b[i] {
+				t.Logf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
+				// fmt.Printf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
+				break
+			}
 		}
 	}
 }
