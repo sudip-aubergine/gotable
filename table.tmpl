@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <title>{{- .HeadTitle -}}</title>
+    <style>
+        html, body{
+            margin: 0;
+            padding: 0;
+            font-family: Helvetica, sans-serif;
+            font-size: {{.FontSize}}px;
+            background: #FAFAFA;
+        }
+        div{
+            display: block;
+        }
+        .container{
+            background-color: rgba(0,0,0,0);
+            padding: 10px 25px;
+        }
+    </style>
+    {{.DefaultCSS}}
+    {{.CustomCSS}}
+    </head>
+    <body>
+    <div class="container">
+        {{.TableHTML}}
+    </div>
+    </body>
+</html>

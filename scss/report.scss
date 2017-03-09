@@ -1,0 +1,49 @@
+@import "variable";
+
+table.rpt-table {
+    font: 100% $font-stack;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin: 0;
+    padding: 0;
+    line-height: $line-height;
+
+    tr {
+        &.title {
+            td {
+                text-align: center;
+                font-weight: bold;
+            }
+        }
+
+        &.section1, &.section2 {
+            td {
+                text-align: center;
+            }
+        }
+
+        &.headers {
+            td {
+                border-bottom: (2 * $table-border-width) solid $table-header-separator;
+                font-weight: bold;
+                padding-top: $table-header-padding-top;
+            }
+        }
+
+        &.top-line {
+            td {
+                border-top: $table-border-width solid $table-rowset-separator;
+            }
+        }
+
+        &.bottom-line {
+            td {
+                border-bottom: $table-border-width solid $table-rowset-separator;
+            }
+        }
+    }
+
+    td {
+        padding: $table-cell-padding;
+    }
+}
