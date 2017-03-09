@@ -295,13 +295,13 @@ func TestSmoke(t *testing.T) {
 	}
 	// valid column css - make first column text color oranage
 	cssList = []*CSSProperty{}
-	cssSmpl = &CSSProperty{Name: "color", Value: "blue"}
+	cssList = append(cssList, &CSSProperty{Name: "color", Value: "blue"})
 	if err = tbl.SetColCSS(0, cssList); err != nil {
 		t.Errorf("smoke_test: Expected `nil` Error, but found: %s\n", err.Error())
 	}
 	// valid cell css case - make all cells background color yellow
 	cssList = []*CSSProperty{}
-	cssSmpl = &CSSProperty{Name: "background-color", Value: "yellow"}
+	cssList = append(cssList, &CSSProperty{Name: "background-color", Value: "yellow"})
 	if err = tbl.SetAllCellCSS(cssList); err != nil {
 		t.Errorf("smoke_test: Expected `nil` Error, but found: %s\n", err.Error())
 	}
