@@ -14,11 +14,12 @@ import (
 	"github.com/yosssi/gohtml"
 )
 
-// TABLECLASS et. al. are the constants used in the html version of table object
+// TABLECONTAINERCLASS et. al. are the constants used in the html version of table object
 const (
-	TABLECLASS    = `rpt-table`
-	TITLECLASS    = `title`
-	HEADERSCLASS  = `headers`
+	TABLECONTAINERCLASS = `rpt-table-container`
+	TITLECLASS          = `title`
+	HEADERSCLASS        = `headers`
+	// DATACLASS           = `data`
 	SECTION1CLASS = `section1`
 	SECTION2CLASS = `section2`
 )
@@ -36,30 +37,42 @@ type HTMLTemplateContext struct {
 }
 
 func (ht *HTMLTable) getTableOutput() (string, error) {
-	var tout string
+	var tContainer string
 
 	// append title
-	tout += ht.getTitle()
+	tContainer += ht.getTitle()
 
 	// append section 1
-	tout += ht.getSection1()
+	tContainer += ht.getSection1()
 
 	// append section 2
-	tout += ht.getSection2()
+	tContainer += ht.getSection2()
+
+	// contains only table tag output
+	var tableOut string
 
 	// append headers
 	headerStr, err := ht.getHeaders()
 	if err != nil {
 		return "", err
 	}
-	tout += headerStr
+	tableOut += headerStr
 
 	// append rows
 	rowsStr, err := ht.getRows()
 	if err != nil {
 		return "", err
 	}
-	tout += rowsStr
+	tableOut += rowsStr
+
+	// wrap headers and rows in a table
+	tableOut = `<table>` + tableOut + `</table>`
+
+	// now append to container of table output
+	tContainer += tableOut
+
+	// wrap it up in a div with a class
+	tContainer = `<div class="` + TABLECONTAINERCLASS + `">` + tContainer + `</table>`
 
 	// make context for template
 	htmlContext := HTMLTemplateContext{FontSize: CSSFONTSIZE}
@@ -70,7 +83,7 @@ func (ht *HTMLTable) getTableOutput() (string, error) {
 	}
 	htmlContext.DefaultCSS = `<style>` + htmlContext.DefaultCSS + `</style>`
 	htmlContext.CustomCSS = `<style>` + ht.StyleString + `</style>`
-	htmlContext.TableHTML = `<table class="` + TABLECLASS + `">` + tout + `</table>`
+	htmlContext.TableHTML = tContainer
 
 	// get template string
 	tableTmplPath, err := ht.getTableTemplatePath()
@@ -110,13 +123,13 @@ func (ht *HTMLTable) getTitle() string {
 				cellCSSProps = append(cellCSSProps, cssProp)
 			}
 
-			// get css string for this td cell
-			ht.StyleString += `table.` + TABLECLASS + ` tr.` + TITLECLASS + ` `
-			ht.StyleString += ht.getCSSForHTMLTag(`td`, cellCSSProps)
+			// get css string for title
+			ht.StyleString += `div.` + TABLECONTAINERCLASS + ` p`
+			ht.StyleString += ht.getCSSForClassSelector(TITLECLASS, cellCSSProps)
 
 		}
-		colSpan := strconv.Itoa(ht.Table.ColCount())
-		return `<tr class="` + TITLECLASS + `"><td colspan="` + colSpan + `">` + title + `</td></tr>`
+
+		return `<p class="` + TITLECLASS + `">` + title + `</p>`
 	}
 
 	// blank return
@@ -135,13 +148,12 @@ func (ht *HTMLTable) getSection1() string {
 				cellCSSProps = append(cellCSSProps, cssProp)
 			}
 
-			// get css string for this td cell
-			ht.StyleString += `table.` + TABLECLASS + ` tr.` + SECTION1CLASS + ` `
-			ht.StyleString += ht.getCSSForHTMLTag(`td`, cellCSSProps)
-
+			// get css string for section1
+			ht.StyleString += `div.` + TABLECONTAINERCLASS + ` p`
+			ht.StyleString += ht.getCSSForClassSelector(SECTION1CLASS, cellCSSProps)
 		}
-		colSpan := strconv.Itoa(ht.Table.ColCount())
-		return `<tr class="` + SECTION1CLASS + `"><td colspan="` + colSpan + `">` + section1 + `</td></tr>`
+
+		return `<p class="` + SECTION1CLASS + `">` + section1 + `</p>`
 	}
 
 	// blank return
@@ -160,13 +172,13 @@ func (ht *HTMLTable) getSection2() string {
 				cellCSSProps = append(cellCSSProps, cssProp)
 			}
 
-			// get css string for this td cell
-			ht.StyleString += `table.` + TABLECLASS + ` tr.` + SECTION2CLASS + ` `
-			ht.StyleString += ht.getCSSForHTMLTag(`td`, cellCSSProps)
-
+			// get css string for section2
+			// get css string for section1
+			ht.StyleString += `div.` + TABLECONTAINERCLASS + ` p`
+			ht.StyleString += ht.getCSSForClassSelector(SECTION2CLASS, cellCSSProps)
 		}
-		colSpan := strconv.Itoa(ht.Table.ColCount())
-		return `<tr class="` + SECTION2CLASS + `"><td colspan="` + colSpan + `">` + section2 + `</td></tr>`
+
+		return `<p class="` + SECTION2CLASS + `">` + section2 + `</p>`
 	}
 
 	// blank return
@@ -229,14 +241,16 @@ func (ht *HTMLTable) getHeaders() (string, error) {
 			}
 		}
 
-		// get css string for this cell
-		ht.StyleString += `table.` + TABLECLASS + ` tr.` + HEADERSCLASS + ` td`
+		// get css string for headers
+		ht.StyleString += `div.` + TABLECONTAINERCLASS + ` table thead tr th`
+		// ht.StyleString += `div.` + TABLECONTAINERCLASS + ` table thead.` + HEADERSCLASS + ` tr th`
 		ht.StyleString += ht.getCSSForClassSelector(thClass, cellCSSProps)
 
-		tHeaders += `<td class="` + thClass + `">` + headerCell.ColTitle + `</td>`
+		tHeaders += `<th class="` + thClass + `">` + headerCell.ColTitle + `</th>`
 	}
 
-	return `<tr class="headers">` + tHeaders + `</tr>`, nil
+	return `<thead><tr>` + tHeaders + `</tr></thead>`, nil
+	// return `<thead class="` + HEADERSCLASS + `"><tr>` + tHeaders + `</tr></thead>`, nil
 }
 
 func (ht *HTMLTable) getRows() (string, error) {
@@ -254,7 +268,7 @@ func (ht *HTMLTable) getRows() (string, error) {
 		rowsStr += s
 	}
 
-	return rowsStr, nil
+	return `<tbody>` + rowsStr + `</tbody>`, nil
 }
 
 func (ht *HTMLTable) getRow(rowIndex int) (string, error) {
@@ -316,7 +330,8 @@ func (ht *HTMLTable) getRow(rowIndex int) (string, error) {
 				cellCSSProps = append(cellCSSProps, cssProp)
 			}
 
-			// get css string for this td cell
+			// get css string for a row
+			ht.StyleString += `div.` + TABLECONTAINERCLASS + ` table tbody tr td`
 			ht.StyleString += ht.getCSSForClassSelector(tdClass, cellCSSProps)
 
 			rowCell = `<td class="` + tdClass + `">` + rowCell + `</td>`
