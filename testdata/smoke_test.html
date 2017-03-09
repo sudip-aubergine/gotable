@@ -1,1 +1,255 @@
-<table><thead><tr><th>Name</th><th>Person Age</th><th>Height (cm)</th><th>Date of Birth</th><th>Country of Birth</th><th>Winnings</th><th>Notes</th><th>Random Date/Time</th></tr></thead><tbody><tr><td>Casandra Åberg</td><td>    66</td><td>     158</td><td>04/21/1950</td><td>Sweden</td><td>   93,883.25</td><td>2000 Seat Toledo</td><td>  01/28/2217 13:44:00 PST</td></tr><tr><td>Lynette C. Allen</td><td>    56</td><td>     156</td><td>10/04/1960</td><td>United States</td><td>   45,373.00</td><td>A lot more notes. A whole, big, line with lots and lots and lots and lots of notes. And some more notes.</td><td>  01/23/2215 15:28:00 PST</td></tr><tr><td>Mary M. Oneil</td><td>    47</td><td>     165</td><td>03/02/1969</td><td>United States</td><td>   17,633.21</td><td>A few notes here</td><td>  09/11/2209 01:00:00 PST</td></tr><tr><td>Stanislaus Aliyeva</td><td>    42</td><td>     172</td><td>04/10/1974</td><td>Slovinia</td><td>  106,632.36</td><td>A few notes here</td><td>  03/20/2020 01:36:00 PDT</td></tr><tr><td>Amanda Melo Ferreira</td><td>    55</td><td>     174</td><td>08/06/1977</td><td>Brazil</td><td>   46,673.42</td><td>2006 Ford Falcon</td><td>  07/12/2073 10:39:00 PST</td></tr><tr><td>                    </td><td>      </td><td>        </td><td>          </td><td>             </td><td>  310,195.24</td><td>                    </td><td>                         </td></tr></tbody></table>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>
+      GOTABLE
+    </title>
+    <style>
+              html, body{
+                  margin: 0;
+                  padding: 0;
+                  font-family: Helvetica, sans-serif;
+                  font-size: 14px;
+                  background: #FAFAFA;
+              }
+              div{
+                  display: block;
+              }
+              .container{
+                  background-color: rgba(0,0,0,0);
+                  padding: 10px 25px;
+              }
+          
+    </style>
+    <style>
+      table.rpt-table {
+        font: 100% Helvetica, sans-serif;
+        border-collapse: collapse;
+        table-layout: fixed;
+        margin: 0;
+        padding: 0;
+        line-height: 1.33333;
+      }
+      table.rpt-table tr.title td {
+        text-align: center;
+        font-weight: bold;
+      }
+      table.rpt-table tr.section1 td, table.rpt-table tr.section2 td {
+        text-align: center;
+      }
+      table.rpt-table tr.headers td {
+        border-bottom: 2px solid #ccc;
+        font-weight: bold;
+        padding-top: 50px;
+      }
+      table.rpt-table tr.top-line td {
+        border-top: 1px solid #adadad;
+      }
+      table.rpt-table tr.bottom-line td {
+        border-bottom: 1px solid #adadad;
+      }
+      table.rpt-table td {
+        padding: 0.75rem;
+      }
+    </style>
+    <style>
+      table.rpt-table tr.title td{color:blue;font-style:italic;font-size:20px;}table.rpt-table tr.section1 td{color:white;background-color:black;}table.rpt-table tr.section2 td{color:red;background-color:yellow;}table.rpt-table tr.headers td.header-0{text-align:left;width:280px;color:orange;font-style:italic;background-color:blue;}table.rpt-table tr.headers td.header-1{text-align:right;width:20px;font-style:italic;background-color:blue;color:orange;}table.rpt-table tr.headers td.header-2{text-align:right;width:84px;background-color:blue;color:orange;font-style:italic;}table.rpt-table tr.headers td.header-3{text-align:left;width:140px;color:orange;font-style:italic;background-color:blue;}table.rpt-table tr.headers td.header-4{text-align:left;width:182px;color:orange;font-style:italic;background-color:blue;}table.rpt-table tr.headers td.header-5{text-align:right;width:168px;font-style:italic;background-color:blue;color:orange;}table.rpt-table tr.headers td.header-6{text-align:left;width:294px;background-color:blue;color:orange;font-style:italic;}table.rpt-table tr.headers td.header-7{text-align:left;width:350px;color:orange;font-style:italic;background-color:blue;}.cell-row-0-col-0{color:orange;text-align:left;}.cell-row-0-col-1{color:orange;text-align:right;}.cell-row-0-col-2{color:orange;text-align:right;}.cell-row-0-col-3{color:orange;text-align:left;}.cell-row-0-col-4{text-align:left;color:orange;}.cell-row-0-col-5{color:orange;text-align:right;}.cell-row-0-col-6{color:orange;text-align:left;}.cell-row-0-col-7{color:orange;text-align:left;}.cell-row-1-col-0{text-align:left;}.cell-row-1-col-1{text-align:right;}.cell-row-1-col-2{text-align:right;}.cell-row-1-col-3{text-align:left;}.cell-row-1-col-4{text-align:left;}.cell-row-1-col-5{text-align:right;}.cell-row-1-col-6{text-align:left;}.cell-row-1-col-7{text-align:left;}.cell-row-2-col-0{text-align:left;}.cell-row-2-col-1{text-align:right;}.cell-row-2-col-2{text-align:right;}.cell-row-2-col-3{text-align:left;}.cell-row-2-col-4{text-align:left;}.cell-row-2-col-5{text-align:right;}.cell-row-2-col-6{text-align:left;}.cell-row-2-col-7{text-align:left;}.cell-row-3-col-0{text-align:left;}.cell-row-3-col-1{text-align:right;}.cell-row-3-col-2{text-align:right;}.cell-row-3-col-3{text-align:left;}.cell-row-3-col-4{text-align:left;}.cell-row-3-col-5{text-align:right;}.cell-row-3-col-6{text-align:left;}.cell-row-3-col-7{text-align:left;}.cell-row-4-col-0{text-align:left;}.cell-row-4-col-1{text-align:right;}.cell-row-4-col-2{text-align:right;}.cell-row-4-col-3{text-align:left;}.cell-row-4-col-4{text-align:left;}.cell-row-4-col-5{text-align:right;}.cell-row-4-col-6{text-align:left;}.cell-row-4-col-7{text-align:left;}.cell-row-5-col-0{text-align:left;}.cell-row-5-col-1{text-align:right;}.cell-row-5-col-2{text-align:right;}.cell-row-5-col-3{text-align:left;}.cell-row-5-col-4{text-align:left;}.cell-row-5-col-5{text-align:right;}.cell-row-5-col-6{text-align:left;}.cell-row-5-col-7{text-align:left;}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <table class="rpt-table">
+        <tr class="title">
+          <td colspan="8">
+            GOTABLE
+          </td>
+        </tr>
+        <tr class="section1">
+          <td colspan="8">
+            A Smoke Test
+          </td>
+        </tr>
+        <tr class="section2">
+          <td colspan="8">
+            February 21, 2017
+          </td>
+        </tr>
+        <tr class="headers">
+          <td class="header-0">
+            Name
+          </td>
+          <td class="header-1">
+            Person Age
+          </td>
+          <td class="header-2">
+            Height (cm)
+          </td>
+          <td class="header-3">
+            Date of Birth
+          </td>
+          <td class="header-4">
+            Country of Birth
+          </td>
+          <td class="header-5">
+            Winnings
+          </td>
+          <td class="header-6">
+            Notes
+          </td>
+          <td class="header-7">
+            Random Date/Time
+          </td>
+        </tr>
+        <tr>
+          <td class="cell-row-0-col-0">
+            Casandra Åberg
+          </td>
+          <td class="cell-row-0-col-1">
+                66
+          </td>
+          <td class="cell-row-0-col-2">
+               158
+          </td>
+          <td class="cell-row-0-col-3">
+            04/21/1950
+          </td>
+          <td class="cell-row-0-col-4">
+            Sweden
+          </td>
+          <td class="cell-row-0-col-5">
+               93,883.25
+          </td>
+          <td class="cell-row-0-col-6">
+            2000 Seat Toledo
+          </td>
+          <td class="cell-row-0-col-7">
+              01/28/2217 21:44:00 UTC
+          </td>
+        </tr>
+        <tr>
+          <td class="cell-row-1-col-0">
+            Lynette C. Allen
+          </td>
+          <td class="cell-row-1-col-1">
+                56
+          </td>
+          <td class="cell-row-1-col-2">
+               156
+          </td>
+          <td class="cell-row-1-col-3">
+            10/04/1960
+          </td>
+          <td class="cell-row-1-col-4">
+            United States
+          </td>
+          <td class="cell-row-1-col-5">
+               45,373.00
+          </td>
+          <td class="cell-row-1-col-6">
+            A lot more notes. A whole, big, line with lots and lots and lots and lots of notes. And some more notes.
+          </td>
+          <td class="cell-row-1-col-7">
+              01/23/2215 23:28:00 UTC
+          </td>
+        </tr>
+        <tr>
+          <td class="cell-row-2-col-0">
+            Mary M. Oneil
+          </td>
+          <td class="cell-row-2-col-1">
+                47
+          </td>
+          <td class="cell-row-2-col-2">
+               165
+          </td>
+          <td class="cell-row-2-col-3">
+            03/02/1969
+          </td>
+          <td class="cell-row-2-col-4">
+            United States
+          </td>
+          <td class="cell-row-2-col-5">
+               17,633.21
+          </td>
+          <td class="cell-row-2-col-6">
+            A few notes here withaverylongnoteword
+          </td>
+          <td class="cell-row-2-col-7">
+              09/11/2209 09:00:00 UTC
+          </td>
+        </tr>
+        <tr>
+          <td class="cell-row-3-col-0">
+            Stanislaus Aliyeva
+          </td>
+          <td class="cell-row-3-col-1">
+                42
+          </td>
+          <td class="cell-row-3-col-2">
+               172
+          </td>
+          <td class="cell-row-3-col-3">
+            04/10/1974
+          </td>
+          <td class="cell-row-3-col-4">
+            Slovinia
+          </td>
+          <td class="cell-row-3-col-5">
+              106,632.36
+          </td>
+          <td class="cell-row-3-col-6">
+            A few notes here
+          </td>
+          <td class="cell-row-3-col-7">
+              03/20/2020 08:36:00 UTC
+          </td>
+        </tr>
+        <tr class="bottom-line">
+          <td class="cell-row-4-col-0">
+            Amanda Melo Ferreira
+          </td>
+          <td class="cell-row-4-col-1">
+                55
+          </td>
+          <td class="cell-row-4-col-2">
+               174
+          </td>
+          <td class="cell-row-4-col-3">
+            08/06/1977
+          </td>
+          <td class="cell-row-4-col-4">
+            Brazil
+          </td>
+          <td class="cell-row-4-col-5">
+               46,673.42
+          </td>
+          <td class="cell-row-4-col-6">
+            2006 Ford Falcon
+          </td>
+          <td class="cell-row-4-col-7">
+              07/12/2073 18:39:00 UTC
+          </td>
+        </tr>
+        <tr>
+          <td class="cell-row-5-col-0">
+          </td>
+          <td class="cell-row-5-col-1">
+          </td>
+          <td class="cell-row-5-col-2">
+          </td>
+          <td class="cell-row-5-col-3">
+          </td>
+          <td class="cell-row-5-col-4">
+          </td>
+          <td class="cell-row-5-col-5">
+              310,195.24
+          </td>
+          <td class="cell-row-5-col-6">
+          </td>
+          <td class="cell-row-5-col-7">
+          </td>
+        </tr>
+      </table>
+    </div>
+  </body>
+</html>

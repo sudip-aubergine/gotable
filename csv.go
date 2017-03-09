@@ -2,84 +2,128 @@ package gotable
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/dustin/go-humanize"
 )
 
-// cellSep is used to separate csv cells
-var cellSep = ","
+// CSVTable struct used to prepare table in html version
+type CSVTable struct {
+	*Table
+	CellSep string
+}
 
-// SprintTableCSV return the table header in csv layout
-func (t *Table) SprintTableCSV(f int) (string, error) {
-	// get headers first
-	s, err := t.SprintColHdrsCSV()
+func (ct *CSVTable) getTableOutput() (string, error) {
+	var tout string
+
+	// append title
+	tout += ct.getTitle()
+
+	// append section 1
+	tout += ct.getSection1()
+
+	// append section 2
+	tout += ct.getSection2()
+
+	// append headers
+	headerStr, err := ct.getHeaders()
 	if err != nil {
 		return "", err
 	}
+	tout += headerStr
 
-	// then append table body
-	rs, err := t.SprintRows(f)
+	// append rows
+	rowsStr, err := ct.getRows()
 	if err != nil {
 		return "", err
 	}
-	s += rs
+	tout += rowsStr
 
-	// finally return CSS table layout
-	// fmt.Println(strings.Replace(s, "\\\"", "'", -1))
-	return s, nil
+	// return output
+	return tout, nil
 }
 
-// SprintColHdrsCSV return the table header in csv layout
-func (t *Table) SprintColHdrsCSV() (string, error) {
-	tHeader := ""
-	for i := 0; i < len(t.ColDefs); i++ {
-		// quote string with "%q"
-		tHeader += fmt.Sprintf("%q", t.ColDefs[i].ColTitle) + cellSep
+func (ct *CSVTable) getTitle() string {
+	return stringln(fmt.Sprintf("%q", ct.Table.GetTitle()))
+}
+
+func (ct *CSVTable) getSection1() string {
+	return stringln(fmt.Sprintf("%q", ct.Table.GetSection1()))
+}
+
+func (ct *CSVTable) getSection2() string {
+	return stringln(fmt.Sprintf("%q", ct.Table.GetSection2()))
+}
+
+func (ct *CSVTable) getHeaders() (string, error) {
+	// check for blank headers
+	blankHdrsErr := ct.Table.HasHeaders()
+	if blankHdrsErr != nil {
+		return "", blankHdrsErr
 	}
-	// remove last cellSep characters
-	tHeader = tHeader[0:len(tHeader)-len(cellSep)] + "\n"
-	return tHeader, nil
+
+	// format headers
+	var tHeader []string
+
+	for i := 0; i < len(ct.Table.ColDefs); i++ {
+		tHeader = append(tHeader, fmt.Sprintf("%q", ct.Table.ColDefs[i].ColTitle))
+	}
+
+	// append last newLine char
+	return stringln(strings.Join(tHeader, ct.CellSep)), nil
 }
 
-// SprintRowsCSV returns the table rows in csv layout
-func (t *Table) SprintRowsCSV(f int) (string, error) {
-	rowsStr := ""
-	for i := 0; i < t.RowCount(); i++ {
-		s, err := t.SprintRow(i, f)
-		if err != nil {
-			return "", err
-		}
+func (ct *CSVTable) getRows() (string, error) {
+	// check for empty data table
+	blankDataErr := ct.Table.HasData()
+	if blankDataErr != nil {
+		return "", blankDataErr
+	}
+
+	var rowsStr string
+	for i := 0; i < ct.Table.RowCount(); i++ {
+		// for valid row, we will never get an error
+		s, _ := ct.getRow(i)
 		rowsStr += s
 	}
+
 	return rowsStr, nil
 }
 
-// SprintRowCSV return a table row in csv layout
-func (t *Table) SprintRowCSV(row int) (string, error) {
-	tRow := ""
+func (ct *CSVTable) getRow(row int) (string, error) {
 
-	// fill the content in rowTextList for the first line
-	for i := 0; i < len(t.Row[row].Col); i++ {
-		var cellStr string
-		// append content in TD
-		switch t.Row[row].Col[i].Type {
+	// This method is only called by internal instance of TextTable
+	// in getRows method, so we should avoid following error check
+	// unless we make it as export
+
+	// // check that this passed row is valid or not
+	// inValidRowErr := ct.Table.HasValidRow(row)
+	// if inValidRowErr != nil {
+	// 	return "", inValidRowErr
+	// }
+
+	// format table row
+	var tRow []string
+
+	for i := 0; i < len(ct.Table.Row[row].Col); i++ {
+
+		switch ct.Table.Row[row].Col[i].Type {
 		case CELLFLOAT:
-			cellStr = fmt.Sprintf(t.ColDefs[i].Pfmt, humanize.FormatFloat("#,###.##", t.Row[row].Col[i].Fval))
+			tRow = append(tRow, fmt.Sprintf(ct.Table.ColDefs[i].Pfmt, humanize.FormatFloat("#,###.##", ct.Table.Row[row].Col[i].Fval)))
 		case CELLINT:
-			cellStr = fmt.Sprintf(t.ColDefs[i].Pfmt, t.Row[row].Col[i].Ival)
+			tRow = append(tRow, fmt.Sprintf(ct.Table.ColDefs[i].Pfmt, ct.Table.Row[row].Col[i].Ival))
 		case CELLSTRING:
 			// FOR CSV, APPEND FULL STRING, THERE ARE NO MULTILINE STRING IN THIS
-			cellStr = fmt.Sprintf("%q", t.Row[row].Col[i].Sval)
+			tRow = append(tRow, fmt.Sprintf("%q", ct.Table.Row[row].Col[i].Sval))
 		case CELLDATE:
-			cellStr = fmt.Sprintf("%*.*s", t.ColDefs[i].Width, t.ColDefs[i].Width, t.Row[row].Col[i].Dval.Format(t.DateFmt))
+			tRow = append(tRow, fmt.Sprintf("%*.*s", ct.Table.ColDefs[i].Width, ct.Table.ColDefs[i].Width, ct.Table.Row[row].Col[i].Dval.Format(ct.Table.DateFmt)))
 		case CELLDATETIME:
-			cellStr = fmt.Sprintf("%*.*s", t.ColDefs[i].Width, t.ColDefs[i].Width, t.Row[row].Col[i].Dval.Format(t.DateTimeFmt))
+			tRow = append(tRow, fmt.Sprintf("%*.*s", ct.Table.ColDefs[i].Width, ct.Table.ColDefs[i].Width, ct.Table.Row[row].Col[i].Dval.Format(ct.Table.DateTimeFmt)))
 		default:
-			cellStr = mkstr(t.ColDefs[i].Width, ' ')
+			tRow = append(tRow, mkstr(ct.Table.ColDefs[i].Width, ' '))
 		}
-		tRow += cellStr + cellSep
 	}
-	// remove last cellSep characters
-	tRow = tRow[0:len(tRow)-len(cellSep)] + "\n"
-	return tRow, nil
+
+	// append newline char at last
+	return stringln(strings.Join(tRow, ct.CellSep)), nil
 }

@@ -1,11 +1,13 @@
 package gotable
 
 import (
-	"errors"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/kardianos/osext"
 )
 
 // Table is a simple skeletal row-column "class" for go that implements a few
@@ -31,20 +33,12 @@ const (
 	TABLEOUTHTML = 2
 	TABLEOUTPDF  = 3
 	TABLEOUTCSV  = 4
+
+	CSSFONTSIZE = 14
+	CSSFONTUNIT = `px`
 )
 
-var (
-	// ErrHeaders error
-	ErrHeaders = errors.New("No Headers found in table")
-	// ErrRows error
-	ErrRows = errors.New("No Rows found in table")
-	// ErrUnKnownFmt error
-	ErrUnKnownFmt = errors.New("Unrecognized format")
-	// ErrPDF error
-	ErrPDF = errors.New("PDF output format yet not supported")
-)
-
-// Cell is the basic data value type for the Table class.
+// Cell is the basic data value type for the Table class
 type Cell struct {
 	Type int       // int, float, or string enumeration
 	Ival int64     // integer value
@@ -80,18 +74,30 @@ type Rowset struct {
 // Table is a structure that defines a spreadsheet-like grid of cells and the
 // operations that can be performed.
 type Table struct {
-	Title        string      // table title
-	Section1     string      // another section for the title, in a different style
-	Section2     string      // a third section for the title, in a different style
-	ColDefs      []ColumnDef // table's column definitions, ordered 0..n left to right
-	Row          []Colset    // Each Colset forms a row
-	TextColSpace int         // space between text columns
-	maxHdrRows   int         // maximum number of header rows across all ColDefs
-	DateFmt      string      // format for printing dates
-	DateTimeFmt  string      // format for datetime values
-	LineAfter    []int       // array of row numbers that have a horizontal line after they are printed
-	LineBefore   []int       // array of row numbers that have a horizontal line before they are printed
-	RS           []Rowset    // a list of rowsets
+	Title       string                             // table title
+	Section1    string                             // another section for the title, in a different style
+	Section2    string                             // a third section for the title, in a different style
+	ColDefs     []ColumnDef                        // table's column definitions, ordered 0..n left to right
+	Row         []Colset                           // Each Colset forms a row
+	maxHdrRows  int                                // maximum number of header rows across all ColDefs
+	DateFmt     string                             // format for printing dates
+	DateTimeFmt string                             // format for datetime values
+	LineAfter   []int                              // array of row numbers that have a horizontal line after they are printed
+	LineBefore  []int                              // array of row numbers that have a horizontal line before they are printed
+	RS          []Rowset                           // a list of rowsets
+	CSS         map[string]map[string]*CSSProperty //CSS holds css property for title, section1, section2, headers, cells
+	Container   string                             // Container has current executable folder path, so that we can get required dependent files
+}
+
+// TableExportType each export output format must satisfy this interface
+type TableExportType interface {
+	getTableOutput() (string, error)
+	getTitle() string
+	getSection1() string
+	getSection2() string
+	getHeaders() (string, error)
+	getRows() (string, error)
+	getRow(row int) (string, error)
 }
 
 // SetTitle sets the table's Title string to the supplied value.
@@ -162,9 +168,14 @@ func (t *Table) ColCount() int {
 
 // Init sets internal formatting controls to their default values
 func (t *Table) Init() {
-	t.TextColSpace = 2
 	t.DateFmt = "01/02/2006"
 	t.DateTimeFmt = "01/02/2006 15:04:00 MST"
+	t.CSS = make(map[string]map[string]*CSSProperty)
+
+	// get current executable dir path
+	// error should be handled whenever there is a requirement for any dependency
+	folderPath, _ := osext.ExecutableFolder()
+	t.Container = folderPath
 }
 
 // AddLineAfter keeps track of the row numbers after which a line will be printed
@@ -237,8 +248,9 @@ func (t *Table) AdjustFormatString(cd *ColumnDef) {
 // AddColumn adds a new ColumnDef to the table
 func (t *Table) AddColumn(title string, width, celltype int, justification int) {
 	var cd = ColumnDef{
-		ColTitle: title, Width: width, CellType: celltype,
-		Justify: justification, Fdecimals: 2, HTMLWidth: -1,
+		ColTitle: title, Width: width,
+		CellType: celltype, Justify: justification,
+		Fdecimals: 2, HTMLWidth: -1,
 	}
 	t.AdjustColumnHeader(&cd)
 	t.AdjustFormatString(&cd)
@@ -249,7 +261,7 @@ func (t *Table) AddColumn(title string, width, celltype int, justification int) 
 // make the title fit.  If necessary, it will force the width of the column to be
 // wide enough to fit the longest word in the title.
 func (t *Table) AdjustColumnHeader(cd *ColumnDef) {
-	a, maxColWidth := t.getMultiLineText(cd.ColTitle, cd.Width)
+	a, maxColWidth := getMultiLineText(cd.ColTitle, cd.Width)
 	if maxColWidth > cd.Width { // if the length of the column title is greater than the user-specified width
 		cd.Width = maxColWidth //increase the column width to hold the column title
 	}
@@ -286,7 +298,7 @@ func (t *Table) AdjustAllColumnHeaders() {
 		}
 		// now add the remaining strings
 		for j := iStart; j < t.maxHdrRows; j++ {
-			n[j] = t.ColDefs[i].Hdr[j-iStart]
+			n[j] = standardizeSpaces(t.ColDefs[i].Hdr[j-iStart])
 		}
 		t.ColDefs[i].Hdr = n // replace the old hdr with the new one
 	}
@@ -385,42 +397,6 @@ func (t *Table) Putf(row, col int, v float64) bool {
 	return true
 }
 
-func (t *Table) getMultiLineText(v string, colWidth int) ([]string, int) {
-	var a []string
-
-	// fit the content in one line whatever it is irrespective of column width
-	if colWidth < 1 {
-		a = append(a, v)
-		return a, -1
-	}
-
-	// get multi line chunk in form of array
-	sa := strings.Split(v, " ") // break up the string at the spaces
-	j := 0
-	maxColWidth := 0
-	for i := 0; i < len(sa); i++ { // spin through all substrings
-		if len(sa[i]) <= colWidth && i+1 < len(sa) { // if the width of this substring is less than the requested width, and we're not at the end of the list
-			s := sa[i]                         // we know we're adding this one
-			for k := i + 1; k < len(sa); k++ { // take as many as possible
-				if len(s)+len(sa[k])+1 <= colWidth { // if it fits...
-					s += " " + sa[k] // ...add it to the list...
-					i = k            // ...and keep loop in sync
-				} else {
-					break // otherwise, add what we have and then go back to the outer loop
-				}
-			}
-			a = append(a, s)
-		} else {
-			a = append(a, sa[i])
-		}
-		if len(a[j]) > maxColWidth { // if there's not enough room for the current string
-			maxColWidth = len(a[j]) // then adjust the max column width we need
-		}
-		j++
-	}
-	return a, maxColWidth
-}
-
 // Puts updates the Cell at row,col with the string value v
 // and sets its type to CELLSTRING. If row or col is out of
 // bounds the return value is false. Otherwise, the return
@@ -433,12 +409,12 @@ func (t *Table) Puts(row, col int, v string) bool {
 		row = len(t.Row) - 1
 	}
 	t.Row[row].Col[col].Type = CELLSTRING
-	t.Row[row].Col[col].Sval = v
+	t.Row[row].Col[col].Sval = standardizeSpaces(v)
 
 	// Need to check width of column everytime when we adding new content
 	// if it is updatable or not
 	cd := t.ColDefs[col]
-	_, cellWidth := t.getMultiLineText(v, cd.Width)
+	_, cellWidth := getMultiLineText(v, cd.Width)
 	if cellWidth > cd.Width { // if the length of the column title is greater than the user-specified width
 		cd.Width = cellWidth //increase the column width to hold the column title
 		t.AdjustFormatString(&cd)
@@ -484,20 +460,23 @@ func (t *Table) Put(row, col int, c Cell) {
 	t.Row[row].Col[col] = c
 }
 
-// String is the "stringer" method implementation for go so that you can simply
+// String is the "stringer" method implementation for gotable so that you can simply
 // print(t)
 func (t Table) String() string {
-	s, _ := t.SprintTable(TABLEOUTTEXT)
-	return prepareForTextPrint(t.Title) + prepareForTextPrint(t.Section1) + prepareForTextPrint(t.Section2) + s
+	s, err := t.SprintTable(TABLEOUTTEXT)
+	if err != nil {
+		return err.Error()
+	}
+	return s
 }
 
+// createColSet creates a new colset with cells, total number of Headers
 func (t *Table) createColSet(c *Colset) {
 	for i := 0; i < len(t.ColDefs); i++ {
 		var cell Cell
 		c.Col = append(c.Col, cell)
 	}
 	c.Height = 1
-
 }
 
 // Sum computes the sum of the rows at the specified column index. It returns a Cell
@@ -675,78 +654,243 @@ func (t *Table) TightenColumns() {
 
 // SprintTable renders the entire table to a string
 func (t *Table) SprintTable(f int) (string, error) {
-	switch f {
-	case TABLEOUTTEXT:
-		return t.SprintTableText(f)
-	case TABLEOUTHTML:
-		return t.SprintTableHTML(f)
-	case TABLEOUTCSV:
-		return t.SprintTableCSV(f)
-	case TABLEOUTPDF:
-		return t.SprintTablePDF(f)
-	}
-	return "", fmt.Errorf("SprintTable: unrecognized format:  %d", f)
+	return t.sprintTableFormat(f)
 }
 
-// SprintColumnHeaders returns a string with the column headers formatted as type f
-func (t *Table) SprintColumnHeaders(f int) (string, error) {
-	// first check if there are any headers
-	if len(t.ColDefs) < 1 {
-		return "", fmt.Errorf("there are no columns")
-	}
-
-	switch f {
-	case TABLEOUTTEXT:
-		return t.SprintColHdrsText()
-	case TABLEOUTHTML:
-		return t.SprintColHdrsHTML()
-	case TABLEOUTCSV:
-		return t.SprintColHdrsCSV()
-	case TABLEOUTPDF:
-		return t.SprintColHdrsPDF()
-	}
-	return "", fmt.Errorf("SprintColumnHeaders unrecognized format:  %d", f)
-}
-
-// SprintRows returns a string formatted for all rows
-func (t *Table) SprintRows(f int) (string, error) {
+// HasData checks that table has actually data or not
+func (t *Table) HasData() error {
 	// if there are no rows in table
 	if t.RowCount() < 1 {
-		return "", fmt.Errorf("SprintRows: there are no rows")
+		return fmt.Errorf("There are no rows in the table")
 	}
-
-	switch f {
-	case TABLEOUTTEXT:
-		return t.SprintRowsText(f)
-	case TABLEOUTHTML:
-		return t.SprintRowsHTML(f)
-	case TABLEOUTCSV:
-		return t.SprintRowsCSV(f)
-	case TABLEOUTPDF:
-		return t.SprintRowsPDF(f)
-	}
-	return "", fmt.Errorf("SprintRows unrecognized format:  %d", f)
+	return nil
 }
 
-// SprintRow returns a string formatted for output type f with the information in row
-func (t *Table) SprintRow(row, f int) (string, error) {
-
-	if row < 0 {
-		return "", fmt.Errorf("SprintRow: row number is less than zero , row: %d", row)
+// HasHeaders checks headers are present or not
+func (t *Table) HasHeaders() error {
+	if len(t.ColDefs) < 1 {
+		return fmt.Errorf("There are no columns in the table")
 	}
-	if row >= len(t.Row) {
-		return "", fmt.Errorf("SprintRow: row number > rows in table, row: %d", row)
-	}
+	return nil
+}
 
+// HasValidRow checks that rowIndex is valid or not
+func (t *Table) HasValidRow(rowIndex int) error {
+	if rowIndex < 0 {
+		return fmt.Errorf("Row number is less than zero, row: %d", rowIndex)
+	}
+	if rowIndex >= t.RowCount() {
+		return fmt.Errorf("Row number > no of rows in table, row: %d", rowIndex)
+	}
+	return nil
+}
+
+// HasValidColumn checks that colIndex is valid or not
+func (t *Table) HasValidColumn(colIndex int) error {
+	if colIndex < 0 {
+		return fmt.Errorf("Column number is less than zero, column: %d", colIndex)
+	}
+	if colIndex >= t.ColCount() {
+		return fmt.Errorf("Column number > no of columns in table, column: %d", colIndex)
+	}
+	return nil
+}
+
+// sprintTableFormat renders the entire table to a string
+func (t *Table) sprintTableFormat(f int) (string, error) {
+	var tout TableExportType
 	switch f {
 	case TABLEOUTTEXT:
-		return t.SprintRowText(row)
+		tout = &TextTable{Table: t, TextColSpace: 2}
+		break
 	case TABLEOUTHTML:
-		return t.SprintRowHTML(row)
+		tout = &HTMLTable{Table: t}
+		break
 	case TABLEOUTCSV:
-		return t.SprintRowCSV(row)
+		tout = &CSVTable{Table: t, CellSep: ","}
+		break
 	case TABLEOUTPDF:
-		return t.SprintRowPDF(row)
+		tout = &PDFTable{Table: t}
+		break
+	default:
+		return "", fmt.Errorf("Unrecognized table format: %d", f)
 	}
-	return "", fmt.Errorf("SprintRow unrecognized format:  %d", f)
+
+	// return expected formatted output of table object
+	return tout.getTableOutput()
+}
+
+// ==========================
+// METHODs for HTML output //
+// ==========================
+
+// CSSProperty holds css property to be used as inline css
+type CSSProperty struct {
+	Name, Value string
+}
+
+// String is the "stringer" method implementation for CSSProperty
+func (cp CSSProperty) String() string {
+	return `"` + cp.Name + `:` + cp.Value + `;"`
+}
+
+// SetRowCSS sets css properties for Table Rows
+func (t *Table) SetRowCSS(rowIndex int, cssList []*CSSProperty) error {
+
+	// check row is valid or not
+	if err := t.HasValidRow(rowIndex); err != nil {
+		return err
+	}
+
+	// convert it into cells attributes
+	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
+		// for valid rowIndex set css for all cells belongs to rowIndex row
+		t.SetCellCSS(rowIndex, colIndex, cssList)
+	}
+
+	return nil
+}
+
+// SetColCSS sets css properties for Table Columns
+func (t *Table) SetColCSS(colIndex int, cssList []*CSSProperty) error {
+
+	// check row is valid or not
+	if err := t.HasValidColumn(colIndex); err != nil {
+		return err
+	}
+
+	// convert it into cells attributes
+	for rowIndex := 0; rowIndex < t.RowCount(); rowIndex++ {
+		// for valid colIndex set css for all cells belongs to colIndex column
+		t.SetCellCSS(rowIndex, colIndex, cssList)
+	}
+
+	return nil
+}
+
+// SetCellCSS sets css properties for Table Cells
+func (t *Table) SetCellCSS(rowIndex, colIndex int, cssList []*CSSProperty) error {
+
+	// check row is valid or not
+	if err := t.HasValidRow(rowIndex); err != nil {
+		return err
+	}
+
+	// check row is valid or not
+	if err := t.HasValidColumn(colIndex); err != nil {
+		return err
+	}
+
+	// css property map
+	g := t.getCSSMapKeyForCell(rowIndex, colIndex)
+	cssMap, ok := t.CSS[g]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[g] = cssMap
+
+	return nil
+}
+
+// SetAllCellCSS sets css properties for all Table Cells
+func (t *Table) SetAllCellCSS(cssList []*CSSProperty) error {
+
+	// convert it into cells attributes
+	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
+		for rowIndex := 0; rowIndex < t.RowCount(); rowIndex++ {
+			// will never meet an error from below function
+			t.SetCellCSS(rowIndex, colIndex, cssList)
+		}
+	}
+
+	return nil
+}
+
+// SetColHTMLWidth sets the column width for table
+func (t *Table) SetColHTMLWidth(colIndex int, width uint, unit string) error {
+
+	// TODO: conversion from different units of font to `px` unit with body font base size
+	// so that width has value with `px` unit value
+
+	if err := t.HasValidColumn(colIndex); err != nil {
+		return err
+	}
+
+	t.ColDefs[colIndex].HTMLWidth = int(width)
+	return nil
+}
+
+// SetTitleCSS sets css for title row
+func (t *Table) SetTitleCSS(cssList []*CSSProperty) {
+	// css property map
+	cssMap, ok := t.CSS[TITLECLASS]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[TITLECLASS] = cssMap
+}
+
+// SetHeaderCSS sets css for headers row
+func (t *Table) SetHeaderCSS(cssList []*CSSProperty) {
+	// css property map
+	cssMap, ok := t.CSS[HEADERSCLASS]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[HEADERSCLASS] = cssMap
+}
+
+// SetSection1CSS sets css for section1 row
+func (t *Table) SetSection1CSS(cssList []*CSSProperty) {
+	// css property map
+	cssMap, ok := t.CSS[SECTION1CLASS]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[SECTION1CLASS] = cssMap
+}
+
+// SetSection2CSS sets css for section2 row
+func (t *Table) SetSection2CSS(cssList []*CSSProperty) {
+	// css property map
+	cssMap, ok := t.CSS[SECTION2CLASS]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[SECTION2CLASS] = cssMap
+}
+
+// getCSSMapKeyForCell format and returns key for cell for css properties usage
+func (t *Table) getCSSMapKeyForCell(rowIndex, colIndex int) string {
+	return `row:` + strconv.Itoa(rowIndex) + `-col:` + strconv.Itoa(colIndex)
 }
