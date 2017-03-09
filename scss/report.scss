@@ -1,49 +1,65 @@
 @import "variable";
 
-table.rpt-table {
+div.rpt-table-container {
     font: 100% $font-stack;
-    border-collapse: collapse;
-    table-layout: fixed;
-    margin: 0;
-    padding: 0;
     line-height: $line-height;
 
-    tr {
+    p {
         &.title {
-            td {
-                text-align: center;
-                font-weight: bold;
-            }
+            text-align: center;
+            font-weight: bold;
         }
 
         &.section1, &.section2 {
-            td {
-                text-align: center;
-            }
-        }
-
-        &.headers {
-            td {
-                border-bottom: (2 * $table-border-width) solid $table-header-separator;
-                font-weight: bold;
-                padding-top: $table-header-padding-top;
-            }
-        }
-
-        &.top-line {
-            td {
-                border-top: $table-border-width solid $table-rowset-separator;
-            }
-        }
-
-        &.bottom-line {
-            td {
-                border-bottom: $table-border-width solid $table-rowset-separator;
-            }
+            text-align: center;
         }
     }
 
-    td {
-        padding: $table-cell-padding;
+    table {
+        border-collapse: collapse;
+        table-layout: fixed;
+        margin: 0;
+        padding: 0;
+
+        td, th {
+            padding: $table-cell-padding;
+        }
+
+        tr {
+            page-break-inside: avoid;
+        }
+
+        thead {
+            display: table-header-group;
+
+            tr {
+                th {
+                    border-bottom: (2 * $table-border-width) solid $table-header-separator;
+                    font-weight: bold;
+                    padding-top: $table-header-padding-top;
+                }
+            }
+        }
+
+        tbody {
+            tr {
+                &.top-line {
+                    td {
+                        border-top: $table-border-width solid $table-rowset-separator;
+                    }
+                }
+
+                &.bottom-line {
+                    td {
+                        border-bottom: $table-border-width solid $table-rowset-separator;
+                    }
+                }
+            }
+        }
+
+        // tfoot {
+        // display: table-row-group;
+        // }
+
     }
 }
