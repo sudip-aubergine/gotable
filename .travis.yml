@@ -2,8 +2,10 @@ language: go
 
 env:
   CODECOV_TOKEN="63cd9447-4f4f-4e38-8c74-aa66ff6a26d1"
+
 before_install:
   - gem install sass
+  - go get -t -v ./...
 
 go:
   - 1.7
