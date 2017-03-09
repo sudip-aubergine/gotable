@@ -222,6 +222,7 @@ func DoTextOutput(t *testing.T, tbl *Table) {
 		t.Logf("smoke_test: error printing columns: %s\n", err.Error())
 		t.Fail()
 	}
+
 	s := fmt.Sprintf("%s\n", (*tbl))
 	(*tbl).TightenColumns()
 	s += fmt.Sprintf("%s\n", (*tbl))
