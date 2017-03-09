@@ -72,7 +72,7 @@ func (ht *HTMLTable) getTableOutput() (string, error) {
 	tContainer += tableOut
 
 	// wrap it up in a div with a class
-	tContainer = `<div class="` + TABLECONTAINERCLASS + `">` + tContainer + `</table>`
+	tContainer = `<div class="` + TABLECONTAINERCLASS + `">` + tContainer + `</div>`
 
 	// make context for template
 	htmlContext := HTMLTemplateContext{FontSize: CSSFONTSIZE}
