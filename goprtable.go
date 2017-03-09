@@ -173,7 +173,7 @@ func (t *Table) Init() {
 	t.CSS = make(map[string]map[string]*CSSProperty)
 
 	// get current executable dir path
-	// error should be handle when dependency required
+	// error should be handled whenever there is a requirement for any dependency
 	folderPath, _ := osext.ExecutableFolder()
 	t.Container = folderPath
 }
