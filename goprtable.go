@@ -710,8 +710,8 @@ func (t *Table) sprintTableFormat(f int) (string, error) {
 		tout = &CSVTable{Table: t, CellSep: ","}
 		break
 	case TABLEOUTPDF:
-		tout = &PDFTable{Table: t}
-		break
+		tout := &PDFTable{Table: t}
+		return tout.getTableOutput()
 	default:
 		return "", fmt.Errorf("Unrecognized table format: %d", f)
 	}
