@@ -5,33 +5,30 @@
       GOTABLE
     </title>
     <style>
-              html, body{
-                  margin: 0;
-                  padding: 0;
-                  font-family: Helvetica, sans-serif;
-                  font-size: 14px;
-                  background: #FAFAFA;
-              }
-              div{
-                  display: block;
-              }
-              .container{
-                  background-color: rgba(0,0,0,0);
-                  padding: 10px 25px;
-              }
-          
-    </style>
-    <style>
-      div.rpt-table-container {
-        font: 100% Helvetica, sans-serif;
+      html, body {
+        margin: 0;
+        padding: 0;
         line-height: 1.33333;
+        font: 100% Helvetica, sans-serif;
+        font-size: 14px;
       }
+      
+      div {
+        display: block;
+      }
+      
+      .container {
+        padding: 10px 15px;
+      }
+      
       div.rpt-table-container p.title {
         text-align: center;
         font-weight: bold;
+        font-size: 18px;
       }
       div.rpt-table-container p.section1, div.rpt-table-container p.section2 {
         text-align: center;
+        font-size: 16px;
       }
       div.rpt-table-container table {
         border-collapse: collapse;
@@ -49,19 +46,19 @@
         display: table-header-group;
       }
       div.rpt-table-container table thead tr th {
-        border-bottom: 2px solid #ccc;
+        border-bottom: 2px solid #BBB;
         font-weight: bold;
-        padding-top: 50px;
+        padding-top: 25px;
       }
       div.rpt-table-container table tbody tr.top-line td {
-        border-top: 1px solid #adadad;
+        border-top: 1px solid #BBB;
       }
       div.rpt-table-container table tbody tr.bottom-line td {
-        border-bottom: 1px solid #adadad;
+        border-bottom: 1px solid #BBB;
       }
     </style>
     <style>
-      div.rpt-table-container p.title{color:blue;font-style:italic;font-size:20px;}div.rpt-table-container p.section1{color:white;background-color:black;}div.rpt-table-container p.section2{color:red;background-color:yellow;}div.rpt-table-container table thead tr th.header-0{text-align:left;width:280px;color:orange;font-style:italic;background-color:blue;}div.rpt-table-container table thead tr th.header-1{text-align:right;width:20px;font-style:italic;background-color:blue;color:orange;}div.rpt-table-container table thead tr th.header-2{text-align:right;width:84px;color:orange;font-style:italic;background-color:blue;}div.rpt-table-container table thead tr th.header-3{text-align:left;width:140px;color:orange;font-style:italic;background-color:blue;}div.rpt-table-container table thead tr th.header-4{text-align:left;width:182px;background-color:blue;color:orange;font-style:italic;}div.rpt-table-container table thead tr th.header-5{text-align:right;width:168px;color:orange;font-style:italic;background-color:blue;}div.rpt-table-container table thead tr th.header-6{text-align:left;width:294px;color:orange;font-style:italic;background-color:blue;}div.rpt-table-container table thead tr th.header-7{text-align:left;width:350px;color:orange;font-style:italic;background-color:blue;}div.rpt-table-container table tbody tr td.cell-row-0-col-0{color:blue;background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-0-col-1{color:orange;background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-0-col-2{color:orange;background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-0-col-3{color:orange;background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-0-col-4{color:orange;background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-0-col-5{color:orange;background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-0-col-6{color:orange;background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-0-col-7{color:orange;background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-1-col-0{color:blue;background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-1-col-1{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-1-col-2{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-1-col-3{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-1-col-4{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-1-col-5{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-1-col-6{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-1-col-7{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-2-col-0{background-color:yellow;text-align:left;color:blue;}div.rpt-table-container table tbody tr td.cell-row-2-col-1{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-2-col-2{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-2-col-3{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-2-col-4{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-2-col-5{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-2-col-6{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-2-col-7{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-3-col-0{color:blue;background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-3-col-1{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-3-col-2{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-3-col-3{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-3-col-4{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-3-col-5{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-3-col-6{text-align:left;background-color:yellow;}div.rpt-table-container table tbody tr td.cell-row-3-col-7{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-4-col-0{color:blue;background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-4-col-1{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-4-col-2{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-4-col-3{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-4-col-4{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-4-col-5{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-4-col-6{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-4-col-7{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-5-col-0{color:blue;background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-5-col-1{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-5-col-2{text-align:right;background-color:yellow;}div.rpt-table-container table tbody tr td.cell-row-5-col-3{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-5-col-4{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-5-col-5{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-5-col-6{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-5-col-7{background-color:yellow;text-align:left;}
+      div.rpt-table-container p.title{color:blue;font-style:italic;font-size:20px;}div.rpt-table-container p.section1{color:white;background-color:black;}div.rpt-table-container p.section2{color:red;background-color:yellow;}div.rpt-table-container table thead tr th.header-0{text-align:left;width:280px;color:orange;font-style:italic;background-color:blue;}div.rpt-table-container table thead tr th.header-1{text-align:right;width:20px;font-style:italic;background-color:blue;color:orange;}div.rpt-table-container table thead tr th.header-2{text-align:right;width:84px;color:orange;font-style:italic;background-color:blue;}div.rpt-table-container table thead tr th.header-3{text-align:left;width:140px;color:orange;font-style:italic;background-color:blue;}div.rpt-table-container table thead tr th.header-4{text-align:left;width:182px;background-color:blue;color:orange;font-style:italic;}div.rpt-table-container table thead tr th.header-5{text-align:right;width:168px;color:orange;font-style:italic;background-color:blue;}div.rpt-table-container table thead tr th.header-6{text-align:left;width:294px;font-style:italic;background-color:blue;color:orange;}div.rpt-table-container table thead tr th.header-7{text-align:left;width:350px;background-color:blue;color:orange;font-style:italic;}div.rpt-table-container table tbody tr td.cell-row-0-col-0{color:blue;background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-0-col-1{color:orange;background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-0-col-2{color:orange;background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-0-col-3{color:orange;background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-0-col-4{color:orange;background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-0-col-5{color:orange;background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-0-col-6{color:orange;background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-0-col-7{color:orange;background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-1-col-0{background-color:yellow;text-align:left;color:blue;}div.rpt-table-container table tbody tr td.cell-row-1-col-1{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-1-col-2{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-1-col-3{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-1-col-4{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-1-col-5{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-1-col-6{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-1-col-7{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-2-col-0{color:blue;background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-2-col-1{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-2-col-2{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-2-col-3{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-2-col-4{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-2-col-5{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-2-col-6{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-2-col-7{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-3-col-0{color:blue;background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-3-col-1{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-3-col-2{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-3-col-3{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-3-col-4{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-3-col-5{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-3-col-6{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-3-col-7{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-4-col-0{color:blue;background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-4-col-1{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-4-col-2{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-4-col-3{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-4-col-4{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-4-col-5{text-align:right;background-color:yellow;}div.rpt-table-container table tbody tr td.cell-row-4-col-6{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-4-col-7{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-5-col-0{color:blue;background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-5-col-1{text-align:right;background-color:yellow;}div.rpt-table-container table tbody tr td.cell-row-5-col-2{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-5-col-3{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-5-col-4{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-5-col-5{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-5-col-6{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-5-col-7{background-color:yellow;text-align:left;}
     </style>
   </head>
   <body>

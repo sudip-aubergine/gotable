@@ -1,17 +1,32 @@
 @import "variable";
 
-div.rpt-table-container {
-    font: 100% $font-stack;
+html, body {
+    margin: 0;
+    padding: 0;
     line-height: $line-height;
+    font: 100% $font-stack;
+    font-size: $font-size-base;
+}
 
+div {
+    display: block;
+}
+
+.container {
+    padding: 10px 15px;
+}
+
+div.rpt-table-container {
     p {
         &.title {
             text-align: center;
             font-weight: bold;
+            font-size: 18px;
         }
 
         &.section1, &.section2 {
             text-align: center;
+            font-size: 16px;
         }
     }
 
