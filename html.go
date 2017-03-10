@@ -19,9 +19,10 @@ const (
 	TABLECONTAINERCLASS = `rpt-table-container`
 	TITLECLASS          = `title`
 	HEADERSCLASS        = `headers`
+	SECTION1CLASS       = `section1`
+	SECTION2CLASS       = `section2`
+
 	// DATACLASS           = `data`
-	SECTION1CLASS = `section1`
-	SECTION2CLASS = `section2`
 )
 
 // HTMLTable struct used to prepare table in html version
@@ -38,6 +39,7 @@ type HTMLTemplateContext struct {
 
 func (ht *HTMLTable) getTableOutput() (string, error) {
 	var tContainer string
+	var err error
 
 	// append title
 	tContainer += ht.getTitle()
@@ -74,6 +76,13 @@ func (ht *HTMLTable) getTableOutput() (string, error) {
 	// wrap it up in a div with a class
 	tContainer = `<div class="` + TABLECONTAINERCLASS + `">` + tContainer + `</div>`
 
+	return ht.formatHTML(tContainer)
+
+}
+
+func (ht *HTMLTable) formatHTML(htmlString string) (string, error) {
+	var err error
+
 	// make context for template
 	htmlContext := HTMLTemplateContext{FontSize: CSSFONTSIZE}
 	htmlContext.HeadTitle = ht.Table.Title
@@ -83,7 +92,7 @@ func (ht *HTMLTable) getTableOutput() (string, error) {
 	}
 	htmlContext.DefaultCSS = `<style>` + htmlContext.DefaultCSS + `</style>`
 	htmlContext.CustomCSS = `<style>` + ht.StyleString + `</style>`
-	htmlContext.TableHTML = tContainer
+	htmlContext.TableHTML = htmlString
 
 	// get template string
 	tableTmplPath, err := ht.getTableTemplatePath()
