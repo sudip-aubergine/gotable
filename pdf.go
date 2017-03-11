@@ -15,6 +15,7 @@ import (
 const (
 	WKHTMLTOPDFCMD = "wkhtmltopdf"
 	TEMPSTORE      = "/tmp"
+	DATETIMEFMT    = "_2 Jan 2006 3:04 PM IST"
 )
 
 // PDFTable struct used to prepare table in pdf version
@@ -113,7 +114,7 @@ func (pt *PDFTable) getPDF(inputFile string) (string, error) {
 
 	var err error
 
-	pdfExportTime := time.Now().Format("01 Jan 2006 03:04 PM IST")
+	pdfExportTime := time.Now().Format(DATETIMEFMT)
 	htmlExportFile := inputFile + ".html"
 	pdfExportFile := inputFile + ".pdf"
 
