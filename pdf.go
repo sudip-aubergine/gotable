@@ -87,7 +87,7 @@ func (pt *PDFTable) getPDF(inputFile string) (string, error) {
 		// header center content
 		"--header-center", pt.Table.GetTitle(),
 		// header font size
-		"--header-font-size", "8",
+		"--header-font-size", "7",
 		// header font
 		"--header-font-name", "opensans",
 		// header spacing
@@ -99,7 +99,7 @@ func (pt *PDFTable) getPDF(inputFile string) (string, error) {
 		// footer font
 		"--footer-font-name", "opensans",
 		// footer font size
-		"--footer-font-size", "8",
+		"--footer-font-size", "7",
 		// footer left content
 		"--footer-left", pdfExportTime,
 		// footer right content
@@ -107,7 +107,7 @@ func (pt *PDFTable) getPDF(inputFile string) (string, error) {
 		// page size
 		"--page-size", "Letter",
 		// orientation
-		"--orientation", "Portrait",
+		"--orientation", "Landscape",
 		// input, output
 		htmlExportFile, "-",
 	}
