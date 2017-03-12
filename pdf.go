@@ -39,46 +39,9 @@ func (pt *PDFTable) WriteFile(filename string) error {
 }
 
 func (pt *PDFTable) getTableOutput() (string, error) {
-	ht := &HTMLTable{Table: pt.Table}
-	ht.Table.SetHeaderCSS([]*CSSProperty{
-		&CSSProperty{Name: "padding-top", Value: "20px"},
-	})
-	var tContainer string
-	var err error
 
-	// append section 1
-	tContainer += ht.getSection1()
-
-	// append section 2
-	tContainer += ht.getSection2()
-
-	// contains only table tag output
-	var tableOut string
-
-	// append headers
-	headerStr, err := ht.getHeaders()
-	if err != nil {
-		return "", err
-	}
-	tableOut += headerStr
-
-	// append rows
-	rowsStr, err := ht.getRows()
-	if err != nil {
-		return "", err
-	}
-	tableOut += rowsStr
-
-	// wrap headers and rows in a table
-	tableOut = `<table>` + tableOut + `</table>`
-
-	// now append to container of table output
-	tContainer += tableOut
-
-	// wrap it up in a div with a class
-	tContainer = `<div class="` + TABLECONTAINERCLASS + `">` + tContainer + `</div>`
-
-	htmlString, err := ht.formatHTML(tContainer)
+	// get html output first
+	htmlString, err := pt.Table.SprintTable(TABLEOUTHTML)
 	if err != nil {
 		return "", err
 	}
@@ -123,7 +86,7 @@ func (pt *PDFTable) getPDF(inputFile string) (string, error) {
 		// header center content
 		"--header-center", pt.Table.GetTitle(),
 		// header font size
-		"--header-font-size", "9",
+		"--header-font-size", "8",
 		// header font
 		"--header-font-name", "opensans",
 		// header spacing
