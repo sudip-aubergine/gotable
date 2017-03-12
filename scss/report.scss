@@ -13,7 +13,7 @@ div {
 }
 
 .container {
-    padding: 10px 15px;
+    padding: 10px 0px;
 }
 
 div.rpt-table-container {
@@ -21,10 +21,15 @@ div.rpt-table-container {
         &.title {
             text-align: center;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 32px;
         }
 
-        &.section1, &.section2 {
+        &.section1 {
+            text-align: center;
+            font-size: 20px;
+        }
+
+        &.section2 {
             text-align: center;
             font-size: 16px;
         }
