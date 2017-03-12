@@ -314,7 +314,7 @@ func TestSmoke(t *testing.T) {
 	cssList = []*CSSProperty{}
 	cssList = append(cssList, &CSSProperty{Name: "color", Value: "blue"})
 	cssList = append(cssList, &CSSProperty{Name: "font-style", Value: "italic"})
-	cssList = append(cssList, &CSSProperty{Name: "font-size", Value: "20px"})
+	// cssList = append(cssList, &CSSProperty{Name: "font-size", Value: "20px"})
 	tbl.SetTitleCSS(cssList)
 
 	// set header css
