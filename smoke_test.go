@@ -196,6 +196,7 @@ func TestSmoke(t *testing.T) {
 	// Bang it a bit...
 	tbl.Sort(0, tbl.RowCount()-1, DOB)
 	tbl.AddLineAfter(tbl.RowCount() - 1) // a line after the last row in the table
+	tbl.AddLineBefore(tbl.RowCount())    // a line after the last row in the table
 	tbl.InsertSumRowsetCols(totalsRSet, tbl.RowCount(), []int{Winnings})
 
 	// css property on table for html
@@ -253,6 +254,10 @@ func TestSmoke(t *testing.T) {
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
+	err = tbl.SetHeaderCellCSS(999, cssList)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
 	err = tbl.SetColCSS(999, cssList)
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
@@ -268,6 +273,10 @@ func TestSmoke(t *testing.T) {
 
 	errExp = "Column number is less than zero"
 	err = tbl.HasValidColumn(-999)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	err = tbl.SetHeaderCellCSS(-999, cssList)
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
@@ -302,9 +311,8 @@ func TestSmoke(t *testing.T) {
 	// valid cell css case - make all cells background color yellow
 	cssList = []*CSSProperty{}
 	cssList = append(cssList, &CSSProperty{Name: "background-color", Value: "yellow"})
-	if err = tbl.SetAllCellCSS(cssList); err != nil {
-		t.Errorf("smoke_test: Expected `nil` Error, but found: %s\n", err.Error())
-	}
+	tbl.SetAllCellCSS(cssList)
+
 	// valid set html width case - make second column width wider
 	if err = tbl.SetColHTMLWidth(1, 20, "px"); err != nil {
 		t.Errorf("smoke_test: Expected `nil` Error, but found: %s\n", err.Error())
@@ -425,8 +433,8 @@ func DoPDFOutput(t *testing.T, tbl *Table) {
 		t.Logf("smoke_test: Error creating PDF output: %s\n", err.Error())
 		// fmt.Printf("smoke_test: Error creating PDF output: %s\n", err.Error())
 	}
-	if len(s) > 0 {
-		t.Errorf("smoke_test: Expected: `PDF output for table is not supported yet`,  found: `%s`\n", s)
+	if len(s) < 0 {
+		t.Errorf("smoke_test: PDF was not created \n")
 	}
 }
 
