@@ -21,6 +21,6 @@ test:
 	go tool cover -html=coverage.out
 
 update:
-	cp smoke_test.txt smoke_test.csv smoke_test.html testdata/
+	cp smoke_test.txt smoke_test.csv smoke_test.html smoke_test.pdf testdata/
 
 all: clean gotable test
