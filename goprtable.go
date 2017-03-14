@@ -700,28 +700,25 @@ type TableExportType interface {
 
 // SprintTable renders the entire table to a string for text output
 func (t *Table) SprintTable(w io.Writer) error {
-	var tout TableExportType
-	tout = &TextTable{Table: t, TextColSpace: 2}
+	var tout TableExportType = &TextTable{Table: t, TextColSpace: 2}
 	return tout.writeTableOutput(w)
 }
 
 // CSVprintTable renders the entire table for csv output
 func (t *Table) CSVprintTable(w io.Writer) error {
-	var tout TableExportType
-	tout = &CSVTable{Table: t, CellSep: ","}
+	var tout TableExportType = &CSVTable{Table: t, CellSep: ","}
 	return tout.writeTableOutput(w)
 }
 
 // HTMLprintTable renders the entire table for html output
 func (t *Table) HTMLprintTable(w io.Writer) error {
-	var tout TableExportType
-	tout = &HTMLTable{Table: t}
+	var tout TableExportType = &HTMLTable{Table: t}
 	return tout.writeTableOutput(w)
 }
 
 // PDFprintTable renders the entire table for pdf output
 func (t *Table) PDFprintTable(w io.Writer) error {
-	tout := &PDFTable{Table: t}
+	var tout = &PDFTable{Table: t}
 	return tout.writeTableOutput(w)
 }
 
