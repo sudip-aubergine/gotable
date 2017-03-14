@@ -1,7 +1,9 @@
 package gotable
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/dustin/go-humanize"
@@ -11,9 +13,10 @@ import (
 type CSVTable struct {
 	*Table
 	CellSep string
+	outbuf  bytes.Buffer
 }
 
-func (ct *CSVTable) getTableOutput() (string, error) {
+func (ct *CSVTable) writeTableOutput(w io.Writer) error {
 	var tout string
 
 	// append title
@@ -28,19 +31,24 @@ func (ct *CSVTable) getTableOutput() (string, error) {
 	// append headers
 	headerStr, err := ct.getHeaders()
 	if err != nil {
-		return "", err
+		return err
 	}
 	tout += headerStr
 
 	// append rows
 	rowsStr, err := ct.getRows()
 	if err != nil {
-		return "", err
+		return err
 	}
 	tout += rowsStr
 
 	// return output
-	return tout, nil
+	if _, err = ct.outbuf.WriteString(tout); err != nil {
+		return err
+	}
+	// write output to passed io.Writer interface object
+	_, err = w.Write(ct.outbuf.Bytes())
+	return err
 }
 
 func (ct *CSVTable) getTitle() string {

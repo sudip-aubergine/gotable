@@ -1,7 +1,9 @@
 package gotable
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"sort"
 	"strconv"
 	"strings"
@@ -87,17 +89,6 @@ type Table struct {
 	RS          []Rowset                           // a list of rowsets
 	CSS         map[string]map[string]*CSSProperty //CSS holds css property for title, section1, section2, headers, cells
 	Container   string                             // Container has current executable folder path, so that we can get required dependent files
-}
-
-// TableExportType each export output format must satisfy this interface
-type TableExportType interface {
-	getTableOutput() (string, error)
-	getTitle() string
-	getSection1() string
-	getSection2() string
-	getHeaders() (string, error)
-	getRows() (string, error)
-	getRow(row int) (string, error)
 }
 
 // SetTitle sets the table's Title string to the supplied value.
@@ -463,11 +454,12 @@ func (t *Table) Put(row, col int, c Cell) {
 // String is the "stringer" method implementation for gotable so that you can simply
 // print(t)
 func (t Table) String() string {
-	s, err := t.SprintTable(TABLEOUTTEXT)
+	var temp bytes.Buffer
+	err := t.SprintTable(&temp)
 	if err != nil {
 		return err.Error()
 	}
-	return s
+	return temp.String()
 }
 
 // createColSet creates a new colset with cells, total number of Headers
@@ -652,11 +644,6 @@ func (t *Table) TightenColumns() {
 	}
 }
 
-// SprintTable renders the entire table to a string
-func (t *Table) SprintTable(f int) (string, error) {
-	return t.sprintTableFormat(f)
-}
-
 // HasData checks that table has actually data or not
 func (t *Table) HasData() error {
 	// if there are no rows in table
@@ -696,28 +683,46 @@ func (t *Table) HasValidColumn(colIndex int) error {
 	return nil
 }
 
-// sprintTableFormat renders the entire table to a string
-func (t *Table) sprintTableFormat(f int) (string, error) {
-	var tout TableExportType
-	switch f {
-	case TABLEOUTTEXT:
-		tout = &TextTable{Table: t, TextColSpace: 2}
-		break
-	case TABLEOUTHTML:
-		tout = &HTMLTable{Table: t}
-		break
-	case TABLEOUTCSV:
-		tout = &CSVTable{Table: t, CellSep: ","}
-		break
-	case TABLEOUTPDF:
-		tout := &PDFTable{Table: t}
-		return tout.getTableOutput()
-	default:
-		return "", fmt.Errorf("Unrecognized table format: %d", f)
-	}
+// ==========================
+// Table Export Output
+// ==========================
 
-	// return expected formatted output of table object
-	return tout.getTableOutput()
+// TableExportType each export output format must satisfy this interface
+type TableExportType interface {
+	writeTableOutput(w io.Writer) error
+	getTitle() string
+	getSection1() string
+	getSection2() string
+	getHeaders() (string, error)
+	getRows() (string, error)
+	getRow(row int) (string, error)
+}
+
+// SprintTable renders the entire table to a string for text output
+func (t *Table) SprintTable(w io.Writer) error {
+	var tout TableExportType
+	tout = &TextTable{Table: t, TextColSpace: 2}
+	return tout.writeTableOutput(w)
+}
+
+// CSVprintTable renders the entire table for csv output
+func (t *Table) CSVprintTable(w io.Writer) error {
+	var tout TableExportType
+	tout = &CSVTable{Table: t, CellSep: ","}
+	return tout.writeTableOutput(w)
+}
+
+// HTMLprintTable renders the entire table for html output
+func (t *Table) HTMLprintTable(w io.Writer) error {
+	var tout TableExportType
+	tout = &HTMLTable{Table: t}
+	return tout.writeTableOutput(w)
+}
+
+// PDFprintTable renders the entire table for pdf output
+func (t *Table) PDFprintTable(w io.Writer) error {
+	tout := &PDFTable{Table: t}
+	return tout.writeTableOutput(w)
 }
 
 // ==========================

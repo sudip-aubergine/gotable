@@ -3,6 +3,7 @@ package gotable
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"path"
 	"sort"
@@ -29,6 +30,7 @@ const (
 type HTMLTable struct {
 	*Table
 	StyleString string
+	outbuf      bytes.Buffer
 }
 
 // HTMLTemplateContext holds the context for table html template
@@ -37,7 +39,7 @@ type HTMLTemplateContext struct {
 	HeadTitle, DefaultCSS, CustomCSS, TableHTML string
 }
 
-func (ht *HTMLTable) getTableOutput() (string, error) {
+func (ht *HTMLTable) writeTableOutput(w io.Writer) error {
 	var tContainer string
 	var err error
 
@@ -56,14 +58,14 @@ func (ht *HTMLTable) getTableOutput() (string, error) {
 	// append headers
 	headerStr, err := ht.getHeaders()
 	if err != nil {
-		return "", err
+		return err
 	}
 	tableOut += headerStr
 
 	// append rows
 	rowsStr, err := ht.getRows()
 	if err != nil {
-		return "", err
+		return err
 	}
 	tableOut += rowsStr
 
@@ -76,11 +78,17 @@ func (ht *HTMLTable) getTableOutput() (string, error) {
 	// wrap it up in a div with a class
 	tContainer = `<div class="` + TABLECONTAINERCLASS + `">` + tContainer + `</div>`
 
-	return ht.formatHTML(tContainer)
+	if err := ht.formatHTML(tContainer); err != nil {
+		return err
+	}
+
+	// write output to passed io.Writer interface object
+	_, err = w.Write(ht.outbuf.Bytes())
+	return err
 
 }
 
-func (ht *HTMLTable) formatHTML(htmlString string) (string, error) {
+func (ht *HTMLTable) formatHTML(htmlString string) error {
 	var err error
 
 	// make context for template
@@ -88,7 +96,7 @@ func (ht *HTMLTable) formatHTML(htmlString string) (string, error) {
 	htmlContext.HeadTitle = ht.Table.Title
 	htmlContext.DefaultCSS, err = ht.getReportDefaultCSS()
 	if err != nil {
-		return "", err
+		return err
 	}
 	htmlContext.DefaultCSS = `<style>` + htmlContext.DefaultCSS + `</style>`
 	htmlContext.CustomCSS = `<style>` + ht.StyleString + `</style>`
@@ -97,27 +105,28 @@ func (ht *HTMLTable) formatHTML(htmlString string) (string, error) {
 	// get template string
 	tableTmplPath, err := ht.getTableTemplatePath()
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	// Create a new template and parse the context in it
 	tmpl := template.New("table.tmpl")
 	tmpl, err = tmpl.ParseFiles(tableTmplPath)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	// write html output in buffer
-	var htmlBuffer bytes.Buffer
-	err = tmpl.Execute(&htmlBuffer, htmlContext)
+	err = tmpl.Execute(&ht.outbuf, htmlContext)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	// return output
-	tableHTML := gohtml.Format(htmlBuffer.String())
-	// tableHTML = strings.Replace(tableHTML, "\\\n", "", -1)
-	return tableHTML, nil
+	// write buffered output after formatting html
+	htmlString = ht.outbuf.String()
+	ht.outbuf.Reset()
+	ht.outbuf.WriteString(gohtml.Format(htmlString))
+
+	return nil
 }
 
 func (ht *HTMLTable) getTitle() string {

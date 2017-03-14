@@ -1,7 +1,9 @@
 package gotable
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"sort"
 
 	"github.com/dustin/go-humanize"
@@ -11,9 +13,10 @@ import (
 type TextTable struct {
 	*Table
 	TextColSpace int
+	outbuf       bytes.Buffer
 }
 
-func (tt *TextTable) getTableOutput() (string, error) {
+func (tt *TextTable) writeTableOutput(w io.Writer) error {
 	var tout string
 
 	// append title
@@ -28,19 +31,24 @@ func (tt *TextTable) getTableOutput() (string, error) {
 	// append headers
 	headerStr, err := tt.getHeaders()
 	if err != nil {
-		return "", err
+		return err
 	}
 	tout += headerStr
 
 	// append rows
 	rowsStr, err := tt.getRows()
 	if err != nil {
-		return "", err
+		return err
 	}
 	tout += rowsStr
 
 	// return output
-	return tout, nil
+	if _, err = tt.outbuf.WriteString(tout); err != nil {
+		return err
+	}
+	// write output to passed io.Writer interface object
+	_, err = w.Write(tt.outbuf.Bytes())
+	return err
 }
 
 func (tt *TextTable) getTitle() string {

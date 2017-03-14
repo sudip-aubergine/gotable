@@ -2,7 +2,7 @@ package gotable
 
 import (
 	"bytes"
-	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -24,28 +24,14 @@ type PDFTable struct {
 	outbuf bytes.Buffer
 }
 
-// Buffer returns the embedded output buffer used if OutputFile is empty
-func (pt *PDFTable) Buffer() *bytes.Buffer {
-	return &pt.outbuf
-}
-
-// Bytes returns the output byte slice from the output buffer used if OutputFile is empty
-func (pt *PDFTable) Bytes() []byte {
-	return pt.outbuf.Bytes()
-}
-
-// WriteFile writes the contents of the output buffer to a file
-func (pt *PDFTable) WriteFile(filename string) error {
-	return ioutil.WriteFile(filename, pt.Bytes(), 0666)
-}
-
-func (pt *PDFTable) getTableOutput() (string, error) {
+func (pt *PDFTable) writeTableOutput(w io.Writer) error {
 
 	// get html output first
-	htmlString, err := pt.Table.SprintTable(TABLEOUTHTML)
-	if err != nil {
-		return "", err
+	var temp bytes.Buffer
+	if err := pt.Table.HTMLprintTable(&temp); err != nil {
+		return err
 	}
+	htmlString := temp.String()
 
 	timeCharReplacer := strings.NewReplacer(":", "-", ".", "", "T", "")
 	currentTime := timeCharReplacer.Replace(time.Now().Format(time.RFC3339Nano))
@@ -57,12 +43,12 @@ func (pt *PDFTable) getTableOutput() (string, error) {
 	// be careful, must append it
 	tempHTMLFile, err := os.Create(filePath + ".html")
 	if err != nil {
-		return "", err
+		return err
 	}
 	// write html string to file
 	_, err = tempHTMLFile.WriteString(htmlString)
 	if err != nil {
-		return "", err
+		return err
 	}
 	tempHTMLFile.Close()
 
@@ -70,16 +56,19 @@ func (pt *PDFTable) getTableOutput() (string, error) {
 	defer os.Remove(tempHTMLFile.Name())
 
 	// return output file path
-	return pt.getPDF(filePath)
+	if err = pt.writePDFBuffer(filePath); err != nil {
+		return err
+	}
+
+	// write output to passed io.Writer interface object
+	_, err = w.Write(pt.outbuf.Bytes())
+	return err
 }
 
-func (pt *PDFTable) getPDF(inputFile string) (string, error) {
-
-	var err error
+func (pt *PDFTable) writePDFBuffer(inputFile string) error {
 
 	pdfExportTime := time.Now().Format(DATETIMEFMT)
 	htmlExportFile := inputFile + ".html"
-	pdfExportFile := inputFile + ".pdf"
 
 	cmdArgs := []string{
 		// top margin
@@ -120,31 +109,27 @@ func (pt *PDFTable) getPDF(inputFile string) (string, error) {
 	// get output pipeline
 	output, err := wkhtmltopdf.StdoutPipe()
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	// Begin the command
 	if err = wkhtmltopdf.Start(); err != nil {
-		return "", err
+		return err
 	}
 
 	// Read the generated PDF from std out
 	b, err := ioutil.ReadAll(output)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	// End the command
 	if err = wkhtmltopdf.Wait(); err != nil {
-		return "", err
+		return err
 	}
 
+	// write output to buffer
 	pt.outbuf.Write(b)
 
-	err = pt.WriteFile(pdfExportFile)
-	if err != nil {
-		fmt.Println("Error WriteFile:", err)
-	}
-
-	return pdfExportFile, nil
+	return nil
 }
