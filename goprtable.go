@@ -768,6 +768,31 @@ func (t *Table) SetColCSS(colIndex int, cssList []*CSSProperty) error {
 	return nil
 }
 
+// SetHeaderCellCSS sets css for only headers cell
+func (t *Table) SetHeaderCellCSS(colIndex int, cssList []*CSSProperty) error {
+	// check row is valid or not
+	if err := t.HasValidColumn(colIndex); err != nil {
+		return err
+	}
+
+	// header class
+	thClass := t.getCSSMapKeyForHeaderCell(colIndex)
+	// css property map
+	cssMap, ok := t.CSS[thClass]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[thClass] = cssMap
+
+	return nil
+}
+
 // SetCellCSS sets css properties for Table Cells
 func (t *Table) SetCellCSS(rowIndex, colIndex int, cssList []*CSSProperty) error {
 
@@ -799,7 +824,7 @@ func (t *Table) SetCellCSS(rowIndex, colIndex int, cssList []*CSSProperty) error
 }
 
 // SetAllCellCSS sets css properties for all Table Cells
-func (t *Table) SetAllCellCSS(cssList []*CSSProperty) error {
+func (t *Table) SetAllCellCSS(cssList []*CSSProperty) {
 
 	// convert it into cells attributes
 	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
@@ -808,8 +833,6 @@ func (t *Table) SetAllCellCSS(cssList []*CSSProperty) error {
 			t.SetCellCSS(rowIndex, colIndex, cssList)
 		}
 	}
-
-	return nil
 }
 
 // SetColHTMLWidth sets the column width for table
@@ -844,18 +867,11 @@ func (t *Table) SetTitleCSS(cssList []*CSSProperty) {
 
 // SetHeaderCSS sets css for headers row
 func (t *Table) SetHeaderCSS(cssList []*CSSProperty) {
-	// css property map
-	cssMap, ok := t.CSS[HEADERSCLASS]
-	if !ok {
-		cssMap = make(map[string]*CSSProperty)
+
+	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
+		t.SetHeaderCellCSS(colIndex, cssList)
 	}
 
-	// map it in style of html table
-	for _, cssProp := range cssList {
-		cssMap[cssProp.Name] = cssProp
-	}
-
-	t.CSS[HEADERSCLASS] = cssMap
 }
 
 // SetSection1CSS sets css for section1 row
@@ -893,4 +909,9 @@ func (t *Table) SetSection2CSS(cssList []*CSSProperty) {
 // getCSSMapKeyForCell format and returns key for cell for css properties usage
 func (t *Table) getCSSMapKeyForCell(rowIndex, colIndex int) string {
 	return `row:` + strconv.Itoa(rowIndex) + `-col:` + strconv.Itoa(colIndex)
+}
+
+// getCSSMapKeyForHeaderCell format and returns key for eader cell for css properties usage
+func (t *Table) getCSSMapKeyForHeaderCell(colIndex int) string {
+	return `header-` + strconv.Itoa(colIndex)
 }

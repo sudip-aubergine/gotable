@@ -137,7 +137,11 @@ func (tt *TextTable) getRow(row int) (string, error) {
 
 	if len(tt.Table.LineBefore) > 0 {
 		j := sort.SearchInts(tt.Table.LineBefore, row)
-		if j < len(tt.Table.LineBefore) && row == tt.Table.LineBefore[j] {
+		// line separator added in `LineAfter`??
+		// If YES, then discard it
+		sepExist := sort.SearchInts(tt.Table.LineAfter, row-1) < tt.Table.RowCount()
+
+		if j < len(tt.Table.LineBefore) && row == tt.Table.LineBefore[j] && !sepExist {
 			s += tt.sprintLineText()
 		}
 	}
