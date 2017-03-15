@@ -11,6 +11,41 @@ import (
 	"time"
 )
 
+// func getTable(row int) *Table {
+
+// 	const description = "Lorem ipsum dolor sit amet, elementum fermentum suspendisse"
+
+// 	var tbl Table
+// 	tbl.Init()
+// 	tbl.SetTitle("Sample Table")
+// 	tbl.SetSection1("Sample Table Section One")
+// 	tbl.SetSection2("Sample Table Section Two")
+
+// 	// add columns
+// 	tbl.AddColumn("Index", 35, CELLSTRING, COLJUSTIFYLEFT)
+// 	tbl.AddColumn("Value", 10, CELLINT, COLJUSTIFYRIGHT)
+// 	tbl.AddColumn("Description", 80, CELLINT, COLJUSTIFYRIGHT)
+
+// 	for i := 0; i < row; i++ {
+// 		tbl.AddRow()
+// 		tbl.Puti(-1, 0, int64(i))
+// 		tbl.Puti(-1, 1, int64(i*10))
+// 		tbl.Puts(-1, 2, description)
+// 	}
+
+// 	return &tbl
+// }
+
+// // from fib_test.go
+// func BenchmarkTable(b *testing.B) {
+// 	// run the table string output function b.N times
+// 	tbl := getTable(10)
+
+// 	for n := 0; n < b.N; n++ {
+// 		_ = tbl.String()
+// 	}
+// }
+
 func TestSmoke(t *testing.T) {
 	var tbl Table
 
@@ -41,7 +76,12 @@ func TestSmoke(t *testing.T) {
 	// output buffer for each type for table
 	var temp bytes.Buffer
 	// text version
-	err = tbl.SprintTable(&temp)
+	_, err = tbl.SprintTable()
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	// FprintTable of text version
+	err = tbl.FprintTable(&temp)
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
@@ -369,7 +409,7 @@ func DoTextOutput(t *testing.T, tbl *Table) {
 		// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
 	}
 
-	if err := tbl.SprintTable(f); err != nil {
+	if err := tbl.TextprintTable(f); err != nil {
 		t.Errorf("smoke_test: Error creating TEXT output: %s\n", err.Error())
 	}
 	// close file after operation
@@ -388,6 +428,61 @@ func DoTextOutput(t *testing.T, tbl *Table) {
 			if i < len(sb) && sb[i] != b[i] {
 				t.Errorf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
 				// fmt.Printf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
+				break
+			}
+		}
+	}
+
+	// add test case for SprintTable, it should be same as TextPrintTable output
+	s, err := tbl.SprintTable()
+	st := []byte(s)
+	if err != nil {
+		t.Errorf("smoke_test: Error creating TEXT output: %s\n", err.Error())
+	}
+	if len(st) != len(sb) {
+		t.Errorf("smoke_test: Expected len = %d,  found len = %d\n", len(st), len(sb))
+	}
+	if len(sb) > 0 && len(st) > 0 {
+		for i := 0; i < len(st); i++ {
+			if i < len(sb) && sb[i] != st[i] {
+				t.Errorf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, st[i], st[i], sb[i], sb[i])
+				break
+			}
+		}
+	}
+
+	// add test case for String, it should be same as TextPrintTable output
+	s = tbl.String()
+	st = []byte(s)
+	if err != nil {
+		t.Errorf("smoke_test: Error creating TEXT output: %s\n", err.Error())
+	}
+	if len(st) != len(sb) {
+		t.Errorf("smoke_test: Expected len = %d,  found len = %d\n", len(st), len(sb))
+	}
+	if len(sb) > 0 && len(st) > 0 {
+		for i := 0; i < len(st); i++ {
+			if i < len(sb) && sb[i] != st[i] {
+				t.Errorf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, st[i], st[i], sb[i], sb[i])
+				break
+			}
+		}
+	}
+
+	// add test case for FprintTable, it should be same as TextPrintTable output
+	var temp bytes.Buffer
+	err = tbl.FprintTable(&temp)
+	st = temp.Bytes()
+	if err != nil {
+		t.Errorf("smoke_test: Error creating TEXT output: %s\n", err.Error())
+	}
+	if len(st) != len(sb) {
+		t.Errorf("smoke_test: Expected len = %d,  found len = %d\n", len(st), len(sb))
+	}
+	if len(sb) > 0 && len(st) > 0 {
+		for i := 0; i < len(st); i++ {
+			if i < len(sb) && sb[i] != st[i] {
+				t.Errorf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, st[i], st[i], sb[i], sb[i])
 				break
 			}
 		}
