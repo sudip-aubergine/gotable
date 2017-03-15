@@ -451,17 +451,6 @@ func (t *Table) Put(row, col int, c Cell) {
 	t.Row[row].Col[col] = c
 }
 
-// String is the "stringer" method implementation for gotable so that you can simply
-// print(t)
-func (t Table) String() string {
-	var temp bytes.Buffer
-	err := t.SprintTable(&temp)
-	if err != nil {
-		return err.Error()
-	}
-	return temp.String()
-}
-
 // createColSet creates a new colset with cells, total number of Headers
 func (t *Table) createColSet(c *Colset) {
 	for i := 0; i < len(t.ColDefs); i++ {
@@ -698,10 +687,36 @@ type TableExportType interface {
 	getRow(row int) (string, error)
 }
 
+// String is the "stringer" method implementation for gotable so that you can simply
+// print(t)
+func (t Table) String() string {
+	var temp bytes.Buffer
+	err := t.FprintTable(&temp)
+	if err != nil {
+		return err.Error()
+	}
+	return temp.String()
+}
+
 // SprintTable renders the entire table to a string for text output
-func (t *Table) SprintTable(w io.Writer) error {
+func (t *Table) SprintTable() (string, error) {
+	var temp bytes.Buffer
+	err := t.FprintTable(&temp)
+	if err != nil {
+		return "", err
+	}
+	return temp.String(), nil
+}
+
+// FprintTable renders the entire table for io.Writer object for text output
+func (t *Table) FprintTable(w io.Writer) error {
 	var tout TableExportType = &TextTable{Table: t, TextColSpace: 2}
 	return tout.writeTableOutput(w)
+}
+
+// TextprintTable renders the entire table for text output, alias for FprintTable
+func (t *Table) TextprintTable(w io.Writer) error {
+	return t.FprintTable(w)
 }
 
 // CSVprintTable renders the entire table for csv output
