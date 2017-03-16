@@ -396,7 +396,7 @@ func TestSmoke(t *testing.T) {
 	DoTextOutput(t, &tbl)
 	DoCSVOutput(t, &tbl)
 	DoHTMLOutput(t, &tbl)
-	// DoPDFOutput(t, &tbl)
+	DoPDFOutput(t, &tbl)
 }
 
 func DoTextOutput(t *testing.T, tbl *Table) {
@@ -556,26 +556,34 @@ func DoHTMLOutput(t *testing.T, tbl *Table) {
 }
 
 func DoPDFOutput(t *testing.T, tbl *Table) {
+
+	funcname := "DoPDFOutput"
+
 	fname := "smoke_test.pdf"
 	f, err := os.Create(fname)
 	if nil != err {
-		t.Errorf("smoke_test: Error creating file %s: %s\n", fname, err.Error())
+		t.Errorf("smoke_test: %s - Error creating file %s: %s\n", funcname, fname, err.Error())
 		// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
 	}
 
 	if err := tbl.PDFprintTable(f); err != nil {
-		t.Errorf("smoke_test: Error creating PDF output: %s\n", err.Error())
+		t.Errorf("smoke_test: %s - Error creating PDF output: %s\n", funcname, err.Error())
 	}
 	// close file after operation
 	f.Close()
 
 	// now compare what we have to the known-good output
 	// b, _ := ioutil.ReadFile("./testdata/smoke_test.pdf")
-	sb, _ := ioutil.ReadFile("./smoke_test.pdf")
+	sb, err := ioutil.ReadFile("./smoke_test.pdf")
+	if err != nil {
+		t.Errorf("smoke_test: %s - Error while reading PDF outputf file: %s\n", funcname, err.Error())
+	}
 
 	if len(sb) == 0 {
-		t.Errorf("smoke_test: Expected some content in PDF output file,  found len = 0")
+		t.Errorf("smoke_test: %s - Expected some content in PDF output file,  found len = 0", funcname)
 	}
+
+	t.Logf("smoke_test: %s - PDF smoke test passed...", funcname)
 
 	// if len(b) != len(sb) {
 	// 	// fmt.Printf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
