@@ -135,10 +135,10 @@ func TestSmoke(t *testing.T) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 	// pdf output
-	err = tbl.PDFprintTable(&temp)
-	if !strings.Contains(err.Error(), errExp) {
-		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
-	}
+	// err = tbl.PDFprintTable(&temp)
+	// if !strings.Contains(err.Error(), errExp) {
+	// 	t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	// }
 
 	const (
 		Name = iota
