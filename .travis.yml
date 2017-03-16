@@ -1,10 +1,7 @@
 language: go
 
-matrix:
-    include:
-      - os: linux
-        dist: trusty
-        sudo: required
+dist: trusty
+sudo: required
 
 env:
   CODECOV_TOKEN="63cd9447-4f4f-4e38-8c74-aa66ff6a26d1"
@@ -20,7 +17,7 @@ before_install:
 
 go:
   - 1.7
-  # - tip
+  - tip
 
 script:
   - make;go test -race -coverprofile=coverage.txt -covermode=atomic
