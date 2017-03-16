@@ -8,10 +8,11 @@ environment:
   WKHTMLTOPDFPATH: c:\wkhtmltopdf
 
 install:
-  - cinst make -v -y -d
-  # - cinst wkhtmltopdf -v -y -d
-  - cinst wget -v -y -d
-  - wget -O c:\wkhtmltopdf http://download.gna.org/wkhtmltopdf/0.12/0.12.4/wkhtmltox-0.12.4_mingw-w64-cross-win64.exe
+  - cinst make -v -y
+  - cinst wkhtmltopdf -v -y
+  # - cinst wget -v -y -d
+  - wget -O c:\wkhtmltopdf\wkhtmltopdf.exe http://download.gna.org/wkhtmltopdf/0.12/0.12.4/wkhtmltox-0.12.4_mingw-w64-cross-win64.exe
+  - c:\wkhtmltopdf\wkhtmltopdf.exe
   - gem install sass
   - echo %PATH%
   - echo %GOPATH%
@@ -21,9 +22,9 @@ install:
   - go env
   - go get -t -v ./...
 
-before_build:
-  - cmd: ECHO this is batch
-  - ps: Write-Host "This is PowerShell"
+# before_build:
+#   - cmd: ECHO this is batch
+#   - ps: Write-Host "This is PowerShell"
 
 build_script:
   - go build -o buildOutput\gotable -i .
