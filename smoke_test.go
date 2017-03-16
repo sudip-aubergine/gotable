@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
+	"os/exec"
 	"strings"
 	"testing"
 	"time"
@@ -558,6 +559,14 @@ func DoHTMLOutput(t *testing.T, tbl *Table) {
 func DoPDFOutput(t *testing.T, tbl *Table) {
 
 	funcname := "DoPDFOutput"
+
+	t.Logf("smoke_test: %s - Container Path of Table = %s", funcname, tbl.Container)
+
+	outs, err := exec.Command("wkhtmltopdf", "-V").Output()
+	if err != nil {
+		t.Errorf("smoke_test: %s - wkhtmltopdf has an error = %s", funcname, err.Error())
+	}
+	t.Logf("smoke_test: %s - Ouput of `wkhtmltopdf -V`= %s", funcname, string(outs))
 
 	fname := "smoke_test.pdf"
 	f, err := os.Create(fname)
