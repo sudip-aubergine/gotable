@@ -1,6 +1,6 @@
 SCSS_BIN := scss
 
-gotable: *.go css wkhtmltopdf
+gotable: *.go css
 	go clean
 	go get -t ./...
 	go vet
