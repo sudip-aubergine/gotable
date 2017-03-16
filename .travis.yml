@@ -4,7 +4,7 @@ matrix:
     include:
       - os: linux
         dist: trusty
-        sudo: false
+        sudo: required
 
 env:
   CODECOV_TOKEN="63cd9447-4f4f-4e38-8c74-aa66ff6a26d1"
