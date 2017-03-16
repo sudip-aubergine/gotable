@@ -1,38 +1,135 @@
 package gotable
 
 import (
-	"fmt"
+	"bytes"
+	"io"
+	"io/ioutil"
+	"os"
+	"os/exec"
+	"path"
+	"strings"
+	"time"
+)
+
+// WKHTMLTOPDFCMD command : html > pdf
+const (
+	WKHTMLTOPDFCMD = "wkhtmltopdf"
+	TEMPSTORE      = "/tmp"
+	DATETIMEFMT    = "_2 Jan 2006 3:04 PM IST"
 )
 
 // PDFTable struct used to prepare table in pdf version
 type PDFTable struct {
 	*Table
+	outbuf bytes.Buffer
 }
 
-func (pt *PDFTable) getTableOutput() (string, error) {
-	return "", fmt.Errorf("PDF output for table is not supported yet")
+func (pt *PDFTable) writeTableOutput(w io.Writer) error {
+
+	// get html output first
+	var temp bytes.Buffer
+	if err := pt.Table.HTMLprintTable(&temp); err != nil {
+		return err
+	}
+	htmlString := temp.String()
+
+	timeCharReplacer := strings.NewReplacer(":", "-", ".", "", "T", "")
+	currentTime := timeCharReplacer.Replace(time.Now().Format(time.RFC3339Nano))
+
+	// create temp file
+	filePath := path.Join(TEMPSTORE, "tablePDF_"+currentTime)
+
+	// only works with html file extension
+	// be careful, must append it
+	tempHTMLFile, err := os.Create(filePath + ".html")
+	if err != nil {
+		return err
+	}
+	// write html string to file
+	_, err = tempHTMLFile.WriteString(htmlString)
+	if err != nil {
+		return err
+	}
+	tempHTMLFile.Close()
+
+	// remove this temp file after operation
+	defer os.Remove(tempHTMLFile.Name())
+
+	// return output file path
+	if err = pt.writePDFBuffer(filePath); err != nil {
+		return err
+	}
+
+	// write output to passed io.Writer interface object
+	_, err = w.Write(pt.outbuf.Bytes())
+	return err
 }
 
-func (pt *PDFTable) getTitle() string {
-	panic("Implementation Error")
-}
+func (pt *PDFTable) writePDFBuffer(inputFile string) error {
 
-func (pt *PDFTable) getSection1() string {
-	panic("Implementation Error")
-}
+	pdfExportTime := time.Now().Format(DATETIMEFMT)
+	htmlExportFile := inputFile + ".html"
 
-func (pt *PDFTable) getSection2() string {
-	panic("Implementation Error")
-}
+	cmdArgs := []string{
+		// top margin
+		"-T", "15",
+		// header center content
+		"--header-center", pt.Table.GetTitle(),
+		// header font size
+		"--header-font-size", "7",
+		// header font
+		"--header-font-name", "opensans",
+		// header spacing
+		"--header-spacing", "3",
+		// bottom margin
+		"-B", "15",
+		// footer spacing
+		"--footer-spacing", "5",
+		// footer font
+		"--footer-font-name", "opensans",
+		// footer font size
+		"--footer-font-size", "7",
+		// footer left content
+		"--footer-left", pdfExportTime,
+		// footer right content
+		"--footer-right", "Page [page] of [toPage]",
+		// page size
+		"--page-size", "Letter",
+		// orientation
+		"--orientation", "Landscape",
+		// input, output
+		htmlExportFile, "-",
+	}
 
-func (pt *PDFTable) getHeaders() (string, error) {
-	panic("Implementation Error")
-}
+	// prepare command
+	wkhtmltopdf := exec.Command(WKHTMLTOPDFCMD, cmdArgs...)
 
-func (pt *PDFTable) getRows() (string, error) {
-	panic("Implementation Error")
-}
+	// REF: https://github.com/aodin/go-pdf-server/blob/master/pdf_server.go
 
-func (pt *PDFTable) getRow(row int) (string, error) {
-	panic("Implementation Error")
+	// get output pipeline
+	output, err := wkhtmltopdf.StdoutPipe()
+	if err != nil {
+		return err
+	}
+
+	// Begin the command
+	if err = wkhtmltopdf.Start(); err != nil {
+		return err
+	}
+
+	// Read the generated PDF from std out
+	b, err := ioutil.ReadAll(output)
+	if err != nil {
+		return err
+	}
+
+	// End the command
+	if err = wkhtmltopdf.Wait(); err != nil {
+		return err
+	}
+
+	// write output to buffer
+	pt.outbuf.Write(b)
+
+	return nil
 }

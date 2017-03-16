@@ -1,6 +1,7 @@
 package gotable
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
@@ -9,6 +10,41 @@ import (
 	"testing"
 	"time"
 )
+
+// func getTable(row int) *Table {
+
+// 	const description = "Lorem ipsum dolor sit amet, elementum fermentum suspendisse"
+
+// 	var tbl Table
+// 	tbl.Init()
+// 	tbl.SetTitle("Sample Table")
+// 	tbl.SetSection1("Sample Table Section One")
+// 	tbl.SetSection2("Sample Table Section Two")
+
+// 	// add columns
+// 	tbl.AddColumn("Index", 35, CELLSTRING, COLJUSTIFYLEFT)
+// 	tbl.AddColumn("Value", 10, CELLINT, COLJUSTIFYRIGHT)
+// 	tbl.AddColumn("Description", 80, CELLINT, COLJUSTIFYRIGHT)
+
+// 	for i := 0; i < row; i++ {
+// 		tbl.AddRow()
+// 		tbl.Puti(-1, 0, int64(i))
+// 		tbl.Puti(-1, 1, int64(i*10))
+// 		tbl.Puts(-1, 2, description)
+// 	}
+
+// 	return &tbl
+// }
+
+// // from fib_test.go
+// func BenchmarkTable(b *testing.B) {
+// 	// run the table string output function b.N times
+// 	tbl := getTable(10)
+
+// 	for n := 0; n < b.N; n++ {
+// 		_ = tbl.String()
+// 	}
+// }
 
 func TestSmoke(t *testing.T) {
 	var tbl Table
@@ -37,18 +73,30 @@ func TestSmoke(t *testing.T) {
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
+	// output buffer for each type for table
+	var temp bytes.Buffer
 	// text version
-	_, err = tbl.SprintTable(TABLEOUTTEXT)
+	_, err = tbl.SprintTable()
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	// FprintTable of text version
+	err = tbl.FprintTable(&temp)
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 	// csv version
-	_, err = tbl.SprintTable(TABLEOUTCSV)
+	err = tbl.CSVprintTable(&temp)
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 	// html version
-	_, err = tbl.SprintTable(TABLEOUTHTML)
+	err = tbl.HTMLprintTable(&temp)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	// pdf version
+	err = tbl.PDFprintTable(&temp)
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
@@ -77,12 +125,17 @@ func TestSmoke(t *testing.T) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 	// csv output
-	_, err = tbl.SprintTable(TABLEOUTCSV)
+	err = tbl.CSVprintTable(&temp)
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 	// html output
-	_, err = tbl.SprintTable(TABLEOUTHTML)
+	err = tbl.HTMLprintTable(&temp)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	// pdf output
+	err = tbl.PDFprintTable(&temp)
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
@@ -187,15 +240,10 @@ func TestSmoke(t *testing.T) {
 		t.Errorf("smoke_test: Expected %d,  found %d\n", tbl.Type(1, Name), CELLSTRING)
 	}
 
-	errExp = "Unrecognized"
-	_, err = tbl.SprintTable(999)
-	if !strings.Contains(err.Error(), errExp) {
-		t.Errorf("smoke_test: Expected %q in error, but not found.  Error = %s\n", errExp, err.Error())
-	}
-
 	// Bang it a bit...
 	tbl.Sort(0, tbl.RowCount()-1, DOB)
 	tbl.AddLineAfter(tbl.RowCount() - 1) // a line after the last row in the table
+	tbl.AddLineBefore(tbl.RowCount())    // a line after the last row in the table
 	tbl.InsertSumRowsetCols(totalsRSet, tbl.RowCount(), []int{Winnings})
 
 	// css property on table for html
@@ -253,6 +301,10 @@ func TestSmoke(t *testing.T) {
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
+	err = tbl.SetHeaderCellCSS(999, cssList)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
 	err = tbl.SetColCSS(999, cssList)
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
@@ -268,6 +320,10 @@ func TestSmoke(t *testing.T) {
 
 	errExp = "Column number is less than zero"
 	err = tbl.HasValidColumn(-999)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
+	err = tbl.SetHeaderCellCSS(-999, cssList)
 	if !strings.Contains(err.Error(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
@@ -302,9 +358,8 @@ func TestSmoke(t *testing.T) {
 	// valid cell css case - make all cells background color yellow
 	cssList = []*CSSProperty{}
 	cssList = append(cssList, &CSSProperty{Name: "background-color", Value: "yellow"})
-	if err = tbl.SetAllCellCSS(cssList); err != nil {
-		t.Errorf("smoke_test: Expected `nil` Error, but found: %s\n", err.Error())
-	}
+	tbl.SetAllCellCSS(cssList)
+
 	// valid set html width case - make second column width wider
 	if err = tbl.SetColHTMLWidth(1, 20, "px"); err != nil {
 		t.Errorf("smoke_test: Expected `nil` Error, but found: %s\n", err.Error())
@@ -314,7 +369,7 @@ func TestSmoke(t *testing.T) {
 	cssList = []*CSSProperty{}
 	cssList = append(cssList, &CSSProperty{Name: "color", Value: "blue"})
 	cssList = append(cssList, &CSSProperty{Name: "font-style", Value: "italic"})
-	cssList = append(cssList, &CSSProperty{Name: "font-size", Value: "20px"})
+	// cssList = append(cssList, &CSSProperty{Name: "font-size", Value: "20px"})
 	tbl.SetTitleCSS(cssList)
 
 	// set header css
@@ -346,21 +401,88 @@ func TestSmoke(t *testing.T) {
 
 func DoTextOutput(t *testing.T, tbl *Table) {
 	(*tbl).TightenColumns()
-	s := fmt.Sprintf("%s\n", (*tbl))
-	saveTableToFile(t, "smoke_test.txt", s)
+
+	fname := "smoke_test.txt"
+	f, err := os.Create(fname)
+	if nil != err {
+		t.Errorf("smoke_test: Error creating file %s: %s\n", fname, err.Error())
+		// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
+	}
+
+	if err := tbl.TextprintTable(f); err != nil {
+		t.Errorf("smoke_test: Error creating TEXT output: %s\n", err.Error())
+	}
+	// close file after operation
+	f.Close()
 
 	// now compare what we have to the known-good output
 	b, _ := ioutil.ReadFile("./testdata/smoke_test.txt")
-	sb := []byte(s)
+	sb, _ := ioutil.ReadFile("./smoke_test.txt")
+
 	if len(b) != len(sb) {
 		// fmt.Printf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
 		t.Errorf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
 	}
 	if len(sb) > 0 && len(b) > 0 {
 		for i := 0; i < len(b); i++ {
-			if sb[i] != b[i] {
+			if i < len(sb) && sb[i] != b[i] {
 				t.Errorf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
 				// fmt.Printf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
+				break
+			}
+		}
+	}
+
+	// add test case for SprintTable, it should be same as TextPrintTable output
+	s, err := tbl.SprintTable()
+	st := []byte(s)
+	if err != nil {
+		t.Errorf("smoke_test: Error creating TEXT output: %s\n", err.Error())
+	}
+	if len(st) != len(sb) {
+		t.Errorf("smoke_test: Expected len = %d,  found len = %d\n", len(st), len(sb))
+	}
+	if len(sb) > 0 && len(st) > 0 {
+		for i := 0; i < len(st); i++ {
+			if i < len(sb) && sb[i] != st[i] {
+				t.Errorf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, st[i], st[i], sb[i], sb[i])
+				break
+			}
+		}
+	}
+
+	// add test case for String, it should be same as TextPrintTable output
+	s = tbl.String()
+	st = []byte(s)
+	if err != nil {
+		t.Errorf("smoke_test: Error creating TEXT output: %s\n", err.Error())
+	}
+	if len(st) != len(sb) {
+		t.Errorf("smoke_test: Expected len = %d,  found len = %d\n", len(st), len(sb))
+	}
+	if len(sb) > 0 && len(st) > 0 {
+		for i := 0; i < len(st); i++ {
+			if i < len(sb) && sb[i] != st[i] {
+				t.Errorf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, st[i], st[i], sb[i], sb[i])
+				break
+			}
+		}
+	}
+
+	// add test case for FprintTable, it should be same as TextPrintTable output
+	var temp bytes.Buffer
+	err = tbl.FprintTable(&temp)
+	st = temp.Bytes()
+	if err != nil {
+		t.Errorf("smoke_test: Error creating TEXT output: %s\n", err.Error())
+	}
+	if len(st) != len(sb) {
+		t.Errorf("smoke_test: Expected len = %d,  found len = %d\n", len(st), len(sb))
+	}
+	if len(sb) > 0 && len(st) > 0 {
+		for i := 0; i < len(st); i++ {
+			if i < len(sb) && sb[i] != st[i] {
+				t.Errorf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, st[i], st[i], sb[i], sb[i])
 				break
 			}
 		}
@@ -368,23 +490,30 @@ func DoTextOutput(t *testing.T, tbl *Table) {
 }
 
 func DoCSVOutput(t *testing.T, tbl *Table) {
-	s, err := (*tbl).SprintTable(TABLEOUTCSV)
+	fname := "smoke_test.csv"
+	f, err := os.Create(fname)
 	if nil != err {
-		t.Errorf("smoke_test: Error creating CSV output: %s\n", err.Error())
-		// fmt.Printf("smoke_test: Error creating CSV output: %s\n", err.Error())
+		t.Errorf("smoke_test: Error creating file %s: %s\n", fname, err.Error())
+		// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
 	}
-	saveTableToFile(t, "smoke_test.csv", s)
+
+	if err := tbl.CSVprintTable(f); err != nil {
+		t.Errorf("smoke_test: Error creating CSV output: %s\n", err.Error())
+	}
+	// close file after operation
+	f.Close()
 
 	// now compare what we have to the known-good output
 	b, _ := ioutil.ReadFile("./testdata/smoke_test.csv")
-	sb := []byte(s)
+	sb, _ := ioutil.ReadFile("./smoke_test.csv")
+
 	if len(b) != len(sb) {
 		// fmt.Printf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
 		t.Errorf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
 	}
 	if len(sb) > 0 && len(b) > 0 {
 		for i := 0; i < len(b); i++ {
-			if sb[i] != b[i] {
+			if i < len(sb) && sb[i] != b[i] {
 				t.Logf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
 				// fmt.Printf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
 				break
@@ -394,23 +523,30 @@ func DoCSVOutput(t *testing.T, tbl *Table) {
 }
 
 func DoHTMLOutput(t *testing.T, tbl *Table) {
-	s, err := (*tbl).SprintTable(TABLEOUTHTML)
+	fname := "smoke_test.html"
+	f, err := os.Create(fname)
 	if nil != err {
-		t.Errorf("smoke_test: Error creating HTML output: %s\n", err.Error())
-		// fmt.Printf("smoke_test: Error creating HTML output: %s\n", err.Error())
+		t.Errorf("smoke_test: Error creating file %s: %s\n", fname, err.Error())
+		// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
 	}
-	saveTableToFile(t, "smoke_test.html", s)
+
+	if err := tbl.HTMLprintTable(f); err != nil {
+		t.Errorf("smoke_test: Error creating HTML output: %s\n", err.Error())
+	}
+	// close file after operation
+	f.Close()
 
 	// now compare what we have to the known-good output
 	b, _ := ioutil.ReadFile("./testdata/smoke_test.html")
-	sb := []byte(s)
+	sb, _ := ioutil.ReadFile("./smoke_test.html")
+
 	if len(b) != len(sb) {
 		// fmt.Printf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
 		t.Errorf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
 	}
 	if len(sb) > 0 && len(b) > 0 {
 		for i := 0; i < len(b); i++ {
-			if sb[i] != b[i] {
+			if i < len(sb) && sb[i] != b[i] {
 				t.Logf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
 				// fmt.Printf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
 				break
@@ -420,14 +556,40 @@ func DoHTMLOutput(t *testing.T, tbl *Table) {
 }
 
 func DoPDFOutput(t *testing.T, tbl *Table) {
-	s, err := (*tbl).SprintTable(TABLEOUTPDF)
+	fname := "smoke_test.pdf"
+	f, err := os.Create(fname)
 	if nil != err {
-		t.Logf("smoke_test: Error creating PDF output: %s\n", err.Error())
-		// fmt.Printf("smoke_test: Error creating PDF output: %s\n", err.Error())
+		t.Errorf("smoke_test: Error creating file %s: %s\n", fname, err.Error())
+		// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
 	}
-	if len(s) > 0 {
-		t.Errorf("smoke_test: Expected: `PDF output for table is not supported yet`,  found: `%s`\n", s)
+
+	if err := tbl.PDFprintTable(f); err != nil {
+		t.Errorf("smoke_test: Error creating PDF output: %s\n", err.Error())
 	}
+	// close file after operation
+	f.Close()
+
+	// now compare what we have to the known-good output
+	// b, _ := ioutil.ReadFile("./testdata/smoke_test.pdf")
+	sb, _ := ioutil.ReadFile("./smoke_test.pdf")
+
+	if len(sb) == 0 {
+		t.Errorf("smoke_test: Expected some content in PDF output file,  found len = 0")
+	}
+
+	// if len(b) != len(sb) {
+	// 	// fmt.Printf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
+	// 	t.Errorf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
+	// }
+	// if len(sb) > 0 && len(b) > 0 {
+	// 	for i := 0; i < len(b); i++ {
+	// 		if i < len(sb) && sb[i] != b[i] {
+	// 			t.Logf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
+	// 			// fmt.Printf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
+	// 			break
+	// 		}
+	// 	}
+	// }
 }
 
 func saveTableToFile(t *testing.T, fname string, s string) error {

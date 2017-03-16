@@ -1,7 +1,9 @@
 package gotable
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"sort"
 
 	"github.com/dustin/go-humanize"
@@ -11,9 +13,10 @@ import (
 type TextTable struct {
 	*Table
 	TextColSpace int
+	outbuf       bytes.Buffer
 }
 
-func (tt *TextTable) getTableOutput() (string, error) {
+func (tt *TextTable) writeTableOutput(w io.Writer) error {
 	var tout string
 
 	// append title
@@ -28,19 +31,24 @@ func (tt *TextTable) getTableOutput() (string, error) {
 	// append headers
 	headerStr, err := tt.getHeaders()
 	if err != nil {
-		return "", err
+		return err
 	}
 	tout += headerStr
 
 	// append rows
 	rowsStr, err := tt.getRows()
 	if err != nil {
-		return "", err
+		return err
 	}
 	tout += rowsStr
 
 	// return output
-	return tout, nil
+	if _, err = tt.outbuf.WriteString(tout); err != nil {
+		return err
+	}
+	// write output to passed io.Writer interface object
+	_, err = w.Write(tt.outbuf.Bytes())
+	return err
 }
 
 func (tt *TextTable) getTitle() string {
@@ -137,7 +145,11 @@ func (tt *TextTable) getRow(row int) (string, error) {
 
 	if len(tt.Table.LineBefore) > 0 {
 		j := sort.SearchInts(tt.Table.LineBefore, row)
-		if j < len(tt.Table.LineBefore) && row == tt.Table.LineBefore[j] {
+		// line separator added in `LineAfter`??
+		// If YES, then discard it
+		sepExist := sort.SearchInts(tt.Table.LineAfter, row-1) < tt.Table.RowCount()
+
+		if j < len(tt.Table.LineBefore) && row == tt.Table.LineBefore[j] && !sepExist {
 			s += tt.sprintLineText()
 		}
 	}

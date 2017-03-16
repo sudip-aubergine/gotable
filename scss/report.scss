@@ -1,49 +1,85 @@
 @import "variable";
 
-table.rpt-table {
-    font: 100% $font-stack;
-    border-collapse: collapse;
-    table-layout: fixed;
+html, body {
     margin: 0;
     padding: 0;
     line-height: $line-height;
+    font: 100% $font-stack;
+    font-size: $font-size-base;
+}
 
-    tr {
+div {
+    display: block;
+}
+
+.container {
+    padding: 0px;
+}
+
+div.rpt-table-container {
+    p {
         &.title {
-            td {
-                text-align: center;
-                font-weight: bold;
-            }
+            text-align: center;
+            font-weight: bold;
+            font-size: 32px;
         }
 
-        &.section1, &.section2 {
-            td {
-                text-align: center;
-            }
+        &.section1 {
+            text-align: center;
+            font-size: 20px;
         }
 
-        &.headers {
-            td {
-                border-bottom: (2 * $table-border-width) solid $table-header-separator;
-                font-weight: bold;
-                padding-top: $table-header-padding-top;
-            }
-        }
-
-        &.top-line {
-            td {
-                border-top: $table-border-width solid $table-rowset-separator;
-            }
-        }
-
-        &.bottom-line {
-            td {
-                border-bottom: $table-border-width solid $table-rowset-separator;
-            }
+        &.section2 {
+            text-align: center;
+            font-size: 16px;
         }
     }
 
-    td {
-        padding: $table-cell-padding;
+    table {
+        border-collapse: collapse;
+        table-layout: fixed;
+        margin: 0;
+        padding: 0;
+
+        td, th {
+            padding: $table-cell-padding;
+        }
+
+        tr {
+            page-break-inside: avoid;
+        }
+
+        thead {
+            display: table-header-group;
+
+            tr {
+                th {
+                    border-bottom: (2 * $table-border-width) solid $table-header-separator;
+                    font-weight: bold;
+                    padding-top: $table-header-padding-top;
+                }
+            }
+        }
+
+        tbody {
+            tr {
+                &.top-line {
+                    td {
+                        border-top: $table-border-width solid $table-rowset-separator;
+                    }
+                }
+
+                &.bottom-line {
+                    td {
+                        border-bottom: $table-border-width solid $table-rowset-separator;
+                    }
+                }
+            }
+        }
+
+        // tfoot {
+        // display: table-row-group;
+        // }
+
     }
 }

@@ -5,251 +5,260 @@
       GOTABLE
     </title>
     <style>
-              html, body{
-                  margin: 0;
-                  padding: 0;
-                  font-family: Helvetica, sans-serif;
-                  font-size: 14px;
-                  background: #FAFAFA;
-              }
-              div{
-                  display: block;
-              }
-              .container{
-                  background-color: rgba(0,0,0,0);
-                  padding: 10px 25px;
-              }
-          
-    </style>
-    <style>
-      table.rpt-table {
+      html, body {
+        margin: 0;
+        padding: 0;
+        line-height: 1.33333;
         font: 100% Helvetica, sans-serif;
+        font-size: 14px;
+      }
+      
+      div {
+        display: block;
+      }
+      
+      .container {
+        padding: 0px;
+      }
+      
+      div.rpt-table-container p.title {
+        text-align: center;
+        font-weight: bold;
+        font-size: 32px;
+      }
+      div.rpt-table-container p.section1 {
+        text-align: center;
+        font-size: 20px;
+      }
+      div.rpt-table-container p.section2 {
+        text-align: center;
+        font-size: 16px;
+      }
+      div.rpt-table-container table {
         border-collapse: collapse;
         table-layout: fixed;
         margin: 0;
         padding: 0;
-        line-height: 1.33333;
       }
-      table.rpt-table tr.title td {
-        text-align: center;
-        font-weight: bold;
-      }
-      table.rpt-table tr.section1 td, table.rpt-table tr.section2 td {
-        text-align: center;
-      }
-      table.rpt-table tr.headers td {
-        border-bottom: 2px solid #ccc;
-        font-weight: bold;
-        padding-top: 50px;
-      }
-      table.rpt-table tr.top-line td {
-        border-top: 1px solid #adadad;
-      }
-      table.rpt-table tr.bottom-line td {
-        border-bottom: 1px solid #adadad;
-      }
-      table.rpt-table td {
+      div.rpt-table-container table td, div.rpt-table-container table th {
         padding: 0.75rem;
+      }
+      div.rpt-table-container table tr {
+        page-break-inside: avoid;
+      }
+      div.rpt-table-container table thead {
+        display: table-header-group;
+      }
+      div.rpt-table-container table thead tr th {
+        border-bottom: 2px solid #BBB;
+        font-weight: bold;
+        padding-top: 20px;
+      }
+      div.rpt-table-container table tbody tr.top-line td {
+        border-top: 1px solid #BBB;
+      }
+      div.rpt-table-container table tbody tr.bottom-line td {
+        border-bottom: 1px solid #BBB;
       }
     </style>
     <style>
-      table.rpt-table tr.title td{color:blue;font-style:italic;font-size:20px;}table.rpt-table tr.section1 td{color:white;background-color:black;}table.rpt-table tr.section2 td{color:red;background-color:yellow;}table.rpt-table tr.headers td.header-0{text-align:left;width:280px;color:orange;font-style:italic;background-color:blue;}table.rpt-table tr.headers td.header-1{text-align:right;width:20px;font-style:italic;background-color:blue;color:orange;}table.rpt-table tr.headers td.header-2{text-align:right;width:84px;background-color:blue;color:orange;font-style:italic;}table.rpt-table tr.headers td.header-3{text-align:left;width:140px;color:orange;font-style:italic;background-color:blue;}table.rpt-table tr.headers td.header-4{text-align:left;width:182px;font-style:italic;background-color:blue;color:orange;}table.rpt-table tr.headers td.header-5{text-align:right;width:168px;color:orange;font-style:italic;background-color:blue;}table.rpt-table tr.headers td.header-6{text-align:left;width:294px;color:orange;font-style:italic;background-color:blue;}table.rpt-table tr.headers td.header-7{text-align:left;width:350px;color:orange;font-style:italic;background-color:blue;}.cell-row-0-col-0{color:blue;background-color:yellow;text-align:left;}.cell-row-0-col-1{text-align:right;color:orange;background-color:yellow;}.cell-row-0-col-2{color:orange;background-color:yellow;text-align:right;}.cell-row-0-col-3{background-color:yellow;text-align:left;color:orange;}.cell-row-0-col-4{text-align:left;color:orange;background-color:yellow;}.cell-row-0-col-5{color:orange;background-color:yellow;text-align:right;}.cell-row-0-col-6{color:orange;background-color:yellow;text-align:left;}.cell-row-0-col-7{color:orange;background-color:yellow;text-align:left;}.cell-row-1-col-0{color:blue;background-color:yellow;text-align:left;}.cell-row-1-col-1{text-align:right;background-color:yellow;}.cell-row-1-col-2{background-color:yellow;text-align:right;}.cell-row-1-col-3{background-color:yellow;text-align:left;}.cell-row-1-col-4{background-color:yellow;text-align:left;}.cell-row-1-col-5{background-color:yellow;text-align:right;}.cell-row-1-col-6{background-color:yellow;text-align:left;}.cell-row-1-col-7{background-color:yellow;text-align:left;}.cell-row-2-col-0{color:blue;background-color:yellow;text-align:left;}.cell-row-2-col-1{background-color:yellow;text-align:right;}.cell-row-2-col-2{background-color:yellow;text-align:right;}.cell-row-2-col-3{background-color:yellow;text-align:left;}.cell-row-2-col-4{text-align:left;background-color:yellow;}.cell-row-2-col-5{background-color:yellow;text-align:right;}.cell-row-2-col-6{background-color:yellow;text-align:left;}.cell-row-2-col-7{background-color:yellow;text-align:left;}.cell-row-3-col-0{color:blue;background-color:yellow;text-align:left;}.cell-row-3-col-1{background-color:yellow;text-align:right;}.cell-row-3-col-2{text-align:right;background-color:yellow;}.cell-row-3-col-3{background-color:yellow;text-align:left;}.cell-row-3-col-4{background-color:yellow;text-align:left;}.cell-row-3-col-5{background-color:yellow;text-align:right;}.cell-row-3-col-6{text-align:left;background-color:yellow;}.cell-row-3-col-7{background-color:yellow;text-align:left;}.cell-row-4-col-0{color:blue;background-color:yellow;text-align:left;}.cell-row-4-col-1{background-color:yellow;text-align:right;}.cell-row-4-col-2{background-color:yellow;text-align:right;}.cell-row-4-col-3{background-color:yellow;text-align:left;}.cell-row-4-col-4{background-color:yellow;text-align:left;}.cell-row-4-col-5{text-align:right;background-color:yellow;}.cell-row-4-col-6{background-color:yellow;text-align:left;}.cell-row-4-col-7{background-color:yellow;text-align:left;}.cell-row-5-col-0{color:blue;background-color:yellow;text-align:left;}.cell-row-5-col-1{background-color:yellow;text-align:right;}.cell-row-5-col-2{background-color:yellow;text-align:right;}.cell-row-5-col-3{background-color:yellow;text-align:left;}.cell-row-5-col-4{background-color:yellow;text-align:left;}.cell-row-5-col-5{text-align:right;background-color:yellow;}.cell-row-5-col-6{background-color:yellow;text-align:left;}.cell-row-5-col-7{background-color:yellow;text-align:left;}
+      div.rpt-table-container p.title{color:blue;font-style:italic;}div.rpt-table-container p.section1{background-color:black;color:white;}div.rpt-table-container p.section2{background-color:yellow;color:red;}div.rpt-table-container table thead tr th.header-0{background-color:blue;color:orange;font-style:italic;text-align:left;width:280px;}div.rpt-table-container table thead tr th.header-1{background-color:blue;color:orange;font-style:italic;text-align:right;width:20px;}div.rpt-table-container table thead tr th.header-2{background-color:blue;color:orange;font-style:italic;text-align:right;width:84px;}div.rpt-table-container table thead tr th.header-3{background-color:blue;color:orange;font-style:italic;text-align:left;width:140px;}div.rpt-table-container table thead tr th.header-4{background-color:blue;color:orange;font-style:italic;text-align:left;width:182px;}div.rpt-table-container table thead tr th.header-5{background-color:blue;color:orange;font-style:italic;text-align:right;width:168px;}div.rpt-table-container table thead tr th.header-6{background-color:blue;color:orange;font-style:italic;text-align:left;width:294px;}div.rpt-table-container table thead tr th.header-7{background-color:blue;color:orange;font-style:italic;text-align:left;width:350px;}div.rpt-table-container table tbody tr td.cell-row-0-col-0{background-color:yellow;color:blue;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-0-col-1{background-color:yellow;color:orange;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-0-col-2{background-color:yellow;color:orange;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-0-col-3{background-color:yellow;color:orange;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-0-col-4{background-color:yellow;color:orange;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-0-col-5{background-color:yellow;color:orange;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-0-col-6{background-color:yellow;color:orange;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-0-col-7{background-color:yellow;color:orange;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-1-col-0{background-color:yellow;color:blue;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-1-col-1{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-1-col-2{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-1-col-3{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-1-col-4{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-1-col-5{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-1-col-6{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-1-col-7{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-2-col-0{background-color:yellow;color:blue;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-2-col-1{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-2-col-2{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-2-col-3{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-2-col-4{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-2-col-5{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-2-col-6{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-2-col-7{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-3-col-0{background-color:yellow;color:blue;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-3-col-1{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-3-col-2{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-3-col-3{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-3-col-4{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-3-col-5{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-3-col-6{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-3-col-7{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-4-col-0{background-color:yellow;color:blue;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-4-col-1{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-4-col-2{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-4-col-3{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-4-col-4{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-4-col-5{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-4-col-6{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-4-col-7{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-5-col-0{background-color:yellow;color:blue;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-5-col-1{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-5-col-2{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-5-col-3{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-5-col-4{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-5-col-5{background-color:yellow;text-align:right;}div.rpt-table-container table tbody tr td.cell-row-5-col-6{background-color:yellow;text-align:left;}div.rpt-table-container table tbody tr td.cell-row-5-col-7{background-color:yellow;text-align:left;}
     </style>
   </head>
   <body>
     <div class="container">
-      <table class="rpt-table">
-        <tr class="title">
-          <td colspan="8">
-            GOTABLE
-          </td>
-        </tr>
-        <tr class="section1">
-          <td colspan="8">
-            A Smoke Test
-          </td>
-        </tr>
-        <tr class="section2">
-          <td colspan="8">
-            February 21, 2017
-          </td>
-        </tr>
-        <tr class="headers">
-          <td class="header-0">
-            Name
-          </td>
-          <td class="header-1">
-            Person Age
-          </td>
-          <td class="header-2">
-            Height (cm)
-          </td>
-          <td class="header-3">
-            Date of Birth
-          </td>
-          <td class="header-4">
-            Country of Birth
-          </td>
-          <td class="header-5">
-            Winnings
-          </td>
-          <td class="header-6">
-            Notes
-          </td>
-          <td class="header-7">
-            Random Date/Time
-          </td>
-        </tr>
-        <tr>
-          <td class="cell-row-0-col-0">
-            Casandra Åberg
-          </td>
-          <td class="cell-row-0-col-1">
-                66
-          </td>
-          <td class="cell-row-0-col-2">
-               158
-          </td>
-          <td class="cell-row-0-col-3">
-            04/21/1950
-          </td>
-          <td class="cell-row-0-col-4">
-            Sweden
-          </td>
-          <td class="cell-row-0-col-5">
-               93,883.25
-          </td>
-          <td class="cell-row-0-col-6">
-            2000 Seat Toledo
-          </td>
-          <td class="cell-row-0-col-7">
-              01/28/2217 21:44:00 UTC
-          </td>
-        </tr>
-        <tr>
-          <td class="cell-row-1-col-0">
-            Lynette C. Allen
-          </td>
-          <td class="cell-row-1-col-1">
-                56
-          </td>
-          <td class="cell-row-1-col-2">
-               156
-          </td>
-          <td class="cell-row-1-col-3">
-            10/04/1960
-          </td>
-          <td class="cell-row-1-col-4">
-            United States
-          </td>
-          <td class="cell-row-1-col-5">
-               45,373.00
-          </td>
-          <td class="cell-row-1-col-6">
-            A lot more notes. A whole, big, line with lots and lots and lots and lots of notes. And some more notes.
-          </td>
-          <td class="cell-row-1-col-7">
-              01/23/2215 23:28:00 UTC
-          </td>
-        </tr>
-        <tr>
-          <td class="cell-row-2-col-0">
-            Mary M. Oneil
-          </td>
-          <td class="cell-row-2-col-1">
-                47
-          </td>
-          <td class="cell-row-2-col-2">
-               165
-          </td>
-          <td class="cell-row-2-col-3">
-            03/02/1969
-          </td>
-          <td class="cell-row-2-col-4">
-            United States
-          </td>
-          <td class="cell-row-2-col-5">
-               17,633.21
-          </td>
-          <td class="cell-row-2-col-6">
-            A few notes here withaverylongnoteword
-          </td>
-          <td class="cell-row-2-col-7">
-              09/11/2209 09:00:00 UTC
-          </td>
-        </tr>
-        <tr>
-          <td class="cell-row-3-col-0">
-            Stanislaus Aliyeva
-          </td>
-          <td class="cell-row-3-col-1">
-                42
-          </td>
-          <td class="cell-row-3-col-2">
-               172
-          </td>
-          <td class="cell-row-3-col-3">
-            04/10/1974
-          </td>
-          <td class="cell-row-3-col-4">
-            Slovinia
-          </td>
-          <td class="cell-row-3-col-5">
-              106,632.36
-          </td>
-          <td class="cell-row-3-col-6">
-            A few notes here
-          </td>
-          <td class="cell-row-3-col-7">
-              03/20/2020 08:36:00 UTC
-          </td>
-        </tr>
-        <tr class="bottom-line">
-          <td class="cell-row-4-col-0">
-            Amanda Melo Ferreira
-          </td>
-          <td class="cell-row-4-col-1">
-                55
-          </td>
-          <td class="cell-row-4-col-2">
-               174
-          </td>
-          <td class="cell-row-4-col-3">
-            08/06/1977
-          </td>
-          <td class="cell-row-4-col-4">
-            Brazil
-          </td>
-          <td class="cell-row-4-col-5">
-               46,673.42
-          </td>
-          <td class="cell-row-4-col-6">
-            2006 Ford Falcon
-          </td>
-          <td class="cell-row-4-col-7">
-              07/12/2073 18:39:00 UTC
-          </td>
-        </tr>
-        <tr>
-          <td class="cell-row-5-col-0">
-          </td>
-          <td class="cell-row-5-col-1">
-          </td>
-          <td class="cell-row-5-col-2">
-          </td>
-          <td class="cell-row-5-col-3">
-          </td>
-          <td class="cell-row-5-col-4">
-          </td>
-          <td class="cell-row-5-col-5">
-              310,195.24
-          </td>
-          <td class="cell-row-5-col-6">
-          </td>
-          <td class="cell-row-5-col-7">
-          </td>
-        </tr>
-      </table>
+      <div class="rpt-table-container">
+        <p class="title">
+          GOTABLE
+        </p>
+        <p class="section1">
+          A Smoke Test
+        </p>
+        <p class="section2">
+          February 21, 2017
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th class="header-0">
+                Name
+              </th>
+              <th class="header-1">
+                Person Age
+              </th>
+              <th class="header-2">
+                Height (cm)
+              </th>
+              <th class="header-3">
+                Date of Birth
+              </th>
+              <th class="header-4">
+                Country of Birth
+              </th>
+              <th class="header-5">
+                Winnings
+              </th>
+              <th class="header-6">
+                Notes
+              </th>
+              <th class="header-7">
+                Random Date/Time
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="cell-row-0-col-0">
+                Casandra Åberg
+              </td>
+              <td class="cell-row-0-col-1">
+                    66
+              </td>
+              <td class="cell-row-0-col-2">
+                   158
+              </td>
+              <td class="cell-row-0-col-3">
+                04/21/1950
+              </td>
+              <td class="cell-row-0-col-4">
+                Sweden
+              </td>
+              <td class="cell-row-0-col-5">
+                   93,883.25
+              </td>
+              <td class="cell-row-0-col-6">
+                2000 Seat Toledo
+              </td>
+              <td class="cell-row-0-col-7">
+                  01/28/2217 21:44:00 UTC
+              </td>
+            </tr>
+            <tr>
+              <td class="cell-row-1-col-0">
+                Lynette C. Allen
+              </td>
+              <td class="cell-row-1-col-1">
+                    56
+              </td>
+              <td class="cell-row-1-col-2">
+                   156
+              </td>
+              <td class="cell-row-1-col-3">
+                10/04/1960
+              </td>
+              <td class="cell-row-1-col-4">
+                United States
+              </td>
+              <td class="cell-row-1-col-5">
+                   45,373.00
+              </td>
+              <td class="cell-row-1-col-6">
+                A lot more notes. A whole, big, line with lots and lots and lots and lots of notes. And some more notes.
+              </td>
+              <td class="cell-row-1-col-7">
+                  01/23/2215 23:28:00 UTC
+              </td>
+            </tr>
+            <tr>
+              <td class="cell-row-2-col-0">
+                Mary M. Oneil
+              </td>
+              <td class="cell-row-2-col-1">
+                    47
+              </td>
+              <td class="cell-row-2-col-2">
+                   165
+              </td>
+              <td class="cell-row-2-col-3">
+                03/02/1969
+              </td>
+              <td class="cell-row-2-col-4">
+                United States
+              </td>
+              <td class="cell-row-2-col-5">
+                   17,633.21
+              </td>
+              <td class="cell-row-2-col-6">
+                A few notes here withaverylongnoteword
+              </td>
+              <td class="cell-row-2-col-7">
+                  09/11/2209 09:00:00 UTC
+              </td>
+            </tr>
+            <tr>
+              <td class="cell-row-3-col-0">
+                Stanislaus Aliyeva
+              </td>
+              <td class="cell-row-3-col-1">
+                    42
+              </td>
+              <td class="cell-row-3-col-2">
+                   172
+              </td>
+              <td class="cell-row-3-col-3">
+                04/10/1974
+              </td>
+              <td class="cell-row-3-col-4">
+                Slovinia
+              </td>
+              <td class="cell-row-3-col-5">
+                  106,632.36
+              </td>
+              <td class="cell-row-3-col-6">
+                A few notes here
+              </td>
+              <td class="cell-row-3-col-7">
+                  03/20/2020 08:36:00 UTC
+              </td>
+            </tr>
+            <tr class="bottom-line">
+              <td class="cell-row-4-col-0">
+                Amanda Melo Ferreira
+              </td>
+              <td class="cell-row-4-col-1">
+                    55
+              </td>
+              <td class="cell-row-4-col-2">
+                   174
+              </td>
+              <td class="cell-row-4-col-3">
+                08/06/1977
+              </td>
+              <td class="cell-row-4-col-4">
+                Brazil
+              </td>
+              <td class="cell-row-4-col-5">
+                   46,673.42
+              </td>
+              <td class="cell-row-4-col-6">
+                2006 Ford Falcon
+              </td>
+              <td class="cell-row-4-col-7">
+                  07/12/2073 18:39:00 UTC
+              </td>
+            </tr>
+            <tr>
+              <td class="cell-row-5-col-0">
+              </td>
+              <td class="cell-row-5-col-1">
+              </td>
+              <td class="cell-row-5-col-2">
+              </td>
+              <td class="cell-row-5-col-3">
+              </td>
+              <td class="cell-row-5-col-4">
+              </td>
+              <td class="cell-row-5-col-5">
+                  310,195.24
+              </td>
+              <td class="cell-row-5-col-6">
+              </td>
+              <td class="cell-row-5-col-7">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </body>
 </html>

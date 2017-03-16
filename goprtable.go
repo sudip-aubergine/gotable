@@ -1,7 +1,9 @@
 package gotable
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"sort"
 	"strconv"
 	"strings"
@@ -87,17 +89,6 @@ type Table struct {
 	RS          []Rowset                           // a list of rowsets
 	CSS         map[string]map[string]*CSSProperty //CSS holds css property for title, section1, section2, headers, cells
 	Container   string                             // Container has current executable folder path, so that we can get required dependent files
-}
-
-// TableExportType each export output format must satisfy this interface
-type TableExportType interface {
-	getTableOutput() (string, error)
-	getTitle() string
-	getSection1() string
-	getSection2() string
-	getHeaders() (string, error)
-	getRows() (string, error)
-	getRow(row int) (string, error)
 }
 
 // SetTitle sets the table's Title string to the supplied value.
@@ -460,16 +451,6 @@ func (t *Table) Put(row, col int, c Cell) {
 	t.Row[row].Col[col] = c
 }
 
-// String is the "stringer" method implementation for gotable so that you can simply
-// print(t)
-func (t Table) String() string {
-	s, err := t.SprintTable(TABLEOUTTEXT)
-	if err != nil {
-		return err.Error()
-	}
-	return s
-}
-
 // createColSet creates a new colset with cells, total number of Headers
 func (t *Table) createColSet(c *Colset) {
 	for i := 0; i < len(t.ColDefs); i++ {
@@ -652,11 +633,6 @@ func (t *Table) TightenColumns() {
 	}
 }
 
-// SprintTable renders the entire table to a string
-func (t *Table) SprintTable(f int) (string, error) {
-	return t.sprintTableFormat(f)
-}
-
 // HasData checks that table has actually data or not
 func (t *Table) HasData() error {
 	// if there are no rows in table
@@ -696,28 +672,69 @@ func (t *Table) HasValidColumn(colIndex int) error {
 	return nil
 }
 
-// sprintTableFormat renders the entire table to a string
-func (t *Table) sprintTableFormat(f int) (string, error) {
-	var tout TableExportType
-	switch f {
-	case TABLEOUTTEXT:
-		tout = &TextTable{Table: t, TextColSpace: 2}
-		break
-	case TABLEOUTHTML:
-		tout = &HTMLTable{Table: t}
-		break
-	case TABLEOUTCSV:
-		tout = &CSVTable{Table: t, CellSep: ","}
-		break
-	case TABLEOUTPDF:
-		tout = &PDFTable{Table: t}
-		break
-	default:
-		return "", fmt.Errorf("Unrecognized table format: %d", f)
-	}
+// ==========================
+// Table Export Output
+// ==========================
 
-	// return expected formatted output of table object
-	return tout.getTableOutput()
+// TableExportType each export output format must satisfy this interface
+type TableExportType interface {
+	writeTableOutput(w io.Writer) error
+	getTitle() string
+	getSection1() string
+	getSection2() string
+	getHeaders() (string, error)
+	getRows() (string, error)
+	getRow(row int) (string, error)
+}
+
+// String is the "stringer" method implementation for gotable so that you can simply
+// print(t)
+func (t Table) String() string {
+	var temp bytes.Buffer
+	err := t.FprintTable(&temp)
+	if err != nil {
+		return err.Error()
+	}
+	return temp.String()
+}
+
+// SprintTable renders the entire table to a string for text output
+func (t *Table) SprintTable() (string, error) {
+	var temp bytes.Buffer
+	err := t.FprintTable(&temp)
+	if err != nil {
+		return "", err
+	}
+	return temp.String(), nil
+}
+
+// FprintTable renders the entire table for io.Writer object for text output
+func (t *Table) FprintTable(w io.Writer) error {
+	var tout TableExportType = &TextTable{Table: t, TextColSpace: 2}
+	return tout.writeTableOutput(w)
+}
+
+// TextprintTable renders the entire table for text output, alias for FprintTable
+func (t *Table) TextprintTable(w io.Writer) error {
+	return t.FprintTable(w)
+}
+
+// CSVprintTable renders the entire table for csv output
+func (t *Table) CSVprintTable(w io.Writer) error {
+	var tout TableExportType = &CSVTable{Table: t, CellSep: ","}
+	return tout.writeTableOutput(w)
+}
+
+// HTMLprintTable renders the entire table for html output
+func (t *Table) HTMLprintTable(w io.Writer) error {
+	var tout TableExportType = &HTMLTable{Table: t}
+	return tout.writeTableOutput(w)
+}
+
+// PDFprintTable renders the entire table for pdf output
+func (t *Table) PDFprintTable(w io.Writer) error {
+	var tout = &PDFTable{Table: t}
+	return tout.writeTableOutput(w)
 }
 
 // ==========================
@@ -768,6 +785,31 @@ func (t *Table) SetColCSS(colIndex int, cssList []*CSSProperty) error {
 	return nil
 }
 
+// SetHeaderCellCSS sets css for only headers cell
+func (t *Table) SetHeaderCellCSS(colIndex int, cssList []*CSSProperty) error {
+	// check row is valid or not
+	if err := t.HasValidColumn(colIndex); err != nil {
+		return err
+	}
+
+	// header class
+	thClass := t.getCSSMapKeyForHeaderCell(colIndex)
+	// css property map
+	cssMap, ok := t.CSS[thClass]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[thClass] = cssMap
+
+	return nil
+}
+
 // SetCellCSS sets css properties for Table Cells
 func (t *Table) SetCellCSS(rowIndex, colIndex int, cssList []*CSSProperty) error {
 
@@ -799,7 +841,7 @@ func (t *Table) SetCellCSS(rowIndex, colIndex int, cssList []*CSSProperty) error
 }
 
 // SetAllCellCSS sets css properties for all Table Cells
-func (t *Table) SetAllCellCSS(cssList []*CSSProperty) error {
+func (t *Table) SetAllCellCSS(cssList []*CSSProperty) {
 
 	// convert it into cells attributes
 	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
@@ -808,8 +850,6 @@ func (t *Table) SetAllCellCSS(cssList []*CSSProperty) error {
 			t.SetCellCSS(rowIndex, colIndex, cssList)
 		}
 	}
-
-	return nil
 }
 
 // SetColHTMLWidth sets the column width for table
@@ -844,18 +884,11 @@ func (t *Table) SetTitleCSS(cssList []*CSSProperty) {
 
 // SetHeaderCSS sets css for headers row
 func (t *Table) SetHeaderCSS(cssList []*CSSProperty) {
-	// css property map
-	cssMap, ok := t.CSS[HEADERSCLASS]
-	if !ok {
-		cssMap = make(map[string]*CSSProperty)
+
+	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
+		t.SetHeaderCellCSS(colIndex, cssList)
 	}
 
-	// map it in style of html table
-	for _, cssProp := range cssList {
-		cssMap[cssProp.Name] = cssProp
-	}
-
-	t.CSS[HEADERSCLASS] = cssMap
 }
 
 // SetSection1CSS sets css for section1 row
@@ -893,4 +926,9 @@ func (t *Table) SetSection2CSS(cssList []*CSSProperty) {
 // getCSSMapKeyForCell format and returns key for cell for css properties usage
 func (t *Table) getCSSMapKeyForCell(rowIndex, colIndex int) string {
 	return `row:` + strconv.Itoa(rowIndex) + `-col:` + strconv.Itoa(colIndex)
+}
+
+// getCSSMapKeyForHeaderCell format and returns key for eader cell for css properties usage
+func (t *Table) getCSSMapKeyForHeaderCell(colIndex int) string {
+	return `header-` + strconv.Itoa(colIndex)
 }
