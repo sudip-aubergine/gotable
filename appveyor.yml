@@ -1,12 +1,14 @@
 version: "{build}"
-clone_folder: c:\go\src\gotable
+clone_folder: c:\go-work\src\gotable
+
+environment:
+  GOPATH: c:\go-work
 
 install:
   - cinst wkhtmltopdf
   - echo %PATH%
   - echo %GOPATH%
-  - echo %GOROOT%
-  - set PATH=c:\go\bin;%PATH%
+  - set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
   - go version
   - go env
   - go get -t -v ./...
