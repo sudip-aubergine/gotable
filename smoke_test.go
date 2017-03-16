@@ -396,7 +396,7 @@ func TestSmoke(t *testing.T) {
 	DoTextOutput(t, &tbl)
 	DoCSVOutput(t, &tbl)
 	DoHTMLOutput(t, &tbl)
-	DoPDFOutput(t, &tbl)
+	// DoPDFOutput(t, &tbl)
 }
 
 func DoTextOutput(t *testing.T, tbl *Table) {
