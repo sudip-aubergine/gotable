@@ -5,14 +5,16 @@ clone_folder: c:\go-work\src\gotable
 
 environment:
   GOPATH: c:\go-work
+  WKHTMLTOPDFPATH: c:\wkhtmltopdf
 
 install:
   - cinst make
-  - cinst wkhtmltopdf
+  - cinst wkhtmltopdf --dir 'c:\wkhtmltopdf' -y
   - gem install sass
   - echo %PATH%
   - echo %GOPATH%
-  - set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
+  - set PATH=%GOPATH%\bin;c:\go\bin;%WKHTMLTOPDFPATH%;%PATH%
+  - echo %PATH%
   - go version
   - go env
   - go get -t -v ./...
