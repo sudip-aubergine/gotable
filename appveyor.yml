@@ -8,8 +8,8 @@ environment:
   WKHTMLTOPDFPATH: c:\wkhtmltopdf
 
 install:
-  - cinst make -v -y
-  - cinst wkhtmltopdf -v -y
+  - cinst make -v -y -d
+  - cinst wkhtmltopdf -v -y -d
   - gem install sass
   - echo %PATH%
   - echo %GOPATH%
