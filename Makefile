@@ -12,6 +12,10 @@ clean:
 
 css:
 	${SCSS_BIN} ./scss/report.scss ./report.css --style=expanded --sourcemap=none
+	@echo "Current working directory:"
+	pwd
+	@echo "scss completed.  ls -l ./report.css:"
+	ls -l ./report.css
 
 lint:
 	golint
