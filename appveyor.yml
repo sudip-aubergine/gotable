@@ -3,7 +3,19 @@ clone_folder: c:\gotable
 
 install:
   - cinst wkhtmltopdf
+  - echo %PATH%
+  - echo %GOPATH%
+  - set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
+  - go version
+  - go env
 
 before_build:
   - cmd: ECHO this is batch
   - ps: Write-Host "This is PowerShell"
+
+build_script:
+  - go build -o buildOutput\gotable -i .
+
+artifacts:
+  - path: buildOutput/gotable
+    name: gotable binary
