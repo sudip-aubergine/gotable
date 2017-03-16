@@ -19,7 +19,11 @@ before_build:
 
 build_script:
   - go build -o buildOutput\gotable -i .
+  - make
 
 artifacts:
   - path: buildOutput/gotable
     name: gotable binary
+
+test:
+  - make test
