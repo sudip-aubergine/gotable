@@ -9,6 +9,7 @@ environment:
 install:
   - cinst make
   - cinst wkhtmltopdf
+  - gem install sass
   - echo %PATH%
   - echo %GOPATH%
   - set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
