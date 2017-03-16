@@ -1,6 +1,6 @@
 SCSS_BIN := scss
 
-gotable: *.go css
+gotable: *.go css wkhtmltopdf
 	go clean
 	go get -t ./...
 	go vet
@@ -24,3 +24,8 @@ update:
 	cp smoke_test.txt smoke_test.csv smoke_test.html smoke_test.pdf testdata/
 
 all: clean gotable test
+
+deps: wkhtmltopdf
+
+wkhtmltopdf:
+	./pdfinstall.sh
