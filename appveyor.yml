@@ -8,6 +8,7 @@ install:
   - set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
   - go version
   - go env
+  - go get -t -v ./...
 
 before_build:
   - cmd: ECHO this is batch
