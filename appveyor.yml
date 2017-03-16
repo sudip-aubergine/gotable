@@ -1,6 +1,9 @@
 version: "{build}"
 clone_folder: c:\gotable
 
+environment:
+  GOPATH: c:\gopath
+
 install:
   - cinst wkhtmltopdf
   - echo %PATH%
