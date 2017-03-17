@@ -12,6 +12,10 @@ clean:
 
 css:
 	${SCSS_BIN} ./scss/report.scss ./report.css --style=expanded --sourcemap=none
+	@echo "Current working directory:"
+	pwd
+	@echo "scss completed.  ls -l ./report.css:"
+	ls -l ./report.css
 
 lint:
 	golint
@@ -24,3 +28,8 @@ update:
 	cp smoke_test.txt smoke_test.csv smoke_test.html smoke_test.pdf testdata/
 
 all: clean gotable test
+
+deps: wkhtmltopdf
+
+wkhtmltopdf:
+	./pdfinstall.sh
