@@ -42,7 +42,8 @@ div.rpt-table-container {
         padding: 0;
 
         td, th {
-            padding: $table-cell-padding;
+            //padding: $table-cell-padding;
+
         }
 
         tr {
@@ -56,14 +57,14 @@ div.rpt-table-container {
                 th {
                     border-bottom: (2 * $table-border-width) solid $table-header-separator;
                     font-weight: bold;
-
-                    // padding-top: $table-header-padding-top;
-
+                    padding-top: $table-header-padding-top;
                 }
             }
         }
 
         tbody {
+            // white-space: nowrap;
+
             tr {
                 &.top-line {
                     td {

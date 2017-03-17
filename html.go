@@ -43,7 +43,10 @@ func (ht *HTMLTable) writeTableOutput(w io.Writer) error {
 	var err error
 
 	// set custom padding of td cells in case it is being generated after pdf
-	ht.Table.SetAllCellCSS([]*CSSProperty{{Name: "padding", Value: "5px 10px"}, {Name: "vertical-align", Value: "top"}})
+	ht.Table.SetAllCellCSS([]*CSSProperty{{Name: "padding", Value: "5px 10px"}})
+
+	// set custom padding of th cells in case it is being generated after pdf
+	ht.Table.SetHeaderCSS([]*CSSProperty{{Name: "padding", Value: "5px 10px"}})
 
 	// append title
 	tContainer += ht.getTitle()
@@ -220,18 +223,20 @@ func (ht *HTMLTable) getHeaders() (string, error) {
 		// NOTE: width calculatation should be done after alignment
 		// width only needs to be set on header cells only not on all
 		// cells belong to column
-		var colWidth string
+		var colWidthUnit string
+		var colWidth int
 
 		if headerCell.HTMLWidth != -1 {
 			// calculate column width based on characters with font size
-			colWidth = strconv.Itoa(headerCell.HTMLWidth) + CSSFONTUNIT
+			colWidth = headerCell.HTMLWidth
 		} else {
 			// calculate column width based on characters with font size
-			colWidth = strconv.Itoa(ht.Table.ColDefs[headerIndex].Width*CSSFONTSIZE) + CSSFONTUNIT
+			colWidth = ht.Table.ColDefs[headerIndex].Width * CSSFONTSIZE
+			// colWidth = int(1 * float64(colWidth))
 		}
-
+		colWidthUnit = strconv.Itoa(colWidth) + CSSFONTUNIT
 		// set width css property on this header cell, no need to apply on each and every cell of this column
-		ht.Table.SetHeaderCellCSS(headerIndex, []*CSSProperty{{Name: "width", Value: colWidth}})
+		ht.Table.SetHeaderCellCSS(headerIndex, []*CSSProperty{{Name: "width", Value: colWidthUnit}})
 
 		// --------------------
 		// apply css on each header cell
