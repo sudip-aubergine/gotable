@@ -40,6 +40,7 @@ type HTMLTemplateContext struct {
 }
 
 func (ht *HTMLTable) writeTableOutput(w io.Writer) error {
+
 	var tContainer string
 	var err error
 
