@@ -91,7 +91,6 @@ func stringln(s string) string {
 func isValidPath(path string) bool {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return false
-	} else {
-		return true
 	}
+	return true
 }
