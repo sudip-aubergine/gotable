@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"path"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/kardianos/osext"
 )
 
 // Table is a simple skeletal row-column "class" for go that implements a few
@@ -88,7 +88,8 @@ type Table struct {
 	LineBefore  []int                              // array of row numbers that have a horizontal line before they are printed
 	RS          []Rowset                           // a list of rowsets
 	CSS         map[string]map[string]*CSSProperty //CSS holds css property for title, section1, section2, headers, cells
-	Container   string                             // Container has current executable folder path, so that we can get required dependent files
+	container   string                             // container holds custom path
+	_container  string                             // _container contains default source code dev dir path
 }
 
 // SetTitle sets the table's Title string to the supplied value.
@@ -163,10 +164,25 @@ func (t *Table) Init() {
 	t.DateTimeFmt = "01/02/2006 15:04:00 MST"
 	t.CSS = make(map[string]map[string]*CSSProperty)
 
-	// get current executable dir path
-	// error should be handled whenever there is a requirement for any dependency
-	folderPath, _ := osext.ExecutableFolder()
-	t.Container = folderPath
+	// set default dev directory path for container to look for report.css
+	// it should be in same directory of this file
+	_, filepath, _, _ := runtime.Caller(1)
+	t._container = path.Dir(filepath)
+	t.container = t._container
+}
+
+// SetContainer sets the path so that one can access report.css
+// it is set default to current source file dir
+// one can set custom location in which modifed report.css must exists
+// first it checks for valid path, if it is then will set otherwise return an error
+func (t *Table) SetContainer(path string) error {
+	if !isValidPath(path) {
+		return fmt.Errorf("Provided path %s is not valid", path)
+	}
+
+	// set if path is valid
+	t.container = path
+	return nil
 }
 
 // AddLineAfter keeps track of the row numbers after which a line will be printed

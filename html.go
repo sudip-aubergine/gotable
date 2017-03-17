@@ -8,7 +8,6 @@ import (
 	"path"
 	"sort"
 	"strconv"
-	// "strings"
 	"text/template"
 
 	"github.com/dustin/go-humanize"
@@ -389,7 +388,15 @@ func (ht *HTMLTable) getCSSForHTMLTag(tagEl string, cssList []*CSSProperty) stri
 
 // getReportDefaultCSS reads default css from report.css
 func (ht *HTMLTable) getReportDefaultCSS() (string, error) {
-	reportCSS := path.Join(ht.Table.Container, "report.css")
+	// try to get it from custom location
+	reportCSS := path.Join(ht.Table.container, "report.css")
+	if !isValidPath(reportCSS) {
+		// try to get from default location
+		reportCSS = path.Join(ht.Table._container, "report.css")
+		if !isValidPath(reportCSS) {
+			return "", fmt.Errorf("report.css not found at path: %s", reportCSS)
+		}
+	}
 
 	cssString, err := ioutil.ReadFile(reportCSS)
 	if err != nil {
@@ -400,7 +407,17 @@ func (ht *HTMLTable) getReportDefaultCSS() (string, error) {
 
 // getTableTemplatePath returns the path of table template file
 func (ht *HTMLTable) getTableTemplatePath() (string, error) {
-	tmpl := path.Join(ht.Table.Container, "table.tmpl")
+	// try to get it from custom location
+	tmpl := path.Join(ht.Table.container, "table.tmpl")
+	if !isValidPath(tmpl) {
+		// try to get from default location
+		tmpl = path.Join(ht.Table._container, "table.tmpl")
+		if !isValidPath(tmpl) {
+			return "", fmt.Errorf("table.tmpl not found at path: %s", tmpl)
+		}
+	}
+
+	// return
 	return tmpl, nil
 }
 

@@ -64,7 +64,7 @@ func TestSmoke(t *testing.T) {
 	tbl.Init() //sets column spacing and date format to default
 
 	// set container path of current directory
-	tbl.Container = "."
+	tbl.SetContainer("/home/sudip")
 
 	// force some edge condition errors...
 	errExp := "no columns"
