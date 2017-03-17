@@ -42,6 +42,9 @@ func (ht *HTMLTable) writeTableOutput(w io.Writer) error {
 	var tContainer string
 	var err error
 
+	// set custom padding of td cells in case it is being generated after pdf
+	ht.Table.SetAllCellCSS([]*CSSProperty{{Name: "padding", Value: "5px 10px"}, {Name: "vertical-align", Value: "top"}})
+
 	// append title
 	tContainer += ht.getTitle()
 
