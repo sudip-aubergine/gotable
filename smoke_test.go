@@ -361,7 +361,7 @@ func TestSmoke(t *testing.T) {
 	tbl.SetAllCellCSS(cssList)
 
 	// valid set html width case - make second column width wider
-	if err = tbl.SetColHTMLWidth(1, 20, "px"); err != nil {
+	if err = tbl.SetColHTMLWidth(1, 10, "ch"); err != nil {
 		t.Errorf("smoke_test: Expected `nil` Error, but found: %s\n", err.Error())
 	}
 
