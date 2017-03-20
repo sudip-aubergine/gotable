@@ -20,7 +20,6 @@ const (
 	TITLECLASS          = `title`
 	SECTION1CLASS       = `section1`
 	SECTION2CLASS       = `section2`
-	TABLEFONTUNIT       = `ch`
 
 	// HEADERSCLASS        = `headers`
 	// DATACLASS           = `data`
@@ -31,6 +30,7 @@ type HTMLTable struct {
 	*Table
 	StyleString string
 	outbuf      bytes.Buffer
+	fontUnit    string
 }
 
 // HTMLTemplateContext holds the context for table html template
@@ -39,9 +39,19 @@ type HTMLTemplateContext struct {
 	HeadTitle, DefaultCSS, CustomCSS, TableHTML string
 }
 
+// SetCSSFontUnit sets font unit. e.g., `px`, `ch`,
+func (ht *HTMLTable) SetCSSFontUnit(fontUnit string) {
+	ht.fontUnit = fontUnit
+}
+
 func (ht *HTMLTable) writeTableOutput(w io.Writer) error {
 	var tContainer string
 	var err error
+
+	// if font unit not set then set default one
+	if ht.fontUnit == "" {
+		ht.fontUnit = "ch"
+	}
 
 	// set custom padding of td cells in case it is being generated after pdf
 	ht.Table.SetAllCellCSS([]*CSSProperty{{Name: "padding", Value: "5px 10px"}})
@@ -234,7 +244,14 @@ func (ht *HTMLTable) getHeaders() (string, error) {
 			// calculate column width based on characters with font size
 			colWidth = ht.Table.ColDefs[headerIndex].Width
 		}
-		colWidthUnit = strconv.Itoa(colWidth) + TABLEFONTUNIT
+
+		// if fontUnit is px then need to convert width in px
+		if ht.fontUnit == "px" {
+			colWidth = colWidth * CSSFONTSIZE
+		}
+		// TODO: put other units conversion too.....
+
+		colWidthUnit = strconv.Itoa(colWidth) + ht.fontUnit
 		// set width css property on this header cell, no need to apply on each and every cell of this column
 		ht.Table.SetHeaderCellCSS(headerIndex, []*CSSProperty{{Name: "width", Value: colWidthUnit}})
 

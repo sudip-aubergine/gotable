@@ -37,7 +37,6 @@ const (
 	TABLEOUTCSV  = 4
 
 	CSSFONTSIZE = 14
-	CSSFONTUNIT = `px`
 )
 
 // Cell is the basic data value type for the Table class
