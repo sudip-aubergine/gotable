@@ -20,6 +20,7 @@ const (
 	TITLECLASS          = `title`
 	SECTION1CLASS       = `section1`
 	SECTION2CLASS       = `section2`
+	TABLEFONTUNIT       = `ch`
 
 	// HEADERSCLASS        = `headers`
 	// DATACLASS           = `data`
@@ -231,10 +232,9 @@ func (ht *HTMLTable) getHeaders() (string, error) {
 			colWidth = headerCell.HTMLWidth
 		} else {
 			// calculate column width based on characters with font size
-			colWidth = ht.Table.ColDefs[headerIndex].Width * CSSFONTSIZE
-			// colWidth = int(1 * float64(colWidth))
+			colWidth = ht.Table.ColDefs[headerIndex].Width
 		}
-		colWidthUnit = strconv.Itoa(colWidth) + CSSFONTUNIT
+		colWidthUnit = strconv.Itoa(colWidth) + TABLEFONTUNIT
 		// set width css property on this header cell, no need to apply on each and every cell of this column
 		ht.Table.SetHeaderCellCSS(headerIndex, []*CSSProperty{{Name: "width", Value: colWidthUnit}})
 
