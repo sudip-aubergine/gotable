@@ -1,6 +1,7 @@
 package gotable
 
 import (
+	"fmt"
 	"os"
 	"strings"
 )
@@ -81,7 +82,7 @@ func stringln(s string) string {
 		return ""
 	}
 	if s[len(s)-1] != '\n' {
-		return s + "\n"
+		return fmt.Println(s)
 	}
 	return s
 }
