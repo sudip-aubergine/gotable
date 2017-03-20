@@ -14,7 +14,7 @@ import (
 // WKHTMLTOPDFCMD command : html > pdf
 const (
 	WKHTMLTOPDFCMD = "wkhtmltopdf"
-	TEMPSTORE      = "/tmp"
+	TEMPSTORE      = "."
 	DATETIMEFMT    = "_2 Jan 2006 3:04 PM IST"
 )
 
