@@ -82,7 +82,7 @@ func stringln(s string) string {
 		return ""
 	}
 	if s[len(s)-1] != '\n' {
-		return fmt.Println(s)
+		return fmt.Sprintln(s)
 	}
 	return s
 }
