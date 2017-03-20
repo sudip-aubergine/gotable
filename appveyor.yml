@@ -10,11 +10,10 @@ environment:
 install:
   - cinst make -v -y
   - cinst wkhtmltopdf -v -y
-  # - cinst wget -v -y -d
+  - cinst wget -v -y
   - wget -O c:\wkhtmltopdf\wkhtmltopdf.exe http://download.gna.org/wkhtmltopdf/0.12/0.12.4/wkhtmltox-0.12.4_mingw-w64-cross-win64.exe
-  - c:\wkhtmltopdf\wkhtmltopdf.exe
+  # - c:\wkhtmltopdf\wkhtmltopdf.exe
   - gem install sass
-  - echo %PATH%
   - echo %GOPATH%
   - set PATH=%GOPATH%\bin;c:\go\bin;%WKHTMLTOPDFPATH%;%PATH%
   - echo %PATH%
