@@ -1,6 +1,8 @@
 package gotable
 
 import (
+	"fmt"
+	"os"
 	"strings"
 )
 
@@ -80,7 +82,16 @@ func stringln(s string) string {
 		return ""
 	}
 	if s[len(s)-1] != '\n' {
-		return s + "\n"
+		return fmt.Sprintln(s)
 	}
 	return s
+}
+
+// isValidPath checks for the valid path
+// it returns the error if path is not valid
+func isValidPath(path string) bool {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }

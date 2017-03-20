@@ -14,7 +14,7 @@ import (
 // WKHTMLTOPDFCMD command : html > pdf
 const (
 	WKHTMLTOPDFCMD = "wkhtmltopdf"
-	TEMPSTORE      = "/tmp"
+	TEMPSTORE      = "."
 	DATETIMEFMT    = "_2 Jan 2006 3:04 PM IST"
 )
 
@@ -28,7 +28,10 @@ func (pt *PDFTable) writeTableOutput(w io.Writer) error {
 
 	// get html output first
 	var temp bytes.Buffer
-	if err := pt.Table.HTMLprintTable(&temp); err != nil {
+	var ht = &HTMLTable{Table: pt.Table}
+	ht.SetCSSFontUnit("px")
+	var tout TableExportType = ht
+	if err := tout.writeTableOutput(&temp); err != nil {
 		return err
 	}
 	htmlString := temp.String()

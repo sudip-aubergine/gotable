@@ -65,7 +65,7 @@ func TestSmoke(t *testing.T) {
 	tbl.Init() //sets column spacing and date format to default
 
 	// set container path of current directory
-	tbl.Container = "."
+	tbl.SetContainer("/home/sudip")
 
 	// force some edge condition errors...
 	errExp := "no columns"
@@ -136,10 +136,10 @@ func TestSmoke(t *testing.T) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 	// pdf output
-	// err = tbl.PDFprintTable(&temp)
-	// if !strings.Contains(err.Error(), errExp) {
-	// 	t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
-	// }
+	err = tbl.PDFprintTable(&temp)
+	if !strings.Contains(err.Error(), errExp) {
+		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
+	}
 
 	const (
 		Name = iota
@@ -362,7 +362,7 @@ func TestSmoke(t *testing.T) {
 	tbl.SetAllCellCSS(cssList)
 
 	// valid set html width case - make second column width wider
-	if err = tbl.SetColHTMLWidth(1, 20, "px"); err != nil {
+	if err = tbl.SetColHTMLWidth(1, 10, "ch"); err != nil {
 		t.Errorf("smoke_test: Expected `nil` Error, but found: %s\n", err.Error())
 	}
 
