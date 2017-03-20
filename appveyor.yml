@@ -27,7 +27,7 @@ build_script:
 
 artifacts:
   - path: buildOutput/gotable
-    name: gotable binary
+    name: gotable
 
 test_script:
   - make test
