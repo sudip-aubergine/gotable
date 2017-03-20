@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
-	"os/exec"
 	"strings"
 	"testing"
 	"time"
@@ -557,42 +556,26 @@ func DoHTMLOutput(t *testing.T, tbl *Table) {
 }
 
 func DoPDFOutput(t *testing.T, tbl *Table) {
-
-	funcname := "DoPDFOutput"
-
-	t.Logf("smoke_test: %s - Container Path of Table = %s", funcname, tbl.Container)
-
-	outs, err := exec.Command("wkhtmltopdf", "-V").Output()
-	if err != nil {
-		t.Errorf("smoke_test: %s - wkhtmltopdf has an error = %s", funcname, err.Error())
-	}
-	t.Logf("smoke_test: %s - Ouput of `wkhtmltopdf -V`= %s", funcname, string(outs))
-
 	fname := "smoke_test.pdf"
 	f, err := os.Create(fname)
 	if nil != err {
-		t.Errorf("smoke_test: %s - Error creating file %s: %s\n", funcname, fname, err.Error())
+		t.Errorf("smoke_test: Error creating file %s: %s\n", fname, err.Error())
 		// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
 	}
 
 	if err := tbl.PDFprintTable(f); err != nil {
-		t.Errorf("smoke_test: %s - Error creating PDF output: %s\n", funcname, err.Error())
+		t.Errorf("smoke_test: Error creating PDF output: %s\n", err.Error())
 	}
 	// close file after operation
 	f.Close()
 
 	// now compare what we have to the known-good output
 	// b, _ := ioutil.ReadFile("./testdata/smoke_test.pdf")
-	sb, err := ioutil.ReadFile("./smoke_test.pdf")
-	if err != nil {
-		t.Errorf("smoke_test: %s - Error while reading PDF outputf file: %s\n", funcname, err.Error())
-	}
+	sb, _ := ioutil.ReadFile("./smoke_test.pdf")
 
 	if len(sb) == 0 {
-		t.Errorf("smoke_test: %s - Expected some content in PDF output file,  found len = 0", funcname)
+		t.Errorf("smoke_test: Expected some content in PDF output file,  found len = 0")
 	}
-
-	t.Logf("smoke_test: %s - PDF smoke test passed...", funcname)
 
 	// if len(b) != len(sb) {
 	// 	// fmt.Printf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
