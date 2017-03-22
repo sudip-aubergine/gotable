@@ -63,8 +63,10 @@ func TestSmoke(t *testing.T) {
 	section2 := "February 21, 2017"
 	tbl.Init() //sets column spacing and date format to default
 
-	// set container path of current directory
-	tbl.SetContainer("/home/sudip")
+	// set fake path for custom template and css
+	// so that it can use default one
+	tbl.SetHTMLTemplate("/home/")
+	tbl.SetHTMLTemplateCSS("/home/hom")
 
 	// force some edge condition errors...
 	errExp := "no columns"

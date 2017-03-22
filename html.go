@@ -110,6 +110,7 @@ func (ht *HTMLTable) formatHTML(htmlString string) error {
 	// make context for template
 	htmlContext := HTMLTemplateContext{FontSize: CSSFONTSIZE}
 	htmlContext.HeadTitle = ht.Table.Title
+
 	htmlContext.DefaultCSS, err = ht.getReportDefaultCSS()
 	if err != nil {
 		return err
@@ -119,13 +120,13 @@ func (ht *HTMLTable) formatHTML(htmlString string) error {
 	htmlContext.TableHTML = htmlString
 
 	// get template string
-	tableTmplPath, err := ht.getTableTemplatePath()
+	tableTmplPath, tmplBaseName, err := ht.getTableTemplatePath()
 	if err != nil {
 		return err
 	}
 
 	// Create a new template and parse the context in it
-	tmpl := template.New("table.tmpl")
+	tmpl := template.New(tmplBaseName)
 	tmpl, err = tmpl.ParseFiles(tableTmplPath)
 	if err != nil {
 		return err
@@ -414,11 +415,11 @@ func (ht *HTMLTable) getCSSForHTMLTag(tagEl string, cssList []*CSSProperty) stri
 // getReportDefaultCSS reads default css from report.css
 func (ht *HTMLTable) getReportDefaultCSS() (string, error) {
 	// try to get it from custom location
-	reportCSS := path.Join(ht.Table.container, "report.css")
-	if !isValidPath(reportCSS) {
+	reportCSS := ht.Table.htmlTemplateCSS
+	if ok, _ := isValidFilePath(reportCSS); !ok {
 		// try to get from default location
 		reportCSS = path.Join(ht.Table._container, "report.css")
-		if !isValidPath(reportCSS) {
+		if ok, _ := isValidFilePath(reportCSS); !ok {
 			return "", fmt.Errorf("report.css not found at path: %s", reportCSS)
 		}
 	}
@@ -431,19 +432,21 @@ func (ht *HTMLTable) getReportDefaultCSS() (string, error) {
 }
 
 // getTableTemplatePath returns the path of table template file
-func (ht *HTMLTable) getTableTemplatePath() (string, error) {
+func (ht *HTMLTable) getTableTemplatePath() (string, string, error) {
+	var tmplBaseName string
+	var ok bool
 	// try to get it from custom location
-	tmpl := path.Join(ht.Table.container, "table.tmpl")
-	if !isValidPath(tmpl) {
+	tmpl := ht.Table.htmlTemplate
+	if ok, tmplBaseName = isValidFilePath(tmpl); !ok {
 		// try to get from default location
 		tmpl = path.Join(ht.Table._container, "table.tmpl")
-		if !isValidPath(tmpl) {
-			return "", fmt.Errorf("table.tmpl not found at path: %s", tmpl)
+		if ok, tmplBaseName = isValidFilePath(tmpl); !ok {
+			return "", "", fmt.Errorf("table.tmpl not found at path: %s", tmpl)
 		}
 	}
 
 	// return
-	return tmpl, nil
+	return tmpl, tmplBaseName, nil
 }
 
 // getCSSPropertyList returns the css property list from css map of table object
