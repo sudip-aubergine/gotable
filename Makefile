@@ -11,7 +11,7 @@ clean:
 	rm -rf *.out *.csv *.html *.txt *.pdf *.css* .sass-cache
 
 css:
-	${SCSS_BIN} ./scss/report.scss ./report.css --style=expanded --sourcemap=none
+	${SCSS_BIN} ./scss/report.scss ./report.css --style=compressed --sourcemap=none
 	@echo "Current working directory:"
 	pwd
 	@echo "scss completed.  ls -l ./report.css:"
@@ -25,7 +25,7 @@ test:
 	go tool cover -html=coverage.out
 
 update:
-	cp smoke_test.txt smoke_test.csv smoke_test.html smoke_test.pdf testdata/
+	cp smoke_test.txt smoke_test.csv smoke_test.html smoke_test.pdf smoke_test_custom_template.html testdata/
 
 all: clean gotable test
 

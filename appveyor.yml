@@ -1,0 +1,33 @@
+image: Visual Studio 2015
+
+version: "{build}"
+clone_folder: c:\go-work\src\gotable
+
+environment:
+  GOPATH: c:\go-work
+
+install:
+  - cinst make -v -y
+  - cinst wkhtmltopdf -v -y -d
+  - gem install sass
+  - echo %GOPATH%
+  - set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
+  - echo %PATH%
+  - go version
+  - go env
+  - go get -t -v ./...
+
+# before_build:
+#   - cmd: ECHO this is batch
+#   - ps: Write-Host "This is PowerShell"
+
+build_script:
+  - go build -o buildOutput\gotable -i .
+  - make
+
+artifacts:
+  - path: buildOutput/gotable
+    name: gotable
+
+test_script:
+  - make test

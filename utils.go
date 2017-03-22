@@ -1,6 +1,8 @@
 package gotable
 
 import (
+	"fmt"
+	"os"
 	"strings"
 )
 
@@ -80,7 +82,32 @@ func stringln(s string) string {
 		return ""
 	}
 	if s[len(s)-1] != '\n' {
-		return s + "\n"
+		return fmt.Sprintln(s)
 	}
 	return s
+}
+
+// isValidFilePath checks valid path for file with Mode of path
+// if it is regular then it returns true, basename of file
+// if mode is dir then it return false, ""
+func isValidFilePath(path string) (bool, string) {
+
+	// get stat
+	filePath, err := os.Stat(path)
+	if err != nil {
+		return false, ""
+	}
+
+	// exists or not
+	if os.IsNotExist(err) {
+		return false, ""
+	}
+
+	// check for the mode of path
+	m := filePath.Mode()
+	if !m.IsRegular() {
+		return false, ""
+	}
+
+	return true, filePath.Name()
 }

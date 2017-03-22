@@ -13,7 +13,7 @@ div {
 }
 
 .container {
-    padding: 0px 25px;
+    padding: 0px 20px;
 }
 
 div.rpt-table-container {
@@ -42,7 +42,8 @@ div.rpt-table-container {
         padding: 0;
 
         td, th {
-            padding: $table-cell-padding;
+            //padding: $table-cell-padding;
+
         }
 
         tr {
@@ -62,6 +63,8 @@ div.rpt-table-container {
         }
 
         tbody {
+            // white-space: nowrap;
+
             tr {
                 &.top-line {
                     td {
@@ -73,6 +76,10 @@ div.rpt-table-container {
                     td {
                         border-bottom: $table-border-width solid $table-rowset-separator;
                     }
+                }
+
+                td {
+                    vertical-align: top;
                 }
             }
         }

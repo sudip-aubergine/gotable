@@ -8,7 +8,6 @@ import (
 	"path"
 	"sort"
 	"strconv"
-	// "strings"
 	"text/template"
 
 	"github.com/dustin/go-humanize"
@@ -31,6 +30,7 @@ type HTMLTable struct {
 	*Table
 	StyleString string
 	outbuf      bytes.Buffer
+	fontUnit    string
 }
 
 // HTMLTemplateContext holds the context for table html template
@@ -39,10 +39,25 @@ type HTMLTemplateContext struct {
 	HeadTitle, DefaultCSS, CustomCSS, TableHTML string
 }
 
-func (ht *HTMLTable) writeTableOutput(w io.Writer) error {
+// SetCSSFontUnit sets font unit. e.g., `px`, `ch`,
+func (ht *HTMLTable) SetCSSFontUnit(fontUnit string) {
+	ht.fontUnit = fontUnit
+}
 
+func (ht *HTMLTable) writeTableOutput(w io.Writer) error {
 	var tContainer string
 	var err error
+
+	// if font unit not set then set default one
+	if ht.fontUnit == "" {
+		ht.fontUnit = "ch"
+	}
+
+	// set custom padding of td cells in case it is being generated after pdf
+	ht.Table.SetAllCellCSS([]*CSSProperty{{Name: "padding", Value: "5px 10px"}})
+
+	// set custom padding of th cells in case it is being generated after pdf
+	ht.Table.SetHeaderCSS([]*CSSProperty{{Name: "padding", Value: "5px 10px"}})
 
 	// append title
 	tContainer += ht.getTitle()
@@ -95,6 +110,7 @@ func (ht *HTMLTable) formatHTML(htmlString string) error {
 	// make context for template
 	htmlContext := HTMLTemplateContext{FontSize: CSSFONTSIZE}
 	htmlContext.HeadTitle = ht.Table.Title
+
 	htmlContext.DefaultCSS, err = ht.getReportDefaultCSS()
 	if err != nil {
 		return err
@@ -104,13 +120,13 @@ func (ht *HTMLTable) formatHTML(htmlString string) error {
 	htmlContext.TableHTML = htmlString
 
 	// get template string
-	tableTmplPath, err := ht.getTableTemplatePath()
+	tableTmplPath, tmplBaseName, err := ht.getTableTemplatePath()
 	if err != nil {
 		return err
 	}
 
 	// Create a new template and parse the context in it
-	tmpl := template.New("table.tmpl")
+	tmpl := template.New(tmplBaseName)
 	tmpl, err = tmpl.ParseFiles(tableTmplPath)
 	if err != nil {
 		return err
@@ -219,18 +235,26 @@ func (ht *HTMLTable) getHeaders() (string, error) {
 		// NOTE: width calculatation should be done after alignment
 		// width only needs to be set on header cells only not on all
 		// cells belong to column
-		var colWidth string
+		var colWidthUnit string
+		var colWidth int
 
 		if headerCell.HTMLWidth != -1 {
 			// calculate column width based on characters with font size
-			colWidth = strconv.Itoa(headerCell.HTMLWidth) + CSSFONTUNIT
+			colWidth = headerCell.HTMLWidth
 		} else {
 			// calculate column width based on characters with font size
-			colWidth = strconv.Itoa(ht.Table.ColDefs[headerIndex].Width*CSSFONTSIZE) + CSSFONTUNIT
+			colWidth = ht.Table.ColDefs[headerIndex].Width
 		}
 
+		// if fontUnit is px then need to convert width in px
+		if ht.fontUnit == "px" {
+			colWidth = colWidth * CSSFONTSIZE
+		}
+		// TODO: put other units conversion too.....
+
+		colWidthUnit = strconv.Itoa(colWidth) + ht.fontUnit
 		// set width css property on this header cell, no need to apply on each and every cell of this column
-		ht.Table.SetHeaderCellCSS(headerIndex, []*CSSProperty{{Name: "width", Value: colWidth}})
+		ht.Table.SetHeaderCellCSS(headerIndex, []*CSSProperty{{Name: "width", Value: colWidthUnit}})
 
 		// --------------------
 		// apply css on each header cell
@@ -390,7 +414,15 @@ func (ht *HTMLTable) getCSSForHTMLTag(tagEl string, cssList []*CSSProperty) stri
 
 // getReportDefaultCSS reads default css from report.css
 func (ht *HTMLTable) getReportDefaultCSS() (string, error) {
-	reportCSS := path.Join(ht.Table.Container, "report.css")
+	// try to get it from custom location
+	reportCSS := ht.Table.htmlTemplateCSS
+	if ok, _ := isValidFilePath(reportCSS); !ok {
+		// try to get from default location
+		reportCSS = path.Join(ht.Table._container, "report.css")
+		if ok, _ := isValidFilePath(reportCSS); !ok {
+			return "", fmt.Errorf("report.css not found at path: %s", reportCSS)
+		}
+	}
 
 	cssString, err := ioutil.ReadFile(reportCSS)
 	if err != nil {
@@ -400,9 +432,21 @@ func (ht *HTMLTable) getReportDefaultCSS() (string, error) {
 }
 
 // getTableTemplatePath returns the path of table template file
-func (ht *HTMLTable) getTableTemplatePath() (string, error) {
-	tmpl := path.Join(ht.Table.Container, "table.tmpl")
-	return tmpl, nil
+func (ht *HTMLTable) getTableTemplatePath() (string, string, error) {
+	var tmplBaseName string
+	var ok bool
+	// try to get it from custom location
+	tmpl := ht.Table.htmlTemplate
+	if ok, tmplBaseName = isValidFilePath(tmpl); !ok {
+		// try to get from default location
+		tmpl = path.Join(ht.Table._container, "table.tmpl")
+		if ok, tmplBaseName = isValidFilePath(tmpl); !ok {
+			return "", "", fmt.Errorf("table.tmpl not found at path: %s", tmpl)
+		}
+	}
+
+	// return
+	return tmpl, tmplBaseName, nil
 }
 
 // getCSSPropertyList returns the css property list from css map of table object

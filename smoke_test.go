@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
+	"path"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -63,8 +65,10 @@ func TestSmoke(t *testing.T) {
 	section2 := "February 21, 2017"
 	tbl.Init() //sets column spacing and date format to default
 
-	// set container path of current directory
-	tbl.Container = "."
+	// set fake path for custom template and css
+	// so that it can use default one
+	tbl.SetHTMLTemplate("/home/")
+	tbl.SetHTMLTemplateCSS("/home/hom")
 
 	// force some edge condition errors...
 	errExp := "no columns"
@@ -361,7 +365,7 @@ func TestSmoke(t *testing.T) {
 	tbl.SetAllCellCSS(cssList)
 
 	// valid set html width case - make second column width wider
-	if err = tbl.SetColHTMLWidth(1, 20, "px"); err != nil {
+	if err = tbl.SetColHTMLWidth(1, 10, "ch"); err != nil {
 		t.Errorf("smoke_test: Expected `nil` Error, but found: %s\n", err.Error())
 	}
 
@@ -397,6 +401,7 @@ func TestSmoke(t *testing.T) {
 	DoCSVOutput(t, &tbl)
 	DoHTMLOutput(t, &tbl)
 	DoPDFOutput(t, &tbl)
+	DoCustomTemplateHTMLOutput(t, &tbl)
 }
 
 func DoTextOutput(t *testing.T, tbl *Table) {
@@ -539,6 +544,43 @@ func DoHTMLOutput(t *testing.T, tbl *Table) {
 	// now compare what we have to the known-good output
 	b, _ := ioutil.ReadFile("./testdata/smoke_test.html")
 	sb, _ := ioutil.ReadFile("./smoke_test.html")
+
+	if len(b) != len(sb) {
+		// fmt.Printf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
+		t.Errorf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
+	}
+	if len(sb) > 0 && len(b) > 0 {
+		for i := 0; i < len(b); i++ {
+			if i < len(sb) && sb[i] != b[i] {
+				t.Logf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
+				// fmt.Printf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
+				break
+			}
+		}
+	}
+}
+
+func DoCustomTemplateHTMLOutput(t *testing.T, tbl *Table) {
+	_, filename, _, _ := runtime.Caller(0)
+	customDir := path.Dir(filename)
+	tbl.SetHTMLTemplate(path.Join(path.Join(customDir, "testdata"), "custom.tmpl"))
+	tbl.SetHTMLTemplateCSS(path.Join(path.Join(customDir, "testdata"), "custom.css"))
+	fname := "smoke_test_custom_template.html"
+	f, err := os.Create(fname)
+	if nil != err {
+		t.Errorf("smoke_test: Error creating file %s: %s\n", fname, err.Error())
+		// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
+	}
+
+	if err := tbl.HTMLprintTable(f); err != nil {
+		t.Errorf("smoke_test: Error creating HTML output: %s\n", err.Error())
+	}
+	// close file after operation
+	f.Close()
+
+	// now compare what we have to the known-good output
+	b, _ := ioutil.ReadFile("./testdata/smoke_test_custom_template.html")
+	sb, _ := ioutil.ReadFile("./smoke_test_custom_template.html")
 
 	if len(b) != len(sb) {
 		// fmt.Printf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
