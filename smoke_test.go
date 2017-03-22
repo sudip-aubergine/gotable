@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
+	"path"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -399,6 +401,7 @@ func TestSmoke(t *testing.T) {
 	DoCSVOutput(t, &tbl)
 	DoHTMLOutput(t, &tbl)
 	DoPDFOutput(t, &tbl)
+	DoCustomTemplateHTMLOutput(t, &tbl)
 }
 
 func DoTextOutput(t *testing.T, tbl *Table) {
@@ -541,6 +544,43 @@ func DoHTMLOutput(t *testing.T, tbl *Table) {
 	// now compare what we have to the known-good output
 	b, _ := ioutil.ReadFile("./testdata/smoke_test.html")
 	sb, _ := ioutil.ReadFile("./smoke_test.html")
+
+	if len(b) != len(sb) {
+		// fmt.Printf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
+		t.Errorf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
+	}
+	if len(sb) > 0 && len(b) > 0 {
+		for i := 0; i < len(b); i++ {
+			if i < len(sb) && sb[i] != b[i] {
+				t.Logf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
+				// fmt.Printf("smoke_test: micompare at character %d, expected %x (%c), found %x (%c)\n", i, b[i], b[i], sb[i], sb[i])
+				break
+			}
+		}
+	}
+}
+
+func DoCustomTemplateHTMLOutput(t *testing.T, tbl *Table) {
+	_, filename, _, _ := runtime.Caller(0)
+	customDir := path.Dir(filename)
+	tbl.SetHTMLTemplate(path.Join(path.Join(customDir, "testdata"), "custom.tmpl"))
+	tbl.SetHTMLTemplateCSS(path.Join(path.Join(customDir, "testdata"), "custom.css"))
+	fname := "smoke_test_custom_template.html"
+	f, err := os.Create(fname)
+	if nil != err {
+		t.Errorf("smoke_test: Error creating file %s: %s\n", fname, err.Error())
+		// fmt.Printf("smoke_test: Error creating file: %s\n", err.Error())
+	}
+
+	if err := tbl.HTMLprintTable(f); err != nil {
+		t.Errorf("smoke_test: Error creating HTML output: %s\n", err.Error())
+	}
+	// close file after operation
+	f.Close()
+
+	// now compare what we have to the known-good output
+	b, _ := ioutil.ReadFile("./testdata/smoke_test_custom_template.html")
+	sb, _ := ioutil.ReadFile("./smoke_test_custom_template.html")
 
 	if len(b) != len(sb) {
 		// fmt.Printf("smoke_test: Expected len = %d,  found len = %d\n", len(b), len(sb))
