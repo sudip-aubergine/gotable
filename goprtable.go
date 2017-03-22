@@ -75,20 +75,21 @@ type Rowset struct {
 // Table is a structure that defines a spreadsheet-like grid of cells and the
 // operations that can be performed.
 type Table struct {
-	Title       string                             // table title
-	Section1    string                             // another section for the title, in a different style
-	Section2    string                             // a third section for the title, in a different style
-	ColDefs     []ColumnDef                        // table's column definitions, ordered 0..n left to right
-	Row         []Colset                           // Each Colset forms a row
-	maxHdrRows  int                                // maximum number of header rows across all ColDefs
-	DateFmt     string                             // format for printing dates
-	DateTimeFmt string                             // format for datetime values
-	LineAfter   []int                              // array of row numbers that have a horizontal line after they are printed
-	LineBefore  []int                              // array of row numbers that have a horizontal line before they are printed
-	RS          []Rowset                           // a list of rowsets
-	CSS         map[string]map[string]*CSSProperty //CSS holds css property for title, section1, section2, headers, cells
-	container   string                             // container holds custom path
-	_container  string                             // _container contains default source code dev dir path
+	Title           string                             // table title
+	Section1        string                             // another section for the title, in a different style
+	Section2        string                             // a third section for the title, in a different style
+	ColDefs         []ColumnDef                        // table's column definitions, ordered 0..n left to right
+	Row             []Colset                           // Each Colset forms a row
+	maxHdrRows      int                                // maximum number of header rows across all ColDefs
+	DateFmt         string                             // format for printing dates
+	DateTimeFmt     string                             // format for datetime values
+	LineAfter       []int                              // array of row numbers that have a horizontal line after they are printed
+	LineBefore      []int                              // array of row numbers that have a horizontal line before they are printed
+	RS              []Rowset                           // a list of rowsets
+	CSS             map[string]map[string]*CSSProperty //CSS holds css property for title, section1, section2, headers, cells
+	_container      string                             // _container contains default source code dev dir path
+	htmlTemplate    string                             // path of custom html template path
+	htmlTemplateCSS string                             // path of custom css for html template
 }
 
 // SetTitle sets the table's Title string to the supplied value.
@@ -167,20 +168,27 @@ func (t *Table) Init() {
 	// it should be in same directory of this file
 	_, filepath, _, _ := runtime.Caller(1)
 	t._container = path.Dir(filepath)
-	t.container = t._container
 }
 
-// SetContainer sets the path so that one can access report.css
-// it is set default to current source file dir
-// one can set custom location in which modifed report.css must exists
-// first it checks for valid path, if it is then will set otherwise return an error
-func (t *Table) SetContainer(path string) error {
-	if !isValidPath(path) {
+// SetHTMLTemplate sets the path of custom html template
+func (t *Table) SetHTMLTemplate(path string) error {
+	if ok, _ := isValidFilePath(path); !ok {
 		return fmt.Errorf("Provided path %s is not valid", path)
 	}
 
 	// set if path is valid
-	t.container = path
+	t.htmlTemplate = path
+	return nil
+}
+
+// SetHTMLTemplateCSS sets the path of custom css external file for html template
+func (t *Table) SetHTMLTemplateCSS(path string) error {
+	if ok, _ := isValidFilePath(path); !ok {
+		return fmt.Errorf("Provided path %s is not valid", path)
+	}
+
+	// set if path is valid
+	t.htmlTemplateCSS = path
 	return nil
 }
 

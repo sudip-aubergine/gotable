@@ -87,11 +87,27 @@ func stringln(s string) string {
 	return s
 }
 
-// isValidPath checks for the valid path
-// it returns the error if path is not valid
-func isValidPath(path string) bool {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return false
+// isValidFilePath checks valid path for file with Mode of path
+// if it is regular then it returns true, basename of file
+// if mode is dir then it return false, ""
+func isValidFilePath(path string) (bool, string) {
+
+	// get stat
+	filePath, err := os.Stat(path)
+	if err != nil {
+		return false, ""
 	}
-	return true
+
+	// exists or not
+	if os.IsNotExist(err) {
+		return false, ""
+	}
+
+	// check for the mode of path
+	m := filePath.Mode()
+	if !m.IsRegular() {
+		return false, ""
+	}
+
+	return true, filePath.Name()
 }
