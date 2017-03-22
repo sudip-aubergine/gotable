@@ -750,6 +750,12 @@ func (t *Table) CSVprintTable(w io.Writer) error {
 
 // HTMLprintTable renders the entire table for html output
 func (t *Table) HTMLprintTable(w io.Writer) error {
+	if len(t.htmlTemplate) == 0 {
+		t.htmlTemplate = "./table.tmpl"
+	}
+	if len(t.htmlTemplateCSS) == 0 {
+		t.htmlTemplateCSS = "./report.css"
+	}
 	var tout TableExportType = &HTMLTable{Table: t}
 	return tout.writeTableOutput(w)
 }
