@@ -67,8 +67,6 @@ func TestSmoke(t *testing.T) {
 
 	// set fake path for custom template and css
 	// so that it can use default one
-	tbl.SetHTMLTemplate("/home/")
-	tbl.SetHTMLTemplateCSS("/home/hom")
 
 	// force some edge condition errors...
 	errExp := "no columns"
