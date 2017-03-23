@@ -160,8 +160,8 @@ func (t *Table) ColCount() int {
 
 // Init sets internal formatting controls to their default values
 func (t *Table) Init() {
-	t.DateFmt = "01/02/2006"
-	t.DateTimeFmt = "01/02/2006 15:04:00 MST"
+	t.DateFmt = "01/02/06"
+	t.DateTimeFmt = "01/02/06 15:04:00 MST"
 	t.CSS = make(map[string]map[string]*CSSProperty)
 
 	// set default dev directory path for container to look for report.css

@@ -416,7 +416,6 @@ func (ht *HTMLTable) getCSSForHTMLTag(tagEl string, cssList []*CSSProperty) stri
 func (ht *HTMLTable) getReportDefaultCSS() (string, error) {
 	// try to get it from custom location
 	reportCSS := ht.Table.htmlTemplateCSS
-	fmt.Printf("reportCSS = %s\n", reportCSS)
 	if ok, _ := isValidFilePath(reportCSS); !ok {
 		// try to get from default location
 		reportCSS = path.Join(ht.Table._container, "report.css")
