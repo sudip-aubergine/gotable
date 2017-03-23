@@ -17,13 +17,9 @@ install:
   - go env
   - go get -t -v ./...
 
-# before_build:
-#   - cmd: ECHO this is batch
-#   - ps: Write-Host "This is PowerShell"
-
 build_script:
-  - go build -o buildOutput\gotable -i .
   - make
+  - go build -o buildOutput\gotable -i .
 
 artifacts:
   - path: buildOutput/gotable
