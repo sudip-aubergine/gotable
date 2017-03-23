@@ -7,17 +7,18 @@ environment:
   GOPATH: c:\go-work
 
 install:
+  # make installation
   - cinst make -v -y
+  # wkhtmltopdf installation
   - cinst wkhtmltopdf -v -y -d
+  # sass installation
   - gem install sass
   - echo %GOPATH%
   - set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
   - echo %PATH%
   - go version
   - go env
-  - go get -t -v ./...
-
-before_test:
+  # build the dependency
   - make
 
 # build_script:
@@ -29,3 +30,6 @@ before_test:
 
 test_script:
   - make test
+
+on_success:
+  - make clean
