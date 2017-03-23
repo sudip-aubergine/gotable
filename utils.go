@@ -88,8 +88,7 @@ func stringln(s string) string {
 }
 
 // isValidFilePath checks valid path for file with Mode of path
-// if it is regular then it returns true, basename of file
-// if mode is dir then it return false, ""
+// it returns true/false, basename of file/""
 func isValidFilePath(path string) (bool, string) {
 
 	// get stat
