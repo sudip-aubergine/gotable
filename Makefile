@@ -2,7 +2,7 @@ SCSS_BIN := scss
 
 gotable: css defaults *.go
 	go clean
-	go get -t ./...
+	go get -t -v ./...
 	go vet
 	go build
 
