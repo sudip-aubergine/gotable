@@ -21,12 +21,12 @@ install:
   # build the dependency
   - make
 
-# build_script:
-#   - go build -o buildOutput\gotable -i .
+build_script:
+  - go build -o buildOutput\gotable -i .
 
-# artifacts:
-#   - path: buildOutput/gotable
-#     name: gotable
+artifacts:
+  - path: buildOutput/gotable
+    name: gotable
 
 test_script:
   - make test
