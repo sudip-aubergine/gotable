@@ -15,7 +15,7 @@ defaults:
 	./defaults.sh
 
 css:
-	${SCSS_BIN} ./scss/report.scss ./gotable.css --style=compressed --sourcemap=none
+	${SCSS_BIN} ./scss/gotable.scss ./gotable.css --style=compressed --sourcemap=none
 	@echo "Current working directory:"
 	pwd
 	@echo "scss completed.  ls -l ./gotable.css:"
