@@ -11,6 +11,7 @@ import (
 	"text/template"
 
 	"github.com/dustin/go-humanize"
+	"github.com/kardianos/osext"
 	"github.com/yosssi/gohtml"
 )
 
@@ -111,7 +112,7 @@ func (ht *HTMLTable) formatHTML(htmlString string) error {
 	htmlContext := HTMLTemplateContext{FontSize: CSSFONTSIZE}
 	htmlContext.HeadTitle = ht.Table.Title
 
-	htmlContext.DefaultCSS, err = ht.getReportDefaultCSS()
+	htmlContext.DefaultCSS, err = ht.getTableCSS()
 	if err != nil {
 		return err
 	}
@@ -120,14 +121,7 @@ func (ht *HTMLTable) formatHTML(htmlString string) error {
 	htmlContext.TableHTML = htmlString
 
 	// get template string
-	tableTmplPath, tmplBaseName, err := ht.getTableTemplatePath()
-	if err != nil {
-		return err
-	}
-
-	// Create a new template and parse the context in it
-	tmpl := template.New(tmplBaseName)
-	tmpl, err = tmpl.ParseFiles(tableTmplPath)
+	tmpl, err := ht.getHTMLTemplate()
 	if err != nil {
 		return err
 	}
@@ -412,41 +406,80 @@ func (ht *HTMLTable) getCSSForHTMLTag(tagEl string, cssList []*CSSProperty) stri
 	return classCSS
 }
 
-// getReportDefaultCSS reads default css from report.css
-func (ht *HTMLTable) getReportDefaultCSS() (string, error) {
-	// try to get it from custom location
-	reportCSS := ht.Table.htmlTemplateCSS
-	if ok, _ := isValidFilePath(reportCSS); !ok {
-		// try to get from default location
-		reportCSS = path.Join(ht.Table._container, "report.css")
-		if ok, _ := isValidFilePath(reportCSS); !ok {
-			return "", fmt.Errorf("report.css not found at path: %s", reportCSS)
+// getTableCSS reads default css and return the content of it
+func (ht *HTMLTable) getTableCSS() (string, error) {
+	// 1. Get the content from custom css file if it exist
+	cssPath := ht.Table.htmlTemplateCSS
+	if ok, _ := isValidFilePath(cssPath); ok {
+		cssString, err := ioutil.ReadFile(cssPath)
+		if err != nil {
+			return "", err
 		}
+		return string(cssString), nil
 	}
 
-	cssString, err := ioutil.ReadFile(reportCSS)
+	// 2. Get the content from default file, from within the execution path
+	// in case first trial failed
+	exDirPath, err := osext.ExecutableFolder()
 	if err != nil {
 		return "", err
 	}
-	return string(cssString), nil
+	cssPath = path.Join(exDirPath, "gotable.css")
+	if ok, _ := isValidFilePath(cssPath); ok {
+		cssString, err := ioutil.ReadFile(cssPath)
+		if err != nil {
+			return "", err
+		}
+		return string(cssString), nil
+	}
+
+	// 3. Get content from constant value defined in defaults.go
+	// in case second trial failed
+	return DCSS, nil
 }
 
-// getTableTemplatePath returns the path of table template file
-func (ht *HTMLTable) getTableTemplatePath() (string, string, error) {
-	var tmplBaseName string
-	var ok bool
-	// try to get it from custom location
-	tmpl := ht.Table.htmlTemplate
-	if ok, tmplBaseName = isValidFilePath(tmpl); !ok {
-		// try to get from default location
-		tmpl = path.Join(ht.Table._container, "table.tmpl")
-		if ok, tmplBaseName = isValidFilePath(tmpl); !ok {
-			return "", "", fmt.Errorf("table.tmpl not found at path: %s", tmpl)
+// getHTMLTemplate returns the *Template object, error
+func (ht *HTMLTable) getHTMLTemplate() (*template.Template, error) {
+
+	// 1. Get the content from custom template file if it exist
+	tmplPath := ht.Table.htmlTemplate
+	if ok, _ := isValidFilePath(tmplPath); ok {
+
+		// generates new template and parse content from html and returns it
+		if tmpl, err := template.ParseFiles(tmplPath); err != nil {
+			goto tmplexdir2
+		} else {
+			// if no error then return simply
+			return tmpl, err
 		}
 	}
 
-	// return
-	return tmpl, tmplBaseName, nil
+	// 2. Get the content from default file, from within the execution path
+	// in case first trial failed
+tmplexdir2:
+	exDirPath, err := osext.ExecutableFolder()
+	if err != nil {
+		return nil, err
+	}
+
+	tmplPath = path.Join(exDirPath, "gotable.tmpl")
+	if ok, _ := isValidFilePath(tmplPath); ok {
+
+		// generates new template and parse content from html and returns it
+		if tmpl, err := template.ParseFiles(tmplPath); err != nil {
+			goto tmplconst3
+		} else {
+			// if no error then return simply
+			return tmpl, err
+		}
+	}
+tmplconst3:
+	// 3. Get content from constant value defined in defaults.go
+	// in case second trial failed
+	tmpl, err := template.New("gotable.tmpl").Parse(DTEMPLATE)
+
+	// finally return *Template, Error
+	return tmpl, err
 }
 
 // getCSSPropertyList returns the css property list from css map of table object

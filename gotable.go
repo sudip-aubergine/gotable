@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"path"
-	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -87,7 +85,6 @@ type Table struct {
 	LineBefore      []int                              // array of row numbers that have a horizontal line before they are printed
 	RS              []Rowset                           // a list of rowsets
 	CSS             map[string]map[string]*CSSProperty //CSS holds css property for title, section1, section2, headers, cells
-	_container      string                             // _container contains default source code dev dir path
 	htmlTemplate    string                             // path of custom html template path
 	htmlTemplateCSS string                             // path of custom css for html template
 }
@@ -163,11 +160,6 @@ func (t *Table) Init() {
 	t.DateFmt = "01/02/2006"
 	t.DateTimeFmt = "01/02/2006 15:04:00 MST"
 	t.CSS = make(map[string]map[string]*CSSProperty)
-
-	// set default dev directory path for container to look for report.css
-	// it should be in same directory of this file
-	_, filepath, _, _ := runtime.Caller(1)
-	t._container = path.Dir(filepath)
 }
 
 // SetHTMLTemplate sets the path of custom html template
@@ -750,12 +742,6 @@ func (t *Table) CSVprintTable(w io.Writer) error {
 
 // HTMLprintTable renders the entire table for html output
 func (t *Table) HTMLprintTable(w io.Writer) error {
-	if len(t.htmlTemplate) == 0 {
-		t.htmlTemplate = "./table.tmpl"
-	}
-	if len(t.htmlTemplateCSS) == 0 {
-		t.htmlTemplateCSS = "./report.css"
-	}
 	var tout TableExportType = &HTMLTable{Table: t}
 	return tout.writeTableOutput(w)
 }

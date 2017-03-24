@@ -1,21 +1,25 @@
 SCSS_BIN := scss
 
-gotable: *.go css
+gotable: css defaults *.go
 	go clean
-	go get -t ./...
+	go get -t -v ./...
 	go vet
 	go build
 
 clean:
 	go clean
 	rm -rf *.out *.csv *.html *.txt *.pdf *.css* .sass-cache
+	rm -f defaults.go
+
+defaults:
+	./defaults.sh
 
 css:
-	${SCSS_BIN} ./scss/report.scss ./report.css --style=compressed --sourcemap=none
+	${SCSS_BIN} ./scss/gotable.scss ./gotable.css --style=compressed --sourcemap=none
 	@echo "Current working directory:"
 	pwd
-	@echo "scss completed.  ls -l ./report.css:"
-	ls -l ./report.css
+	@echo "scss completed.  ls -l ./gotable.css:"
+	ls -l ./gotable.css
 
 lint:
 	golint

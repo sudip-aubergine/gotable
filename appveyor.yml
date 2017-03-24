@@ -7,23 +7,22 @@ environment:
   GOPATH: c:\go-work
 
 install:
+  # make installation
   - cinst make -v -y
+  # wkhtmltopdf installation
   - cinst wkhtmltopdf -v -y -d
+  # sass installation
   - gem install sass
   - echo %GOPATH%
   - set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
   - echo %PATH%
   - go version
   - go env
-  - go get -t -v ./...
-
-# before_build:
-#   - cmd: ECHO this is batch
-#   - ps: Write-Host "This is PowerShell"
+  # build the dependency
+  - make
 
 build_script:
   - go build -o buildOutput\gotable -i .
-  - make
 
 artifacts:
   - path: buildOutput/gotable
@@ -31,3 +30,6 @@ artifacts:
 
 test_script:
   - make test
+
+on_success:
+  - make clean
