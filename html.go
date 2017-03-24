@@ -21,6 +21,7 @@ const (
 	TITLECLASS          = `title`
 	SECTION1CLASS       = `section1`
 	SECTION2CLASS       = `section2`
+	SECTION3CLASS       = `section3`
 
 	// HEADERSCLASS        = `headers`
 	// DATACLASS           = `data`
@@ -68,6 +69,9 @@ func (ht *HTMLTable) writeTableOutput(w io.Writer) error {
 
 	// append section 2
 	tContainer += ht.getSection2()
+
+	// append section 2
+	tContainer += ht.getSection3()
 
 	// contains only table tag output
 	var tableOut string
@@ -186,6 +190,22 @@ func (ht *HTMLTable) getSection2() string {
 
 	// blank return
 	return section2
+}
+
+func (ht *HTMLTable) getSection3() string {
+	section3 := ht.Table.GetSection3()
+
+	if section3 != "" {
+		if cellCSSProps, ok := ht.getCSSPropertyList(SECTION3CLASS); ok {
+			// get css string for section3
+			ht.StyleString += `div.` + TABLECONTAINERCLASS + ` p`
+			ht.StyleString += ht.getCSSForClassSelector(SECTION3CLASS, cellCSSProps)
+		}
+		return `<p class="` + SECTION3CLASS + `">` + section3 + `</p>`
+	}
+
+	// blank return
+	return section3
 }
 
 func (ht *HTMLTable) getHeaders() (string, error) {

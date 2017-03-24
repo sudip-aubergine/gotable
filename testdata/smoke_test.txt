@@ -1,6 +1,7 @@
 GOTABLE
 A Smoke Test
 February 21, 2017
+section3
                       Person  Height  Date of     Country of                                                                   
 Name                     Age    (cm)  Birth       Birth              Winnings  Notes                  Random Date/Time         
 --------------------  ------  ------  ----------  -------------  ------------  ---------------------  -------------------------

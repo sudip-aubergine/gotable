@@ -76,6 +76,7 @@ type Table struct {
 	Title           string                             // table title
 	Section1        string                             // another section for the title, in a different style
 	Section2        string                             // a third section for the title, in a different style
+	Section3        string                             // another section for extra usage
 	ColDefs         []ColumnDef                        // table's column definitions, ordered 0..n left to right
 	Row             []Colset                           // Each Colset forms a row
 	maxHdrRows      int                                // maximum number of header rows across all ColDefs
@@ -126,6 +127,19 @@ func (t *Table) SetSection2(s string) {
 // GetSection2 sets the table's Section2 string to the supplied value
 func (t *Table) GetSection2() string {
 	return t.Section2
+}
+
+// SetSection3 sets the table's Section3 string to the supplied value
+// Note: Caller is expected to supply "\n" on strings if desired for
+// text output.  The "\n" may not be desired or needed for the other
+// formats
+func (t *Table) SetSection3(s string) {
+	t.Section3 = s
+}
+
+// GetSection3 sets the table's Section3 string to the supplied value
+func (t *Table) GetSection3() string {
+	return t.Section3
 }
 
 // RowCount returns the number of rows in the table
@@ -697,6 +711,7 @@ type TableExportType interface {
 	getTitle() string
 	getSection1() string
 	getSection2() string
+	getSection3() string
 	getHeaders() (string, error)
 	getRows() (string, error)
 	getRow(row int) (string, error)
@@ -936,6 +951,22 @@ func (t *Table) SetSection2CSS(cssList []*CSSProperty) {
 	}
 
 	t.CSS[SECTION2CLASS] = cssMap
+}
+
+// SetSection3CSS sets css for section3 row
+func (t *Table) SetSection3CSS(cssList []*CSSProperty) {
+	// css property map
+	cssMap, ok := t.CSS[SECTION3CLASS]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[SECTION3CLASS] = cssMap
 }
 
 // getCSSMapKeyForCell format and returns key for cell for css properties usage

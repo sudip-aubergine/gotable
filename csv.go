@@ -28,6 +28,9 @@ func (ct *CSVTable) writeTableOutput(w io.Writer) error {
 	// append section 2
 	tout += ct.getSection2()
 
+	// append section 3
+	tout += ct.getSection3()
+
 	// append headers
 	headerStr, err := ct.getHeaders()
 	if err != nil {
@@ -61,6 +64,10 @@ func (ct *CSVTable) getSection1() string {
 
 func (ct *CSVTable) getSection2() string {
 	return stringln(fmt.Sprintf("%q", ct.Table.GetSection2()))
+}
+
+func (ct *CSVTable) getSection3() string {
+	return stringln(fmt.Sprintf("%q", ct.Table.GetSection3()))
 }
 
 func (ct *CSVTable) getHeaders() (string, error) {
