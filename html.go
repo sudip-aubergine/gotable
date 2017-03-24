@@ -408,23 +408,23 @@ func (ht *HTMLTable) getCSSForClassSelector(className string, cssList []*CSSProp
 }
 
 // getCSSForHTMLTag return css string for html tag element
-func (ht *HTMLTable) getCSSForHTMLTag(tagEl string, cssList []*CSSProperty) string {
-	var classCSS string
+// func (ht *HTMLTable) getCSSForHTMLTag(tagEl string, cssList []*CSSProperty) string {
+// 	var classCSS string
 
-	// append notation for selector
-	classCSS += tagEl + `{`
+// 	// append notation for selector
+// 	classCSS += tagEl + `{`
 
-	for _, cssProp := range cssList {
-		// append css property name
-		classCSS += cssProp.Name + `:` + cssProp.Value + `;`
-	}
+// 	for _, cssProp := range cssList {
+// 		// append css property name
+// 		classCSS += cssProp.Name + `:` + cssProp.Value + `;`
+// 	}
 
-	// finally block ending sign
-	classCSS += `}`
+// 	// finally block ending sign
+// 	classCSS += `}`
 
-	// return class css string
-	return classCSS
-}
+// 	// return class css string
+// 	return classCSS
+// }
 
 // getTableCSS reads default css and return the content of it
 func (ht *HTMLTable) getTableCSS() (string, error) {
