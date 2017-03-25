@@ -28,6 +28,9 @@ func (tt *TextTable) writeTableOutput(w io.Writer) error {
 	// append section 2
 	tout += tt.getSection2()
 
+	// append section 3
+	tout += tt.getSection3()
+
 	// append headers
 	headerStr, err := tt.getHeaders()
 	if err != nil {
@@ -73,6 +76,14 @@ func (tt *TextTable) getSection2() string {
 		return stringln(section2)
 	}
 	return section2
+}
+
+func (tt *TextTable) getSection3() string {
+	section3 := tt.Table.GetSection3()
+	if section3 != "" {
+		return stringln(section3)
+	}
+	return section3
 }
 
 // SprintColHdrsText formats the column headers as text and returns the string

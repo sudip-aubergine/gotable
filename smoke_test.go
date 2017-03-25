@@ -63,6 +63,7 @@ func TestSmoke(t *testing.T) {
 	title := "GOTABLE"
 	section1 := "A Smoke Test"
 	section2 := "February 21, 2017"
+	section3 := "section3"
 	tbl.Init() //sets column spacing and date format to default
 
 	// set fake path for custom template and css
@@ -106,6 +107,7 @@ func TestSmoke(t *testing.T) {
 	tbl.SetTitle(title)
 	tbl.SetSection1(section1)
 	tbl.SetSection2(section2)
+	tbl.SetSection3(section3)
 	tbl.AddColumn("Name", 35, CELLSTRING, COLJUSTIFYLEFT)               // 0 Name
 	tbl.AddColumn("Person Age", 3, CELLINT, COLJUSTIFYRIGHT)            // 1 Age
 	tbl.AddColumn("Height (cm)", 0, CELLINT, COLJUSTIFYRIGHT)           // 2 Height in centimeters
@@ -221,6 +223,9 @@ func TestSmoke(t *testing.T) {
 	}
 	if tbl.GetSection2() != section2 {
 		t.Errorf("smoke_test: Expected %s,  found %s\n", tbl.GetSection2(), section2)
+	}
+	if tbl.GetSection3() != section3 {
+		t.Errorf("smoke_test: Expected %s,  found %s\n", tbl.GetSection3(), section3)
 	}
 	cell := tbl.Get(0, 0)
 	if cell.Sval != d[0].Name {
@@ -393,6 +398,11 @@ func TestSmoke(t *testing.T) {
 	cssList = append(cssList, &CSSProperty{Name: "color", Value: "red"})
 	cssList = append(cssList, &CSSProperty{Name: "background-color", Value: "yellow"})
 	tbl.SetSection2CSS(cssList)
+
+	// set section3 css
+	cssList = []*CSSProperty{}
+	cssList = append(cssList, &CSSProperty{Name: "color", Value: "green"})
+	tbl.SetSection3CSS(cssList)
 
 	// Now hit it hard...
 	DoTextOutput(t, &tbl)
