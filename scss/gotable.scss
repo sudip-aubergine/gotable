@@ -49,7 +49,7 @@ div.rpt-table-container {
 
         td, th {
             //padding: $table-cell-padding;
-
+            box-sizing: $table-cell-box-sizing;
         }
 
         tr {
