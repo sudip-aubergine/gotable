@@ -885,7 +885,10 @@ func (t *Table) SetAllCellCSS(cssList []*CSSProperty) {
 // SetColHTMLWidth sets the column width for table
 func (t *Table) SetColHTMLWidth(colIndex int, width uint, unit string) error {
 
-	// TODO: conversion from different units of font to `px` unit with body font base size
+	// fix the bug of unit coversion
+	// unit will be not in effect, only one unit for all cells in table will be applied
+
+	// TODO: conversion from different units of font to `ch` unit with body font base size
 	// so that width has value with `px` unit value
 
 	if err := t.HasValidColumn(colIndex); err != nil {

@@ -261,12 +261,13 @@ func (ht *HTMLTable) getHeaders() (string, error) {
 		}
 
 		// if fontUnit is px then need to convert width in px
-		if ht.fontUnit == "px" {
+		switch ht.fontUnit {
+		case "px":
 			colWidth = colWidth * CSSFONTSIZE
 		}
-		// TODO: put other units conversion too.....
-
+		// TODO: put other units conversion switch cases too.....
 		colWidthUnit = strconv.Itoa(colWidth) + ht.fontUnit
+
 		// set width css property on this header cell, no need to apply on each and every cell of this column
 		ht.Table.SetHeaderCellCSS(headerIndex, []*CSSProperty{{Name: "width", Value: colWidthUnit}})
 
