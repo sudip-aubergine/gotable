@@ -24,6 +24,9 @@ const (
 	SECTION3CLASS       = `section3`
 	ERRORSSECTION       = `error-section`
 
+	NOROWSCLASS    = `no-rows`
+	NOHEADERSCLASS = `no-headers`
+
 	// HEADERSCLASS        = `headers`
 	// DATACLASS           = `data`
 )
@@ -72,12 +75,22 @@ func (ht *HTMLTable) writeTableOutput(w io.Writer) error {
 
 	// append headers
 	if headerStr, err := ht.getHeaders(); err != nil {
-		tableOut += `<p class="no-headers">` + err.Error() + `</p>`
+		if cellCSSProps, ok := ht.getCSSPropertyList(NOHEADERSCLASS); ok {
+			// get css string for section1
+			ht.StyleString += `div.` + TABLECONTAINERCLASS + ` p`
+			ht.StyleString += ht.getCSSForClassSelector(NOHEADERSCLASS, cellCSSProps)
+		}
+		tableOut += `<p class="` + NOHEADERSCLASS + `">` + err.Error() + `</p>`
 	} else {
 		// if headers found then append rows
 		if rowsStr, err := ht.getRows(); err != nil {
 			colSpan := strconv.Itoa(ht.Table.ColCount())
-			noRowsTD := `<td colspan="` + colSpan + `" class="no-rows">` + err.Error() + `</td>`
+			if cellCSSProps, ok := ht.getCSSPropertyList(NOROWSCLASS); ok {
+				// get css string for section1
+				ht.StyleString += `div.` + TABLECONTAINERCLASS + ` table tbody tr td`
+				ht.StyleString += ht.getCSSForClassSelector(NOROWSCLASS, cellCSSProps)
+			}
+			noRowsTD := `<td colspan="` + colSpan + `" class="` + NOROWSCLASS + `">` + err.Error() + `</td>`
 			tableOut += `<tbody><tr>` + noRowsTD + `</tr></tbody>`
 		} else {
 			// if rows exist, then only show headers

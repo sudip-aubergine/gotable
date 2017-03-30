@@ -66,8 +66,8 @@ func TestSmoke(t *testing.T) {
 	section3 := "section3"
 	tbl.Init() //sets column spacing and date format to default
 
-	// set fake path for custom template and css
-	// so that it can use default one
+	tbl.SetNoRowsCSS([]*CSSProperty{{Name: "font-family", Value: "monospace"}})
+	tbl.SetNoHeadersCSS([]*CSSProperty{{Name: "font-family", Value: "monospace"}})
 
 	// force some edge condition errors...
 	errExp := "No Header Columns"

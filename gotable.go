@@ -1017,3 +1017,35 @@ func (t *Table) SetColCSS(colIndex int, cssList []*CSSProperty) error {
 
 	return nil
 }
+
+// SetNoRowsCSS sets css on html tag which has no rows msg
+func (t *Table) SetNoRowsCSS(cssList []*CSSProperty) {
+	// css property map
+	cssMap, ok := t.CSS[NOROWSCLASS]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[NOROWSCLASS] = cssMap
+}
+
+// SetNoHeadersCSS sets css on html tag which has no headers/columns msg
+func (t *Table) SetNoHeadersCSS(cssList []*CSSProperty) {
+	// css property map
+	cssMap, ok := t.CSS[NOHEADERSCLASS]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[NOHEADERSCLASS] = cssMap
+}
