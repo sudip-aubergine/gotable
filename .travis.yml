@@ -17,6 +17,8 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then sudo rm wkhtmltox-0.12.4_osx-cocoa-x86-64.pkg ; fi
   # install sass
   - gem install sass
+  # get golint
+  - go get github.com/golang/lint/golint
   # build the dependency
   - make
 
