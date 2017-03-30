@@ -66,11 +66,11 @@ func TestSmoke(t *testing.T) {
 	section3 := "section3"
 	tbl.Init() //sets column spacing and date format to default
 
-	// set fake path for custom template and css
-	// so that it can use default one
+	tbl.SetNoRowsCSS([]*CSSProperty{{Name: "font-family", Value: "monospace"}})
+	tbl.SetNoHeadersCSS([]*CSSProperty{{Name: "font-family", Value: "monospace"}})
 
 	// force some edge condition errors...
-	errExp := "no columns"
+	errExp := "No Header Columns"
 	// headers check
 	err := tbl.HasHeaders()
 	if !strings.Contains(err.Error(), errExp) {
@@ -79,28 +79,23 @@ func TestSmoke(t *testing.T) {
 	// output buffer for each type for table
 	var temp bytes.Buffer
 	// text version
-	_, err = tbl.SprintTable()
-	if !strings.Contains(err.Error(), errExp) {
+	textOut, err := tbl.SprintTable()
+	if !strings.Contains(textOut, errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 	// FprintTable of text version
 	err = tbl.FprintTable(&temp)
-	if !strings.Contains(err.Error(), errExp) {
+	if !strings.Contains(temp.String(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 	// csv version
 	err = tbl.CSVprintTable(&temp)
-	if !strings.Contains(err.Error(), errExp) {
+	if !strings.Contains(temp.String(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 	// html version
 	err = tbl.HTMLprintTable(&temp)
-	if !strings.Contains(err.Error(), errExp) {
-		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
-	}
-	// pdf version
-	err = tbl.PDFprintTable(&temp)
-	if !strings.Contains(err.Error(), errExp) {
+	if !strings.Contains(temp.String(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 
@@ -117,7 +112,7 @@ func TestSmoke(t *testing.T) {
 	tbl.AddColumn("Notes", 20, CELLSTRING, COLJUSTIFYLEFT)              // 6 Notes
 	tbl.AddColumn("Random Date/Time", 25, CELLDATETIME, COLJUSTIFYLEFT) // 7 totally random datetime
 
-	errExp = "no rows"
+	errExp = "No Records"
 	// headers check
 	err = tbl.HasData()
 	if !strings.Contains(err.Error(), errExp) {
@@ -130,17 +125,12 @@ func TestSmoke(t *testing.T) {
 	}
 	// csv output
 	err = tbl.CSVprintTable(&temp)
-	if !strings.Contains(err.Error(), errExp) {
+	if !strings.Contains(temp.String(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 	// html output
 	err = tbl.HTMLprintTable(&temp)
-	if !strings.Contains(err.Error(), errExp) {
-		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
-	}
-	// pdf output
-	err = tbl.PDFprintTable(&temp)
-	if !strings.Contains(err.Error(), errExp) {
+	if !strings.Contains(temp.String(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 

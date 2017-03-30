@@ -31,26 +31,35 @@ func (tt *TextTable) writeTableOutput(w io.Writer) error {
 	// append section 3
 	tout += tt.getSection3()
 
+	var tableOut string
 	// append headers
-	headerStr, err := tt.getHeaders()
-	if err != nil {
-		return err
-	}
-	tout += headerStr
+	if headerStr, err := tt.getHeaders(); err != nil {
+		tableOut += stringln(err.Error())
+	} else {
 
-	// append rows
-	rowsStr, err := tt.getRows()
-	if err != nil {
-		return err
+		// append rows
+		if rowsStr, err := tt.getRows(); err != nil {
+			tableOut += stringln(err.Error())
+		} else {
+			// if rows exist, then only show headers
+			tableOut += headerStr
+			tableOut += rowsStr
+		}
 	}
-	tout += rowsStr
+
+	// // render error list
+	// tout += tt.getErrorSection()
+
+	if tableOut != "" {
+		tout += tableOut
+	}
 
 	// return output
-	if _, err = tt.outbuf.WriteString(tout); err != nil {
+	if _, err := tt.outbuf.WriteString(tout); err != nil {
 		return err
 	}
 	// write output to passed io.Writer interface object
-	_, err = w.Write(tt.outbuf.Bytes())
+	_, err := w.Write(tt.outbuf.Bytes())
 	return err
 }
 
@@ -85,6 +94,21 @@ func (tt *TextTable) getSection3() string {
 	}
 	return section3
 }
+
+// func (tt *TextTable) getErrorSection() string {
+// 	errSection := ""
+
+// 	errList := tt.Table.GetErrorList()
+// 	if len(errList) > 0 {
+// 		for _, errStr := range errList {
+// 			errSection += stringln(errStr)
+// 		}
+// 		errSection = NEWLINE + errSection + NEWLINE
+// 	}
+
+// 	// blank return
+// 	return errSection
+// }
 
 // SprintColHdrsText formats the column headers as text and returns the string
 func (tt *TextTable) getHeaders() (string, error) {
