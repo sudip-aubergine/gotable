@@ -70,7 +70,7 @@ func TestSmoke(t *testing.T) {
 	// so that it can use default one
 
 	// force some edge condition errors...
-	errExp := "no columns"
+	errExp := "No Header Columns"
 	// headers check
 	err := tbl.HasHeaders()
 	if !strings.Contains(err.Error(), errExp) {
@@ -112,7 +112,7 @@ func TestSmoke(t *testing.T) {
 	tbl.AddColumn("Notes", 20, CELLSTRING, COLJUSTIFYLEFT)              // 6 Notes
 	tbl.AddColumn("Random Date/Time", 25, CELLDATETIME, COLJUSTIFYLEFT) // 7 totally random datetime
 
-	errExp = "no rows"
+	errExp = "No Records"
 	// headers check
 	err = tbl.HasData()
 	if !strings.Contains(err.Error(), errExp) {

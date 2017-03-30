@@ -687,7 +687,7 @@ func (t *Table) TightenColumns() {
 func (t *Table) HasData() error {
 	// if there are no rows in table
 	if t.RowCount() < 1 {
-		return fmt.Errorf("There are no rows in the table")
+		return fmt.Errorf("No Records Found!")
 	}
 	return nil
 }
@@ -695,7 +695,7 @@ func (t *Table) HasData() error {
 // HasHeaders checks headers are present or not
 func (t *Table) HasHeaders() error {
 	if len(t.ColDefs) < 1 {
-		return fmt.Errorf("There are no columns in the table")
+		return fmt.Errorf("No Header Columns Found!")
 	}
 	return nil
 }
