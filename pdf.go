@@ -28,12 +28,21 @@ func (pt *PDFTable) writeTableOutput(w io.Writer) error {
 
 	// get html output first
 	var temp bytes.Buffer
-	var ht = &HTMLTable{Table: pt.Table}
+
+	// copy table object so that we can override properties over table
+	// so it won't affect original table
+	var pdfTable = *pt.Table
+	var ht = &HTMLTable{Table: &pdfTable}
+
+	// set custom values over ht
 	ht.SetCSSFontUnit("px")
+
 	var tout TableExportType = ht
+
 	if err := tout.writeTableOutput(&temp); err != nil {
 		return err
 	}
+
 	htmlString := temp.String()
 
 	timeCharReplacer := strings.NewReplacer(":", "-", ".", "", "T", "")

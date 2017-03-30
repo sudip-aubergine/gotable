@@ -35,6 +35,7 @@ const (
 	TABLEOUTCSV  = 4
 
 	CSSFONTSIZE = 14
+	NEWLINE     = "\n"
 )
 
 // Cell is the basic data value type for the Table class
@@ -88,6 +89,7 @@ type Table struct {
 	CSS             map[string]map[string]*CSSProperty //CSS holds css property for title, section1, section2, headers, cells
 	htmlTemplate    string                             // path of custom html template path
 	htmlTemplateCSS string                             // path of custom css for html template
+	// errorList       []string                           // stores the list of error in string format
 }
 
 // SetTitle sets the table's Title string to the supplied value.
@@ -141,6 +143,25 @@ func (t *Table) SetSection3(s string) {
 func (t *Table) GetSection3() string {
 	return t.Section3
 }
+
+// // AddErrorString adds error string in list of errors
+// func (t *Table) AddErrorString(errS string) {
+// 	t.errorList = append(t.errorList, errS)
+// }
+
+// // RemoveErrorString removes an error from list of errors
+// func (t *Table) RemoveErrorString(errS string) {
+// 	for i, errStr := range t.errorList {
+// 		if errStr == errS {
+// 			t.errorList = append(t.errorList[:i], t.errorList[i+1:]...)
+// 		}
+// 	}
+// }
+
+// // GetErrorList returns the list of erros
+// func (t *Table) GetErrorList() []string {
+// 	return t.errorList
+// }
 
 // RowCount returns the number of rows in the table
 func (t *Table) RowCount() int {
@@ -666,7 +687,7 @@ func (t *Table) TightenColumns() {
 func (t *Table) HasData() error {
 	// if there are no rows in table
 	if t.RowCount() < 1 {
-		return fmt.Errorf("There are no rows in the table")
+		return fmt.Errorf("No Records Found!")
 	}
 	return nil
 }
@@ -674,7 +695,7 @@ func (t *Table) HasData() error {
 // HasHeaders checks headers are present or not
 func (t *Table) HasHeaders() error {
 	if len(t.ColDefs) < 1 {
-		return fmt.Errorf("There are no columns in the table")
+		return fmt.Errorf("No Header Columns Found!")
 	}
 	return nil
 }
@@ -712,6 +733,7 @@ type TableExportType interface {
 	getSection1() string
 	getSection2() string
 	getSection3() string
+	// getErrorSection() string
 	getHeaders() (string, error)
 	getRows() (string, error)
 	getRow(row int) (string, error)
@@ -781,119 +803,14 @@ func (cp CSSProperty) String() string {
 	return `"` + cp.Name + `:` + cp.Value + `;"`
 }
 
-// SetRowCSS sets css properties for Table Rows
-func (t *Table) SetRowCSS(rowIndex int, cssList []*CSSProperty) error {
-
-	// check row is valid or not
-	if err := t.HasValidRow(rowIndex); err != nil {
-		return err
-	}
-
-	// convert it into cells attributes
-	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
-		// for valid rowIndex set css for all cells belongs to rowIndex row
-		t.SetCellCSS(rowIndex, colIndex, cssList)
-	}
-
-	return nil
+// getCSSMapKeyForCell format and returns key for cell for css properties usage
+func (t *Table) getCSSMapKeyForCell(rowIndex, colIndex int) string {
+	return `row:` + strconv.Itoa(rowIndex) + `-col:` + strconv.Itoa(colIndex)
 }
 
-// SetColCSS sets css properties for Table Columns
-func (t *Table) SetColCSS(colIndex int, cssList []*CSSProperty) error {
-
-	// check row is valid or not
-	if err := t.HasValidColumn(colIndex); err != nil {
-		return err
-	}
-
-	// convert it into cells attributes
-	for rowIndex := 0; rowIndex < t.RowCount(); rowIndex++ {
-		// for valid colIndex set css for all cells belongs to colIndex column
-		t.SetCellCSS(rowIndex, colIndex, cssList)
-	}
-
-	return nil
-}
-
-// SetHeaderCellCSS sets css for only headers cell
-func (t *Table) SetHeaderCellCSS(colIndex int, cssList []*CSSProperty) error {
-	// check row is valid or not
-	if err := t.HasValidColumn(colIndex); err != nil {
-		return err
-	}
-
-	// header class
-	thClass := t.getCSSMapKeyForHeaderCell(colIndex)
-	// css property map
-	cssMap, ok := t.CSS[thClass]
-	if !ok {
-		cssMap = make(map[string]*CSSProperty)
-	}
-
-	// map it in style of html table
-	for _, cssProp := range cssList {
-		cssMap[cssProp.Name] = cssProp
-	}
-
-	t.CSS[thClass] = cssMap
-
-	return nil
-}
-
-// SetCellCSS sets css properties for Table Cells
-func (t *Table) SetCellCSS(rowIndex, colIndex int, cssList []*CSSProperty) error {
-
-	// check row is valid or not
-	if err := t.HasValidRow(rowIndex); err != nil {
-		return err
-	}
-
-	// check row is valid or not
-	if err := t.HasValidColumn(colIndex); err != nil {
-		return err
-	}
-
-	// css property map
-	g := t.getCSSMapKeyForCell(rowIndex, colIndex)
-	cssMap, ok := t.CSS[g]
-	if !ok {
-		cssMap = make(map[string]*CSSProperty)
-	}
-
-	// map it in style of html table
-	for _, cssProp := range cssList {
-		cssMap[cssProp.Name] = cssProp
-	}
-
-	t.CSS[g] = cssMap
-
-	return nil
-}
-
-// SetAllCellCSS sets css properties for all Table Cells
-func (t *Table) SetAllCellCSS(cssList []*CSSProperty) {
-
-	// convert it into cells attributes
-	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
-		for rowIndex := 0; rowIndex < t.RowCount(); rowIndex++ {
-			// will never meet an error from below function
-			t.SetCellCSS(rowIndex, colIndex, cssList)
-		}
-	}
-}
-
-// SetColHTMLWidth sets the column width for table
-func (t *Table) SetColHTMLWidth(colIndex int, width uint, unit string) error {
-
-	// TODO: conversion from different units of font to `px` unit with body font base size
-	// so that width has value with `px` unit value
-
-	if err := t.HasValidColumn(colIndex); err != nil {
-		return err
-	}
-
-	t.ColDefs[colIndex].HTMLWidth = int(width)
-	return nil
+// getCSSMapKeyForHeaderCell format and returns key for eader cell for css properties usage
+func (t *Table) getCSSMapKeyForHeaderCell(colIndex int) string {
+	return `header-` + strconv.Itoa(colIndex)
 }
 
 // SetTitleCSS sets css for title row
@@ -910,15 +827,6 @@ func (t *Table) SetTitleCSS(cssList []*CSSProperty) {
 	}
 
 	t.CSS[TITLECLASS] = cssMap
-}
-
-// SetHeaderCSS sets css for headers row
-func (t *Table) SetHeaderCSS(cssList []*CSSProperty) {
-
-	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
-		t.SetHeaderCellCSS(colIndex, cssList)
-	}
-
 }
 
 // SetSection1CSS sets css for section1 row
@@ -969,12 +877,175 @@ func (t *Table) SetSection3CSS(cssList []*CSSProperty) {
 	t.CSS[SECTION3CLASS] = cssMap
 }
 
-// getCSSMapKeyForCell format and returns key for cell for css properties usage
-func (t *Table) getCSSMapKeyForCell(rowIndex, colIndex int) string {
-	return `row:` + strconv.Itoa(rowIndex) + `-col:` + strconv.Itoa(colIndex)
+// // SetErrorSectionCSS sets css for error section row
+// func (t *Table) SetErrorSectionCSS(cssList []*CSSProperty) {
+// 	// css property map
+// 	cssMap, ok := t.CSS[ERRORSSECTION]
+// 	if !ok {
+// 		cssMap = make(map[string]*CSSProperty)
+// 	}
+
+// 	// map it in style of html table
+// 	for _, cssProp := range cssList {
+// 		cssMap[cssProp.Name] = cssProp
+// 	}
+
+// 	t.CSS[ERRORSSECTION] = cssMap
+// }
+
+// SetHeaderCellCSS sets css for only headers cell
+func (t *Table) SetHeaderCellCSS(colIndex int, cssList []*CSSProperty) error {
+	// check row is valid or not
+	if err := t.HasValidColumn(colIndex); err != nil {
+		return err
+	}
+
+	// header class
+	thClass := t.getCSSMapKeyForHeaderCell(colIndex)
+	// css property map
+	cssMap, ok := t.CSS[thClass]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[thClass] = cssMap
+
+	return nil
 }
 
-// getCSSMapKeyForHeaderCell format and returns key for eader cell for css properties usage
-func (t *Table) getCSSMapKeyForHeaderCell(colIndex int) string {
-	return `header-` + strconv.Itoa(colIndex)
+// SetHeaderCSS sets css for headers row
+func (t *Table) SetHeaderCSS(cssList []*CSSProperty) {
+	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
+		t.SetHeaderCellCSS(colIndex, cssList)
+	}
+}
+
+// SetColHTMLWidth sets the column width for table
+func (t *Table) SetColHTMLWidth(colIndex int, width uint, unit string) error {
+
+	// fix the bug of unit coversion
+	// unit will be not in effect, only one unit for all cells in table will be applied
+
+	// TODO: conversion from different units of font to `ch` unit with body font base size
+	// so that width has value with `px` unit value
+
+	if err := t.HasValidColumn(colIndex); err != nil {
+		return err
+	}
+
+	t.ColDefs[colIndex].HTMLWidth = int(width)
+	return nil
+}
+
+// SetCellCSS sets css properties for Table Cells
+func (t *Table) SetCellCSS(rowIndex, colIndex int, cssList []*CSSProperty) error {
+
+	// check row is valid or not
+	if err := t.HasValidRow(rowIndex); err != nil {
+		return err
+	}
+
+	// check row is valid or not
+	if err := t.HasValidColumn(colIndex); err != nil {
+		return err
+	}
+
+	// css property map
+	g := t.getCSSMapKeyForCell(rowIndex, colIndex)
+	cssMap, ok := t.CSS[g]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[g] = cssMap
+
+	return nil
+}
+
+// SetAllCellCSS sets css properties for all Table Cells
+func (t *Table) SetAllCellCSS(cssList []*CSSProperty) {
+
+	// convert it into cells attributes
+	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
+		for rowIndex := 0; rowIndex < t.RowCount(); rowIndex++ {
+			// will never meet an error from below function
+			t.SetCellCSS(rowIndex, colIndex, cssList)
+		}
+	}
+}
+
+// SetRowCSS sets css properties for Table Rows
+func (t *Table) SetRowCSS(rowIndex int, cssList []*CSSProperty) error {
+
+	// check row is valid or not
+	if err := t.HasValidRow(rowIndex); err != nil {
+		return err
+	}
+
+	// convert it into cells attributes
+	for colIndex := 0; colIndex < t.ColCount(); colIndex++ {
+		// for valid rowIndex set css for all cells belongs to rowIndex row
+		t.SetCellCSS(rowIndex, colIndex, cssList)
+	}
+
+	return nil
+}
+
+// SetColCSS sets css properties for Table Columns
+func (t *Table) SetColCSS(colIndex int, cssList []*CSSProperty) error {
+
+	// check row is valid or not
+	if err := t.HasValidColumn(colIndex); err != nil {
+		return err
+	}
+
+	// convert it into cells attributes
+	for rowIndex := 0; rowIndex < t.RowCount(); rowIndex++ {
+		// for valid colIndex set css for all cells belongs to colIndex column
+		t.SetCellCSS(rowIndex, colIndex, cssList)
+	}
+
+	return nil
+}
+
+// SetNoRowsCSS sets css on html tag which has no rows msg
+func (t *Table) SetNoRowsCSS(cssList []*CSSProperty) {
+	// css property map
+	cssMap, ok := t.CSS[NOROWSCLASS]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[NOROWSCLASS] = cssMap
+}
+
+// SetNoHeadersCSS sets css on html tag which has no headers/columns msg
+func (t *Table) SetNoHeadersCSS(cssList []*CSSProperty) {
+	// css property map
+	cssMap, ok := t.CSS[NOHEADERSCLASS]
+	if !ok {
+		cssMap = make(map[string]*CSSProperty)
+	}
+
+	// map it in style of html table
+	for _, cssProp := range cssList {
+		cssMap[cssProp.Name] = cssProp
+	}
+
+	t.CSS[NOHEADERSCLASS] = cssMap
 }

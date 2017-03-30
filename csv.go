@@ -31,26 +31,35 @@ func (ct *CSVTable) writeTableOutput(w io.Writer) error {
 	// append section 3
 	tout += ct.getSection3()
 
-	// append headers
-	headerStr, err := ct.getHeaders()
-	if err != nil {
-		return err
-	}
-	tout += headerStr
+	var tableOut string
 
-	// append rows
-	rowsStr, err := ct.getRows()
-	if err != nil {
-		return err
+	// append headers
+	if headerStr, err := ct.getHeaders(); err != nil {
+		tableOut += stringln(fmt.Sprintf("%q", err.Error()))
+	} else {
+
+		// append rows
+		if rowsStr, err := ct.getRows(); err != nil {
+			tableOut += stringln(fmt.Sprintf("%q", err.Error()))
+		} else {
+			tableOut += headerStr
+			tableOut += rowsStr
+		}
 	}
-	tout += rowsStr
+
+	// // render errorlist
+	// tout += ct.getErrorSection()
+
+	if tableOut != "" {
+		tout += tableOut
+	}
 
 	// return output
-	if _, err = ct.outbuf.WriteString(tout); err != nil {
+	if _, err := ct.outbuf.WriteString(tout); err != nil {
 		return err
 	}
 	// write output to passed io.Writer interface object
-	_, err = w.Write(ct.outbuf.Bytes())
+	_, err := w.Write(ct.outbuf.Bytes())
 	return err
 }
 
@@ -69,6 +78,21 @@ func (ct *CSVTable) getSection2() string {
 func (ct *CSVTable) getSection3() string {
 	return stringln(fmt.Sprintf("%q", ct.Table.GetSection3()))
 }
+
+// func (ct *CSVTable) getErrorSection() string {
+// 	errSection := ""
+
+// 	errList := ct.Table.GetErrorList()
+// 	if len(errList) > 0 {
+// 		for _, errStr := range errList {
+// 			errSection += stringln(fmt.Sprintf("%q", errStr))
+// 		}
+// 		errSection = NEWLINE + errSection + NEWLINE
+// 	}
+
+// 	// blank return
+// 	return errSection
+// }
 
 func (ct *CSVTable) getHeaders() (string, error) {
 	// check for blank headers

@@ -4,7 +4,9 @@ gotable: css defaults *.go
 	go clean
 	go get -t -v ./...
 	go vet
+	golint
 	go build
+	go install
 
 clean:
 	go clean
