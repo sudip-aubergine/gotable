@@ -22,6 +22,7 @@ const (
 	SECTION1CLASS       = `section1`
 	SECTION2CLASS       = `section2`
 	SECTION3CLASS       = `section3`
+	ERRORSSECTION       = `error-section`
 
 	// HEADERSCLASS        = `headers`
 	// DATACLASS           = `data`
@@ -48,18 +49,11 @@ func (ht *HTMLTable) SetCSSFontUnit(fontUnit string) {
 
 func (ht *HTMLTable) writeTableOutput(w io.Writer) error {
 	var tContainer string
-	var err error
 
 	// if font unit not set then set default one
 	if ht.fontUnit == "" {
 		ht.fontUnit = "ch"
 	}
-
-	// set custom padding of td cells in case it is being generated after pdf
-	ht.Table.SetAllCellCSS([]*CSSProperty{{Name: "padding", Value: "5px 10px"}})
-
-	// set custom padding of th cells in case it is being generated after pdf
-	ht.Table.SetHeaderCSS([]*CSSProperty{{Name: "padding", Value: "5px 10px"}})
 
 	// append title
 	tContainer += ht.getTitle()
@@ -70,31 +64,38 @@ func (ht *HTMLTable) writeTableOutput(w io.Writer) error {
 	// append section 2
 	tContainer += ht.getSection2()
 
-	// append section 2
+	// append section 3
 	tContainer += ht.getSection3()
 
 	// contains only table tag output
 	var tableOut string
 
 	// append headers
-	headerStr, err := ht.getHeaders()
-	if err != nil {
-		return err
-	}
-	tableOut += headerStr
+	if headerStr, err := ht.getHeaders(); err != nil {
+		tableOut += `<p class="no-headers">` + err.Error() + `</p>`
+	} else {
+		// if headers found then append rows
+		if rowsStr, err := ht.getRows(); err != nil {
+			colSpan := strconv.Itoa(ht.Table.ColCount())
+			noRowsTD := `<td colspan="` + colSpan + `" class="no-rows">` + err.Error() + `</td>`
+			tableOut += `<tbody><tr>` + noRowsTD + `</tr></tbody>`
+		} else {
+			// if rows exist, then only show headers
+			tableOut += headerStr
+			tableOut += rowsStr
+		}
 
-	// append rows
-	rowsStr, err := ht.getRows()
-	if err != nil {
-		return err
+		// wrap headers and rows in a table
+		tableOut = `<table>` + tableOut + `</table>`
 	}
-	tableOut += rowsStr
 
-	// wrap headers and rows in a table
-	tableOut = `<table>` + tableOut + `</table>`
+	// // render error list
+	// tContainer += ht.getErrorSection()
 
 	// now append to container of table output
-	tContainer += tableOut
+	if tableOut != "" {
+		tContainer += tableOut
+	}
 
 	// wrap it up in a div with a class
 	tContainer = `<div class="` + TABLECONTAINERCLASS + `">` + tContainer + `</div>`
@@ -104,9 +105,8 @@ func (ht *HTMLTable) writeTableOutput(w io.Writer) error {
 	}
 
 	// write output to passed io.Writer interface object
-	_, err = w.Write(ht.outbuf.Bytes())
+	_, err := w.Write(ht.outbuf.Bytes())
 	return err
-
 }
 
 func (ht *HTMLTable) formatHTML(htmlString string) error {
@@ -207,6 +207,22 @@ func (ht *HTMLTable) getSection3() string {
 	// blank return
 	return section3
 }
+
+// func (ht *HTMLTable) getErrorSection() string {
+// 	errSection := ""
+
+// 	errList := ht.Table.GetErrorList()
+// 	if len(errList) > 0 {
+// 		for i, errStr := range errList {
+// 			index := strconv.Itoa(i)
+// 			errSection += `<p class="error-` + index + `">` + errStr + `</p>`
+// 		}
+// 		return `<div class="` + ERRORSSECTION + `">` + errSection + `</div>`
+// 	}
+
+// 	// blank return
+// 	return errSection
+// }
 
 func (ht *HTMLTable) getHeaders() (string, error) {
 

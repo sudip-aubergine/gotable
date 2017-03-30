@@ -79,28 +79,23 @@ func TestSmoke(t *testing.T) {
 	// output buffer for each type for table
 	var temp bytes.Buffer
 	// text version
-	_, err = tbl.SprintTable()
-	if !strings.Contains(err.Error(), errExp) {
+	textOut, err := tbl.SprintTable()
+	if !strings.Contains(textOut, errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 	// FprintTable of text version
 	err = tbl.FprintTable(&temp)
-	if !strings.Contains(err.Error(), errExp) {
+	if !strings.Contains(temp.String(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 	// csv version
 	err = tbl.CSVprintTable(&temp)
-	if !strings.Contains(err.Error(), errExp) {
+	if !strings.Contains(temp.String(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 	// html version
 	err = tbl.HTMLprintTable(&temp)
-	if !strings.Contains(err.Error(), errExp) {
-		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
-	}
-	// pdf version
-	err = tbl.PDFprintTable(&temp)
-	if !strings.Contains(err.Error(), errExp) {
+	if !strings.Contains(temp.String(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 
@@ -130,17 +125,12 @@ func TestSmoke(t *testing.T) {
 	}
 	// csv output
 	err = tbl.CSVprintTable(&temp)
-	if !strings.Contains(err.Error(), errExp) {
+	if !strings.Contains(temp.String(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 	// html output
 	err = tbl.HTMLprintTable(&temp)
-	if !strings.Contains(err.Error(), errExp) {
-		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
-	}
-	// pdf output
-	err = tbl.PDFprintTable(&temp)
-	if !strings.Contains(err.Error(), errExp) {
+	if !strings.Contains(temp.String(), errExp) {
 		t.Errorf("smoke_test: Expected %q, but found: %s\n", errExp, err.Error())
 	}
 
